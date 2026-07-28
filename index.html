@@ -1741,6 +1741,64 @@
       opacity: 0.78;
     }
 
+
+    .public-mode.single-public .bracket {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      padding: 6px 18px 10px;
+      gap: clamp(30px, 4vw, 86px);
+      justify-content: space-between;
+      align-items: stretch;
+    }
+
+    .public-mode.single-public .round {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 280px;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .public-mode.single-public .round-title {
+      min-height: 28px;
+      padding: 5px 8px;
+      font-size: clamp(0.82rem, 1vw, 1.05rem);
+    }
+
+    .public-mode.single-public .match {
+      min-height: 86px;
+      padding: 8px;
+      gap: 5px;
+    }
+
+    .public-mode.single-public .match-meta {
+      font-size: clamp(0.58rem, 0.7vw, 0.72rem);
+    }
+
+    .public-mode.single-public .team {
+      grid-template-columns: minmax(0, 1fr) 34px;
+      min-height: 28px;
+      padding: 4px 6px;
+      gap: 4px;
+    }
+
+    .public-mode.single-public .team-name {
+      font-size: clamp(0.78rem, 0.95vw, 1rem);
+      white-space: normal;
+      line-height: 1.05;
+      overflow: visible;
+      text-overflow: clip;
+      word-break: normal;
+    }
+
+    .public-mode.single-public .score-input {
+      width: 34px;
+      min-height: 24px;
+      font-size: 0.9rem;
+      padding: 2px;
+    }
+
     .public-mode.double-public #lastSync {
       display: none;
     }
@@ -2269,7 +2327,7 @@
             <p class="muted" id="publicSubtitle"></p>
           </div>
         </div>
-        <span class="pill sand">Atualiza a cada 5s</span>
+        <span class="pill sand">Atualiza a cada 10s</span>
         <div class="refresh-clock">
           <span>Proximo refresh</span>
           <strong id="refreshCountdown">30s</strong>
@@ -3800,6 +3858,7 @@
       }
 
       document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
+      document.body.classList.toggle("single-public", Boolean(isPublic && tournament.mode === "single"));
       document.body.classList.toggle("groups-public", Boolean(isPublic && tournament.mode === "groups"));
       if (isPublic && tournament.mode === "double") {
         bracket.innerHTML = `${liveMatchOverlayHtml()}${doubleEliminationSvg(tournament.teams || normalizeTeams())}`;
