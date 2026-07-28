@@ -193,7 +193,7 @@
 
     .nav-tabs {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 8px;
       margin-bottom: 14px;
     }
@@ -428,6 +428,65 @@
     .stat strong {
       display: block;
       font-size: 1.35rem;
+    }
+
+    .control-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .control-card {
+      min-height: 88px;
+      padding: 13px;
+      border: 1px solid rgba(230, 199, 109, 0.18);
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
+        rgba(6, 16, 12, 0.42);
+    }
+
+    .control-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+    }
+
+    .control-card strong {
+      display: block;
+      font-size: 1.32rem;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow: auto;
+    }
+
+    .control-table {
+      min-width: 980px;
+    }
+
+    .control-table input,
+    .control-table select {
+      width: 100%;
+      min-height: 36px;
+      padding: 7px 9px;
+      font-size: 0.9rem;
+    }
+
+    .control-table th,
+    .control-table td {
+      vertical-align: middle;
+    }
+
+    .money-cell {
+      min-width: 112px;
+    }
+
+    .uniform-size {
+      min-width: 92px;
     }
 
     .bracket-wrap {
@@ -1144,6 +1203,8 @@
         overflow: visible;
       }
       .stats { grid-template-columns: repeat(3, 1fr); }
+      .nav-tabs { grid-template-columns: repeat(3, 1fr); }
+      .control-summary { grid-template-columns: repeat(2, 1fr); }
       .grid-2 { grid-template-columns: 1fr; }
     }
 
@@ -1163,6 +1224,7 @@
       }
       .brand, .topbar, .public-mode .public-banner { flex-direction: column; display: flex; }
       .nav-tabs { grid-template-columns: 1fr 1fr; }
+      .control-summary { grid-template-columns: 1fr; }
       .field-row, .actions, .mode-tabs, .team-row { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr; }
       .topbar-actions { justify-content: stretch; }
@@ -1286,6 +1348,8 @@
         <button class="active" type="button" data-view="bracketView">Chave</button>
         <button type="button" data-view="queueView">Jogos</button>
         <button type="button" data-view="rankingView">Ranking</button>
+        <button type="button" data-view="financeView">Financeiro</button>
+        <button type="button" data-view="uniformView">Uniformes</button>
         <button type="button" data-view="settingsView">Resumo</button>
       </nav>
 
@@ -1353,6 +1417,56 @@
         </div>
       </section>
 
+      <section class="view" id="financeView">
+        <div class="topbar">
+          <div>
+            <h2>Controle financeiro</h2>
+            <p class="muted">Acompanhe inscricao paga, valor, forma de pagamento e observacoes por dupla.</p>
+          </div>
+        </div>
+        <div class="control-summary">
+          <div class="control-card"><span>Total previsto</span><strong id="financeTotal">R$ 0,00</strong></div>
+          <div class="control-card"><span>Total recebido</span><strong id="financePaid">R$ 0,00</strong></div>
+          <div class="control-card"><span>Em aberto</span><strong id="financeOpen">R$ 0,00</strong></div>
+          <div class="control-card"><span>Duplas pagas</span><strong id="financePaidCount">0/0</strong></div>
+        </div>
+        <div class="panel">
+          <div class="table-scroll">
+            <table class="control-table">
+              <thead>
+                <tr><th>Dupla</th><th>Status</th><th class="money-cell">Valor</th><th>Forma</th><th>Data</th><th>Observacao</th></tr>
+              </thead>
+              <tbody id="financeBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="uniformView">
+        <div class="topbar">
+          <div>
+            <h2>Controle de uniformes</h2>
+            <p class="muted">Registre camisa, short e entrega para cada atleta das duplas cadastradas.</p>
+          </div>
+        </div>
+        <div class="control-summary">
+          <div class="control-card"><span>Atletas</span><strong id="uniformAthletes">0</strong></div>
+          <div class="control-card"><span>Camisas P/M/G/GG</span><strong id="uniformShirts">0/0/0/0</strong></div>
+          <div class="control-card"><span>Shorts P/M/G/GG</span><strong id="uniformShorts">0/0/0/0</strong></div>
+          <div class="control-card"><span>Entregues</span><strong id="uniformDelivered">0/0</strong></div>
+        </div>
+        <div class="panel">
+          <div class="table-scroll">
+            <table class="control-table">
+              <thead>
+                <tr><th>Dupla</th><th>Atleta</th><th class="uniform-size">Camisa</th><th class="uniform-size">Short</th><th>Numero</th><th>Status</th><th>Observacao</th></tr>
+              </thead>
+              <tbody id="uniformBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section class="view" id="settingsView">
         <div class="topbar">
           <div>
@@ -1388,6 +1502,8 @@
     let activeView = "bracketView";
     let mode = "single";
     let teams = [];
+    let finances = {};
+    let uniforms = {};
     let tournament = null;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
@@ -1487,6 +1603,22 @@
 
     function teamKey(team) {
       return team ? team.id : "";
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function moneyValue(value) {
+      return Number(String(value || "0").replace(",", ".")) || 0;
+    }
+
+    function formatMoney(value) {
+      return moneyValue(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
 
     function nextPowerOfTwo(value) {
@@ -1999,8 +2131,31 @@
       });
     }
 
+    function activeTeams() {
+      return tournament?.teams?.length ? tournament.teams : normalizeTeams();
+    }
+
+    function financeRecord(team) {
+      const key = teamKey(team);
+      if (!key) return null;
+      if (!finances[key]) {
+        finances[key] = { status: "Aberto", value: "", method: "", date: "", note: "" };
+      }
+      return finances[key];
+    }
+
+    function uniformRecord(team, athleteIndex) {
+      const teamId = teamKey(team);
+      if (!teamId) return null;
+      const key = `${teamId}__${athleteIndex}`;
+      if (!uniforms[key]) {
+        uniforms[key] = { shirt: "", shorts: "", number: "", status: "Pendente", note: "" };
+      }
+      return uniforms[key];
+    }
+
     function persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, tournament, mode, activeView }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView }));
     }
 
     function loadState() {
@@ -2012,6 +2167,8 @@
       try {
         const state = JSON.parse(raw);
         teams = Array.isArray(state.teams) ? state.teams : [];
+        finances = state.finances && typeof state.finances === "object" ? state.finances : {};
+        uniforms = state.uniforms && typeof state.uniforms === "object" ? state.uniforms : {};
         tournament = state.tournament || null;
         mode = state.mode || "single";
         activeView = state.activeView || "bracketView";
@@ -2022,6 +2179,8 @@
 
     function loadSample(keepTournament) {
       teams = samplePairs.map(pair => ({ id: uid(), a: pair[0], b: pair[1], seed: pair[2] }));
+      finances = {};
+      uniforms = {};
       setSettings(defaultSettings());
       mode = "double";
       if (!keepTournament) tournament = null;
@@ -2060,8 +2219,7 @@
         button.addEventListener("click", () => {
           teams = teams.filter(team => team.id !== button.dataset.remove);
           persist();
-          renderTeams();
-          renderSummary();
+          renderAll();
         });
       });
     }
@@ -2314,6 +2472,96 @@
       `).join("");
     }
 
+    function renderFinance() {
+      const body = document.getElementById("financeBody");
+      if (!body) return;
+      const rows = activeTeams();
+      let total = 0;
+      let paid = 0;
+      let paidCount = 0;
+
+      body.innerHTML = rows.length ? rows.map(team => {
+        const record = financeRecord(team);
+        const value = moneyValue(record.value);
+        total += value;
+        if (record.status === "Pago") {
+          paid += value;
+          paidCount += 1;
+        }
+        return `
+          <tr>
+            <th>${teamName(team)}</th>
+            <td>
+              <select data-finance="${team.id}" data-field="status">
+                ${["Aberto", "Pago", "Parcial", "Cortesia"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </td>
+            <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" data-finance="${team.id}" data-field="value"></td>
+            <td>
+              <select data-finance="${team.id}" data-field="method">
+                ${["", "Pix", "Dinheiro", "Cartao", "Transferencia", "Outro"].map(option => `<option value="${option}" ${record.method === option ? "selected" : ""}>${option || "Forma"}</option>`).join("")}
+              </select>
+            </td>
+            <td><input type="date" value="${escapeAttr(record.date)}" data-finance="${team.id}" data-field="date"></td>
+            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." data-finance="${team.id}" data-field="note"></td>
+          </tr>
+        `;
+      }).join("") : '<tr><td colspan="6">Cadastre duplas para controlar pagamentos.</td></tr>';
+
+      document.getElementById("financeTotal").textContent = formatMoney(total);
+      document.getElementById("financePaid").textContent = formatMoney(paid);
+      document.getElementById("financeOpen").textContent = formatMoney(total - paid);
+      document.getElementById("financePaidCount").textContent = `${paidCount}/${rows.length}`;
+    }
+
+    function renderUniforms() {
+      const body = document.getElementById("uniformBody");
+      if (!body) return;
+      const rows = activeTeams();
+      const sizeOrder = ["P", "M", "G", "GG"];
+      const shirtTotals = { P: 0, M: 0, G: 0, GG: 0 };
+      const shortTotals = { P: 0, M: 0, G: 0, GG: 0 };
+      let athletes = 0;
+      let delivered = 0;
+
+      body.innerHTML = rows.length ? rows.flatMap(team => [0, 1].map(index => {
+        const record = uniformRecord(team, index);
+        const athlete = index === 0 ? team.a : team.b;
+        athletes += 1;
+        if (shirtTotals[record.shirt] !== undefined) shirtTotals[record.shirt] += 1;
+        if (shortTotals[record.shorts] !== undefined) shortTotals[record.shorts] += 1;
+        if (record.status === "Entregue") delivered += 1;
+        return `
+          <tr>
+            <th>${teamName(team)}</th>
+            <td>${athlete || `Atleta ${index + 1}`}</td>
+            <td>
+              <select data-uniform="${team.id}" data-athlete="${index}" data-field="shirt">
+                ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shirt === size ? "selected" : ""}>${size || "Camisa"}</option>`).join("")}
+              </select>
+            </td>
+            <td>
+              <select data-uniform="${team.id}" data-athlete="${index}" data-field="shorts">
+                ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shorts === size ? "selected" : ""}>${size || "Short"}</option>`).join("")}
+              </select>
+            </td>
+            <td><input value="${escapeAttr(record.number)}" placeholder="Opcional" data-uniform="${team.id}" data-athlete="${index}" data-field="number"></td>
+            <td>
+              <select data-uniform="${team.id}" data-athlete="${index}" data-field="status">
+                ${["Pendente", "Separado", "Entregue", "Trocar"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </td>
+            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: preferencia, troca, falta..." data-uniform="${team.id}" data-athlete="${index}" data-field="note"></td>
+          </tr>
+        `;
+      })).join("") : '<tr><td colspan="7">Cadastre duplas para controlar uniformes.</td></tr>';
+
+      document.getElementById("uniformAthletes").textContent = athletes;
+      document.getElementById("uniformShirts").textContent = sizeOrder.map(size => shirtTotals[size]).join("/");
+      document.getElementById("uniformShorts").textContent = sizeOrder.map(size => shortTotals[size]).join("/");
+      document.getElementById("uniformDelivered").textContent = `${delivered}/${athletes}`;
+    }
+
     function renderClock() {
       const clock = document.getElementById("publicClock");
       if (clock) clock.textContent = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -2365,6 +2613,8 @@
       renderQueue();
       renderRanking();
       renderSummary();
+      renderFinance();
+      renderUniforms();
       renderClock();
       renderBracketModelHelp();
       renderModeHelp();
@@ -2378,8 +2628,7 @@
       document.getElementById("addTeam").addEventListener("click", () => {
         teams.push({ id: uid(), a: "", b: "", seed: "" });
         persist();
-        renderTeams();
-        renderSummary();
+        renderAll();
       });
 
       document.getElementById("generate").addEventListener("click", createTournament);
@@ -2390,6 +2639,8 @@
       document.getElementById("clear").addEventListener("click", () => {
         if (!confirm("Limpar torneio, duplas e placares?")) return;
         teams = [{ id: uid(), a: "", b: "", seed: "" }, { id: uid(), a: "", b: "", seed: "" }];
+        finances = {};
+        uniforms = {};
         tournament = null;
         persist();
         renderAll();
@@ -2423,6 +2674,28 @@
           renderBracketModelHelp();
           renderSummary();
         });
+      });
+
+      document.getElementById("financeView").addEventListener("change", event => {
+        const teamId = event.target.dataset.finance;
+        if (!teamId) return;
+        const team = activeTeams().find(item => item.id === teamId);
+        const record = financeRecord(team);
+        if (!record) return;
+        record[event.target.dataset.field] = event.target.value;
+        persist();
+        renderFinance();
+      });
+
+      document.getElementById("uniformView").addEventListener("change", event => {
+        const teamId = event.target.dataset.uniform;
+        if (!teamId) return;
+        const team = activeTeams().find(item => item.id === teamId);
+        const record = uniformRecord(team, Number(event.target.dataset.athlete));
+        if (!record) return;
+        record[event.target.dataset.field] = event.target.value;
+        persist();
+        renderUniforms();
       });
     }
 
