@@ -571,6 +571,19 @@
       background: var(--sand);
     }
 
+    .danger-action {
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(122, 31, 31, 0.92);
+      border: 1px solid rgba(255, 113, 113, 0.48);
+    }
+
+    .danger-action:hover {
+      background: rgba(158, 42, 42, 0.98);
+    }
+
     .secondary {
       color: var(--text);
       background: rgba(255, 255, 255, 0.09);
@@ -2201,6 +2214,7 @@
             <p class="muted">Edite os dados principais do evento.</p>
           </div>
           <div class="topbar-actions">
+            <button class="danger-action" type="button" id="deleteTournamentButton">Apagar torneio</button>
             <button class="primary" type="button" id="saveEventInfo">Salvar informações</button>
           </div>
         </div>
@@ -3285,6 +3299,18 @@
       }
     }
 
+    async function deleteRemoteTournament(id) {
+      if (!id) return;
+      try {
+        await supabaseRequest(`${SUPABASE_TABLE}?id=eq.${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" }
+        });
+      } catch (error) {
+        console.warn("Nao foi possivel apagar no Supabase:", error.message);
+      }
+    }
+
     function persist() {
       upsertActiveTournament();
       const snapshot = tournaments.find(item => item.id === activeTournamentId);
@@ -3350,6 +3376,45 @@
         tournaments = [];
         hasActiveTournament = false;
       }
+    }
+
+    async function deleteCurrentTournament() {
+      if (!activeTournamentId) return;
+      const name = (getSettings().name || "este torneio").trim();
+      const confirmed = window.confirm(`Apagar "${name}"? Essa acao remove o torneio do historico.`);
+      if (!confirmed) return;
+
+      const removedId = activeTournamentId;
+      tournaments = tournaments.filter(item => item.id !== removedId);
+      activeTournamentId = "";
+      hasActiveTournament = false;
+      teams = [];
+      finances = [];
+      uniforms = {};
+      tournament = null;
+      mode = "single";
+      activeView = "bracketView";
+      teamTargetCount = 16;
+      setSettings(defaultSettings());
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 3,
+        activeTournamentId,
+        hasActiveTournament,
+        tournaments,
+        teams,
+        finances,
+        uniforms,
+        tournament,
+        mode,
+        activeView,
+        menuCollapsed,
+        adminPanelHidden,
+        teamTargetCount
+      }));
+
+      renderAll();
+      await deleteRemoteTournament(removedId);
     }
 
     function loadSample(keepTournament) {
@@ -4022,6 +4087,7 @@
       document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
       document.getElementById("exitTournamentButton").addEventListener("click", openNewTournamentScreen);
       document.getElementById("saveEventInfo").addEventListener("click", saveEventInfo);
+      document.getElementById("deleteTournamentButton").addEventListener("click", deleteCurrentTournament);
 
       document.getElementById("addTeam").addEventListener("click", () => {
         const options = [4, 8, 12, 16, 20, 24];
