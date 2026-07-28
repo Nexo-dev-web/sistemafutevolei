@@ -77,7 +77,7 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: 168px 390px minmax(0, 1fr);
+      grid-template-columns: 58px 390px minmax(0, 1fr);
       gap: 18px;
       min-height: 100vh;
       padding: 16px;
@@ -88,7 +88,7 @@
     }
 
     body:not(.show-admin-panel) .app-shell {
-      grid-template-columns: 168px minmax(0, 1fr);
+      grid-template-columns: 58px minmax(0, 1fr);
     }
 
     body.menu-collapsed:not(.show-admin-panel) .app-shell {
@@ -220,6 +220,82 @@
     .pill.blue { background: var(--blue); }
     .pill.red { background: var(--red); color: #fff; }
 
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(230, 199, 109, 0.2), transparent 30%),
+        radial-gradient(circle at 78% 18%, rgba(53, 228, 138, 0.18), transparent 28%),
+        rgba(3, 10, 8, 0.94);
+      backdrop-filter: blur(18px);
+    }
+
+    body.needs-tournament .start-screen {
+      display: grid;
+    }
+
+    body.needs-tournament .app-shell {
+      filter: blur(8px);
+      pointer-events: none;
+    }
+
+    .start-card {
+      width: min(620px, 100%);
+      display: grid;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
+        rgba(8, 17, 14, 0.96);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.48);
+    }
+
+    .start-card h1 {
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1;
+    }
+
+    .start-form,
+    .history-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .history-list {
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      width: 100%;
+      display: grid;
+      gap: 4px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      text-align: left;
+    }
+
+    .history-item strong {
+      font-size: 1rem;
+    }
+
+    .history-item span {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
     .nav-tabs {
       position: sticky;
       top: 16px;
@@ -241,14 +317,19 @@
     }
 
     .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex: 0 0 auto;
       width: 40px;
       min-height: 40px;
+      padding: 0;
       border-radius: 8px;
       color: var(--text);
       background: rgba(255, 255, 255, 0.08);
       border: 1px dashed rgba(230, 199, 109, 0.36);
       font-size: 1.05rem;
+      font-weight: 1000;
     }
 
     .nav-tabs button, .mode-tabs button {
@@ -319,16 +400,6 @@
     .nav-tabs button[data-view]:focus-visible::after {
       opacity: 1;
       transform: translateY(-50%) translateX(0);
-    }
-
-    body.menu-collapsed .nav-tabs {
-      padding: 8px;
-    }
-
-    body.menu-collapsed .nav-tabs button {
-      padding: 0;
-      font-size: 0;
-      min-height: 40px;
     }
 
     body.menu-collapsed .menu-toggle {
@@ -1213,6 +1284,12 @@
       font-size: 0.68rem;
     }
 
+    .phase-panel h3 small,
+    .match-meta strong,
+    .match-meta span + span {
+      display: none !important;
+    }
+
     .match-save {
       display: none;
     }
@@ -1779,9 +1856,36 @@
   </style>
 </head>
 <body>
+  <section class="start-screen" id="startScreen" aria-label="Criar ou abrir torneio">
+    <div class="start-card">
+      <div>
+        <h1>Torneio</h1>
+        <h2>Novo torneio</h2>
+        <div class="start-form">
+          <label class="field">Nome do torneio
+            <input id="newTournamentName" type="text" placeholder="Ex: Copa Futevolei Nexo">
+          </label>
+          <div class="field-row">
+            <label class="field">Data
+              <input id="newTournamentDate" type="date">
+            </label>
+            <label class="field">Local
+              <input id="newTournamentLocation" type="text" placeholder="Ex: Arena Noite Vegas">
+            </label>
+          </div>
+          <button class="primary" type="button" id="createNewTournament">Criar torneio</button>
+        </div>
+      </div>
+      <div>
+        <h2>Carregar torneio existente</h2>
+        <div class="history-list" id="tournamentHistory"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="app-shell">
     <nav class="nav-tabs">
-      <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">&lt;</button>
+      <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">☰</button>
       <button class="active" type="button" data-view="bracketView" data-icon="🏆" aria-label="Chave" title="Chave">Chave</button>
       <button type="button" data-view="queueView" data-icon="▶" aria-label="Jogos" title="Jogos">Jogos</button>
       <button type="button" data-view="rankingView" data-icon="★" aria-label="Ranking" title="Ranking">Ranking</button>
@@ -1812,6 +1916,15 @@
       <label class="field">Nome do torneio
         <input id="tournamentName" type="text">
       </label>
+
+      <div class="field-row">
+        <label class="field">Data
+          <input id="tournamentDate" type="date">
+        </label>
+        <label class="field">Local
+          <input id="tournamentLocation" type="text" placeholder="Local do evento">
+        </label>
+      </div>
 
       <div class="field-row">
         <label class="field">Categoria
@@ -1907,6 +2020,7 @@
             <p class="muted" id="subtitle">Gere a tabela para visualizar os confrontos.</p>
           </div>
           <div class="topbar-actions">
+            <button class="secondary" type="button" id="newTournamentButton">Novo torneio</button>
             <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
             <button class="secondary" type="button" id="openPublic">Abrir telao</button>
             <button class="primary" type="button" id="saveScores">Salvar placares</button>
@@ -2026,7 +2140,7 @@
         <div class="topbar">
           <div>
             <h2>Dashboard do torneio</h2>
-            <p class="muted">Visao geral para acompanhar operacao, pagamentos, uniformes e andamento dos jogos.</p>
+            <p class="muted">Resumo rapido do evento.</p>
           </div>
         </div>
         <div class="bi-grid">
@@ -2080,20 +2194,8 @@
               </div>
             </div>
           </div>
-          <div class="bi-card bi-panel">
-            <h3>Pipeline por fase</h3>
-            <div id="dashPhaseBars"></div>
-          </div>
-          <div class="bi-card bi-panel">
-            <h3>Uniformes</h3>
-            <div id="dashUniformBars"></div>
-          </div>
-          <div class="bi-card bi-panel">
-            <h3>Top desempenho</h3>
-            <ul class="phase-list" id="dashTopRanking"></ul>
-          </div>
           <div class="bi-card bi-panel full">
-            <h3>Leitura do analista</h3>
+            <h3>Pontos de atencao</h3>
             <ul class="insight-list" id="dashInsights"></ul>
           </div>
         </div>
@@ -2103,6 +2205,9 @@
 
   <script>
     const STORAGE_KEY = "nexo_futevolei_tournament_v2";
+    const SUPABASE_URL = "https://bucyqoczsximiythoztw.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_3JjJZUCsQXk6vK1Ka0VEqg_Kr4zinnb";
+    const SUPABASE_TABLE = "futevolei_tournaments";
     const REFRESH_MS = 30000;
     const params = new URLSearchParams(window.location.search);
     const isPublic = params.get("view") === "chaveamento";
@@ -2113,6 +2218,9 @@
     let finances = [];
     let uniforms = {};
     let tournament = null;
+    let tournaments = [];
+    let activeTournamentId = "";
+    let hasActiveTournament = false;
     let menuCollapsed = false;
     let adminPanelHidden = false;
     let teamTargetCount = 16;
@@ -2160,6 +2268,8 @@
     function defaultSettings() {
       return {
         name: "Copa Futevolei Nexo",
+        date: "",
+        location: "",
         category: "Intermediario",
         courts: 2,
         points: 21,
@@ -2172,6 +2282,8 @@
     function getSettings() {
       return {
         name: document.getElementById("tournamentName")?.value.trim() || "Torneio de Futevolei",
+        date: document.getElementById("tournamentDate")?.value || "",
+        location: document.getElementById("tournamentLocation")?.value.trim() || "",
         category: document.getElementById("category")?.value || "Intermediario",
         courts: Number(document.getElementById("courts")?.value || 1),
         points: Number(document.getElementById("pointsToWin")?.value || 21),
@@ -2184,6 +2296,8 @@
     function setSettings(settings) {
       const s = { ...defaultSettings(), ...settings };
       document.getElementById("tournamentName").value = s.name;
+      document.getElementById("tournamentDate").value = s.date || "";
+      document.getElementById("tournamentLocation").value = s.location || "";
       document.getElementById("category").value = s.category;
       document.getElementById("courts").value = s.courts;
       document.getElementById("pointsToWin").value = s.points;
@@ -2451,57 +2565,58 @@
 
       const slots = Array.from({ length: 16 }, (_, index) => validTeams[index] || null);
       let scheduleIndex = 0;
-      const match = (code, teamA = null, teamB = null, status = "Aguardando") => ({
+      const match = (code, teamA = null, teamB = null, status = "Aguardando", label = "") => ({
         ...createEmptyMatch(settings, scheduleIndex++, status),
         code,
+        label,
         teamA,
         teamB
       });
       const rounds = [
         {
-          name: "Principal - 1a Rodada",
+          name: "Oitavas de final",
           bracketSide: "Principal",
           matches: Array.from({ length: 8 }, (_, index) => match(`J${index + 1}`, slots[index * 2], slots[index * 2 + 1], "Pendente"))
         },
         {
-          name: "Principal - Oitavas",
+          name: "Quartas de final",
           bracketSide: "Principal",
           matches: ["J13", "J14", "J15", "J16"].map(code => match(code))
         },
         {
-          name: "Principal - Quartas",
+          name: "Semifinal classificatoria",
           bracketSide: "Principal",
           matches: ["J21", "J22"].map(code => match(code))
         },
         {
-          name: "Repescagem - 1a Rodada",
+          name: "Oitavas da repescagem",
           bracketSide: "Repescagem",
           matches: ["J9", "J10", "J11", "J12"].map(code => match(code))
         },
         {
-          name: "Repescagem - Oitavas",
+          name: "Quartas da repescagem",
           bracketSide: "Repescagem",
           matches: ["J17", "J18", "J19", "J20"].map(code => match(code))
         },
         {
-          name: "Repescagem - Quartas",
+          name: "Semifinal da repescagem",
           bracketSide: "Repescagem",
           matches: ["J23", "J24"].map(code => match(code))
         },
         {
-          name: "Repescagem - Semifinal",
+          name: "Final da repescagem",
           bracketSide: "Repescagem",
           matches: ["J25", "J26"].map(code => match(code))
         },
         {
-          name: "Finais - Semifinais",
+          name: "Semifinal",
           bracketSide: "Finais",
           matches: ["J27", "J28"].map(code => match(code))
         },
         {
-          name: "Finais",
+          name: "Final e 3o lugar",
           bracketSide: "Finais",
-          matches: [match("J30"), match("J29")]
+          matches: [match("J30", null, null, "Aguardando", "Final"), match("J29", null, null, "Aguardando", "3o lugar")]
         }
       ];
 
@@ -2737,6 +2852,18 @@
     }
 
     function defaultFinanceRows() {
+      const baseTeams = normalizeTeams();
+      if (baseTeams.length) {
+        return baseTeams.map(team => ({
+          id: team.id,
+          team: teamName(team),
+          status: "Aberto",
+          value: "",
+          method: "",
+          date: "",
+          note: ""
+        }));
+      }
       return samplePairs.slice(0, 16).map(pair => ({
         id: uid(),
         team: `${pair[0]} / ${pair[1]}`,
@@ -2754,8 +2881,26 @@
 
     function financeRows() {
       if (!Array.isArray(finances)) finances = [];
-      if (!finances.length) finances = defaultFinanceRows();
+      syncFinanceWithTeams();
       return finances;
+    }
+
+    function syncFinanceWithTeams() {
+      if (!Array.isArray(finances)) finances = [];
+      const existing = new Map(finances.map(row => [row.id, row]));
+      const validTeams = normalizeTeams();
+      if (!validTeams.length && !finances.length) {
+        finances = [];
+        return;
+      }
+      const synced = validTeams.map(team => {
+        const current = existing.get(team.id);
+        return current
+          ? { ...current, id: team.id, team: teamName(team) }
+          : { id: team.id, team: teamName(team), status: "Aberto", value: "", method: "", date: "", note: "" };
+      });
+      const manualRows = finances.filter(row => !teams.some(team => team.id === row.id) && row.team);
+      finances = [...synced, ...manualRows];
     }
 
     function uniformRecord(team, athleteIndex) {
@@ -2768,37 +2913,143 @@
       return uniforms[key];
     }
 
+    function currentStateSnapshot() {
+      syncFinanceWithTeams();
+      return {
+        id: activeTournamentId || uid(),
+        meta: getSettings(),
+        teams,
+        finances,
+        uniforms,
+        tournament,
+        mode,
+        activeView,
+        menuCollapsed,
+        adminPanelHidden,
+        teamTargetCount,
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function applyTournamentState(state) {
+      activeTournamentId = state.id || uid();
+      hasActiveTournament = true;
+      teams = Array.isArray(state.teams) ? state.teams : [];
+      finances = Array.isArray(state.finances) ? state.finances : [];
+      uniforms = state.uniforms && typeof state.uniforms === "object" ? state.uniforms : {};
+      tournament = state.tournament || null;
+      mode = state.mode || "single";
+      activeView = state.activeView || "bracketView";
+      menuCollapsed = Boolean(state.menuCollapsed);
+      adminPanelHidden = Boolean(state.adminPanelHidden);
+      teamTargetCount = Number(state.teamTargetCount) || Math.max(16, teams.length || 16);
+      if (mode === "double") teamTargetCount = 16;
+      setSettings(state.meta || state.tournament || defaultSettings());
+      syncTeamRowsWithTarget();
+      syncFinanceWithTeams();
+    }
+
+    function upsertActiveTournament() {
+      if (!hasActiveTournament) return;
+      const snapshot = currentStateSnapshot();
+      activeTournamentId = snapshot.id;
+      const index = tournaments.findIndex(item => item.id === snapshot.id);
+      if (index >= 0) tournaments[index] = snapshot;
+      else tournaments.unshift(snapshot);
+    }
+
+    async function supabaseRequest(path, options = {}) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        ...options,
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...(options.headers || {})
+        }
+      });
+      if (!response.ok) throw new Error(await response.text());
+      if (response.status === 204) return null;
+      return response.json();
+    }
+
+    async function syncRemoteTournaments() {
+      try {
+        const rows = await supabaseRequest(`${SUPABASE_TABLE}?select=id,payload,updated_at&order=updated_at.desc`);
+        if (!Array.isArray(rows)) return;
+        const remote = rows.map(row => row.payload).filter(Boolean);
+        const merged = new Map();
+        [...remote, ...tournaments].forEach(item => {
+          if (!item?.id) return;
+          const current = merged.get(item.id);
+          if (!current || String(item.savedAt || "") > String(current.savedAt || "")) merged.set(item.id, item);
+        });
+        tournaments = [...merged.values()];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId, hasActiveTournament, tournaments }));
+        renderAll();
+      } catch (error) {
+        console.warn("Supabase historico indisponivel:", error.message);
+      }
+    }
+
+    async function saveRemoteTournament(snapshot) {
+      if (!snapshot?.id) return;
+      try {
+        await supabaseRequest(`${SUPABASE_TABLE}?on_conflict=id`, {
+          method: "POST",
+          headers: { Prefer: "resolution=merge-duplicates" },
+          body: JSON.stringify({ id: snapshot.id, payload: snapshot, updated_at: snapshot.savedAt })
+        });
+      } catch (error) {
+        console.warn("Nao foi possivel salvar no Supabase:", error.message);
+      }
+    }
+
     function persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed, adminPanelHidden, teamTargetCount }));
+      upsertActiveTournament();
+      const snapshot = tournaments.find(item => item.id === activeTournamentId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 3,
+        activeTournamentId,
+        hasActiveTournament,
+        tournaments,
+        teams,
+        finances,
+        uniforms,
+        tournament,
+        mode,
+        activeView,
+        menuCollapsed,
+        adminPanelHidden,
+        teamTargetCount
+      }));
+      if (snapshot) saveRemoteTournament(snapshot);
     }
 
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        loadSample(true);
+        tournaments = [];
+        hasActiveTournament = false;
         return;
       }
       try {
         const state = JSON.parse(raw);
-        teams = Array.isArray(state.teams) ? state.teams : [];
-        if (Array.isArray(state.finances)) {
-          finances = state.finances;
-        } else if (state.finances && typeof state.finances === "object") {
-          finances = Object.entries(state.finances).map(([teamId, record]) => {
-            const team = teams.find(item => item.id === teamId);
-            return {
-              id: uid(),
-              team: team ? teamName(team) : "",
-              status: record.status || "Aberto",
-              value: record.value || "",
-              method: record.method || "",
-              date: record.date || "",
-              note: record.note || ""
-            };
-          });
-        } else {
-          finances = [];
+        tournaments = Array.isArray(state.tournaments) ? state.tournaments : [];
+        activeTournamentId = state.activeTournamentId || "";
+        hasActiveTournament = false;
+        const activeState = tournaments.find(item => item.id === activeTournamentId);
+        if (isPublic && activeState) {
+          applyTournamentState(activeState);
+          return;
         }
+        if (tournaments.length) {
+          return;
+        }
+
+        teams = Array.isArray(state.teams) ? state.teams : [];
+        finances = Array.isArray(state.finances) ? state.finances : [];
         uniforms = state.uniforms && typeof state.uniforms === "object" ? state.uniforms : {};
         tournament = state.tournament || null;
         mode = state.mode || "single";
@@ -2807,12 +3058,29 @@
         adminPanelHidden = Boolean(state.adminPanelHidden);
         teamTargetCount = Number(state.teamTargetCount) || Math.max(16, teams.length || 16);
         if (mode === "double") teamTargetCount = 16;
+        if (teams.length || tournament) {
+          activeTournamentId = uid();
+          setSettings(tournament || defaultSettings());
+          syncTeamRowsWithTarget();
+          syncFinanceWithTeams();
+          const snapshot = currentStateSnapshot();
+          tournaments = [snapshot];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
+        }
       } catch {
-        loadSample(true);
+        tournaments = [];
+        hasActiveTournament = false;
       }
     }
 
     function loadSample(keepTournament) {
+      if (!hasActiveTournament) {
+        createTournamentShell({
+          name: "Copa Futevolei Nexo",
+          date: new Date().toISOString().slice(0, 10),
+          location: "Arena Noite Vegas"
+        });
+      }
       teams = samplePairs.map(pair => ({ id: uid(), a: pair[0], b: pair[1] }));
       finances = defaultFinanceRows();
       uniforms = {};
@@ -2821,6 +3089,63 @@
       mode = "double";
       if (!keepTournament) tournament = null;
       createTournament();
+    }
+
+    function createTournamentShell(meta) {
+      activeTournamentId = uid();
+      hasActiveTournament = true;
+      teams = [];
+      finances = [];
+      uniforms = {};
+      tournament = null;
+      mode = "single";
+      activeView = "bracketView";
+      adminPanelHidden = false;
+      teamTargetCount = 16;
+      setSettings({ ...defaultSettings(), ...meta });
+      syncTeamRowsWithTarget();
+      syncFinanceWithTeams();
+      persist();
+      renderAll();
+    }
+
+    function openNewTournamentScreen() {
+      persist();
+      hasActiveTournament = false;
+      activeTournamentId = "";
+      const date = document.getElementById("newTournamentDate");
+      if (date && !date.value) date.value = new Date().toISOString().slice(0, 10);
+      document.getElementById("newTournamentName").value = "";
+      document.getElementById("newTournamentLocation").value = "";
+      renderAll();
+    }
+
+    function renderTournamentHistory() {
+      const list = document.getElementById("tournamentHistory");
+      if (!list) return;
+      const rows = [...tournaments].sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")));
+      list.innerHTML = rows.length ? rows.map(item => {
+        const meta = item.meta || item.tournament || {};
+        const date = meta.date ? new Date(`${meta.date}T12:00:00`).toLocaleDateString("pt-BR") : "Sem data";
+        const location = meta.location || "Sem local";
+        const count = Array.isArray(item.teams) ? item.teams.filter(team => team.a || team.b).length : 0;
+        return `
+          <button class="history-item" type="button" data-open-tournament="${item.id}">
+            <strong>${escapeAttr(meta.name || "Torneio sem nome")}</strong>
+            <span>${escapeAttr(date)} - ${escapeAttr(location)} - ${count} duplas</span>
+          </button>
+        `;
+      }).join("") : '<p class="muted">Nenhum torneio salvo ainda.</p>';
+
+      list.querySelectorAll("[data-open-tournament]").forEach(button => {
+        button.addEventListener("click", () => {
+          const state = tournaments.find(item => item.id === button.dataset.openTournament);
+          if (!state) return;
+          applyTournamentState(state);
+          persist();
+          renderAll();
+        });
+      });
     }
 
     function modeLabel(value = mode) {
@@ -2847,6 +3172,7 @@
         input.addEventListener("input", () => {
           const team = teams.find(item => item.id === input.dataset.team);
           if (team) team[input.dataset.field] = input.value;
+          syncFinanceWithTeams();
           persist();
           renderSummary();
         });
@@ -2855,6 +3181,7 @@
       list.querySelectorAll("[data-remove]").forEach(button => {
         button.addEventListener("click", () => {
           teams = teams.filter(team => team.id !== button.dataset.remove);
+          syncFinanceWithTeams();
           persist();
           renderAll();
         });
@@ -2866,6 +3193,7 @@
       while (teams.length < target) teams.push({ id: uid(), a: "", b: "" });
       if (teams.length > target) teams = teams.slice(0, target);
       if (!teams.length) teams = [{ id: uid(), a: "", b: "" }, { id: uid(), a: "", b: "" }];
+      syncFinanceWithTeams();
     }
 
     function renderBracket() {
@@ -2903,11 +3231,22 @@
 
     function doubleAdminHtml() {
       const sectionInfo = {
-        Principal: { step: "A", title: "Chave Principal", note: "Venceu, continua por cima. Perdeu, cai para a repescagem." },
-        Repescagem: { step: "B", title: "Repescagem", note: "Quem perder aqui sai do torneio. Quem vencer segue vivo." },
-        Finais: { step: "C", title: "Finais", note: "Semifinais, disputa de 3o lugar e grande final." }
+        Principal: { step: "A", title: "Classificatoria", note: "Quem perde cai para a repescagem." },
+        Repescagem: { step: "B", title: "Repescagem", note: "Quem perde aqui sai do torneio." },
+        Finais: { step: "C", title: "Finais", note: "Semifinal, disputa de 3o lugar e final." }
       };
       const sections = ["Principal", "Repescagem", "Finais"];
+      const displayRoundName = name => ({
+        "Principal - 1a Rodada": "Oitavas de final",
+        "Principal - Oitavas": "Quartas de final",
+        "Principal - Quartas": "Semifinal classificatoria",
+        "Repescagem - 1a Rodada": "Oitavas da repescagem",
+        "Repescagem - Oitavas": "Quartas da repescagem",
+        "Repescagem - Quartas": "Semifinal da repescagem",
+        "Repescagem - Semifinal": "Final da repescagem",
+        "Finais - Semifinais": "Semifinal",
+        "Finais": "Final e 3o lugar"
+      })[name] || name;
       return `
         <div class="double-admin">
           ${sections.map(section => `
@@ -2919,7 +3258,7 @@
                   .filter(item => item.round.bracketSide === section)
                   .map(({ round, roundIndex }) => `
                     <div class="phase-panel">
-                      <h3>${round.name}<small>${round.matches.map(match => match.code).join(" / ")}</small></h3>
+                      <h3>${displayRoundName(round.name)}</h3>
                       ${round.matches.map((match, matchIndex) => matchHtml(match, roundIndex, matchIndex)).join("")}
                     </div>
                   `).join("")}
@@ -3015,7 +3354,7 @@
           <rect x="0" y="0" width="1800" height="940" fill="#06100c" />
           <text class="title-text" x="900" y="44">TABELA DE JOGOS</text>
           <text class="subtitle-text" x="900" y="74">16 DUPLAS - DUPLA ELIMINATORIA</text>
-          <text class="label-text" x="455" y="115">Chave Principal</text>
+          <text class="label-text" x="455" y="115">Classificatoria</text>
           <text class="label-text" x="1360" y="115">Repescagem</text>
           <text class="label-text" x="900" y="635">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
@@ -3025,7 +3364,6 @@
           <text class="label-text" x="1138" y="690">Campeao</text>
           <text class="small-text" x="790" y="478">Final principal</text>
           <text class="small-text" x="910" y="222">Final da repescagem</text>
-          <text class="legend-text" x="900" y="925">Legenda: J = jogo | V = vencedor do jogo | P = perdedor do jogo | VR = vencedor da repescagem</text>
         </svg>
       `;
     }
@@ -3033,11 +3371,11 @@
     function matchHtml(match, roundIndex, matchIndex) {
       const aWinner = match.winner === "A" ? " winner" : "";
       const bWinner = match.winner === "B" ? " winner" : "";
+      const matchLabel = match.label || (match.code === "J30" ? "Final" : match.code === "J29" ? "3o lugar" : "");
       return `
         <article class="match">
           <div class="match-meta">
-            <span>${match.code ? `<strong>${match.code}</strong> ` : ""}${match.status}</span>
-            <span>Quadra ${match.court || "-"} - ${match.scheduled || "--:--"}</span>
+            <span>${matchLabel ? `${escapeAttr(matchLabel)} - ` : ""}${match.status}</span>
           </div>
           <div class="team${aWinner}">
             <span class="team-name ${match.teamA ? "" : "bye"}">${teamName(match.teamA)}</span>
@@ -3059,8 +3397,6 @@
         <article class="queue-card">
           <div class="queue-meta">
             <span class="pill sand">${match.roundName}</span>
-            <span class="pill blue">Quadra ${match.court}</span>
-            <span class="pill">${match.scheduled}</span>
           </div>
           <strong>${teamName(match.teamA)} x ${teamName(match.teamB)}</strong>
           <span class="muted">${match.status} - jogo ate ${tournament?.points || 21} pontos</span>
@@ -3122,7 +3458,7 @@
       document.getElementById("teamCount").textContent = `${validTeams}/${teamTargetCount}`;
       document.getElementById("roundCount").textContent = rounds;
       document.getElementById("matchCount").textContent = matches.length;
-      document.getElementById("nextMatchLabel").textContent = next ? `Q${next.court}` : "-";
+      document.getElementById("nextMatchLabel").textContent = next ? "Pronto" : "-";
       document.getElementById("refreshLabel").textContent = isPublic ? "30s" : "manual";
       document.getElementById("scorePill").textContent = `${settings.points || 21} pts`;
       document.getElementById("mainTitle").textContent = settings.name || "Chaveamento";
@@ -3158,39 +3494,20 @@
       const financePct = pct(financePaid, financeTotal);
       let uniformDelivered = 0;
       let uniformAthletes = 0;
-      const uniformSizes = {};
       dashboardTeams.forEach(team => {
         [0, 1].forEach(index => {
           const record = uniformRecord(team, index);
           uniformAthletes += 1;
           if (record.status === "Entregue") uniformDelivered += 1;
-          const size = index === 0 ? record.shirtA : record.shirtB;
-          if (size) uniformSizes[size] = (uniformSizes[size] || 0) + 1;
         });
       });
       const uniformPending = Math.max(uniformAthletes - uniformDelivered, 0);
       const uniformPct = pct(uniformDelivered, uniformAthletes);
       const progressPct = pct(finished, matches.length);
-      const phaseRows = (tournament?.rounds || []).slice(0, 8).map(round => {
-        const roundMatches = round.matches || [];
-        const done = roundMatches.filter(match => match.status === "Finalizado").length;
-        return bar(round.name, done, roundMatches.length || 1);
-      }).join("");
-      const ranking = rankingRows().slice(0, 5);
-      const topRows = ranking.length ? ranking.map((row, index) => `
-        <li class="phase-row"><span>${index + 1}. ${escapeAttr(teamName(row.team))}</span><b>${row.wins}V / ${row.games}J</b></li>
-      `).join("") : '<li class="phase-row"><span>Sem jogos finalizados</span><b>-</b></li>';
-      const uniformBars = Object.keys(uniformSizes).length
-        ? Object.entries(uniformSizes).sort((a, b) => b[1] - a[1]).map(([size, total]) => bar(`Camisa ${size}`, total, uniformAthletes)).join("")
-        : bar("Entregues", uniformDelivered, uniformAthletes || 1) + bar("Pendentes", uniformPending, uniformAthletes || 1);
       const insights = [];
-      insights.push(`<li><span class="insight-dot"></span><div><b>Prioridade operacional:</b> ${next ? `proximo jogo na Quadra ${next.court}, ${escapeAttr(teamName(next.teamA))} x ${escapeAttr(teamName(next.teamB))} as ${escapeAttr(next.scheduled)}.` : "nenhum confronto liberado no momento."}</div></li>`);
-      insights.push(`<li><span class="insight-dot"></span><div><b>Ritmo da tabela:</b> ${progressPct}% concluido, com ${pending} jogos pendentes e ${finished} finalizados.</div></li>`);
-      insights.push(`<li><span class="insight-dot"></span><div><b>Caixa:</b> ${financePct}% do previsto recebido, ${formatMoney(financeOpen)} ainda em aberto.</div></li>`);
-      insights.push(`<li><span class="insight-dot"></span><div><b>Uniformes:</b> ${uniformDelivered}/${uniformAthletes} atletas com entrega marcada. Faltam ${uniformPending} registros.</div></li>`);
-      if (tournament?.formatNote || settings.notes) {
-        insights.push(`<li><span class="insight-dot"></span><div><b>Observacao:</b> ${escapeAttr(tournament?.formatNote || settings.notes)}</div></li>`);
-      }
+      insights.push(`<li><span class="insight-dot"></span><div><b>Proximo:</b> ${next ? `${escapeAttr(teamName(next.teamA))} x ${escapeAttr(teamName(next.teamB))}` : "Nenhum jogo liberado."}</div></li>`);
+      insights.push(`<li><span class="insight-dot"></span><div><b>Financeiro:</b> ${formatMoney(financeOpen)} em aberto.</div></li>`);
+      insights.push(`<li><span class="insight-dot"></span><div><b>Uniformes:</b> faltam ${uniformPending} registros.</div></li>`);
 
       setText("dashTournament", settings.name || "Torneio");
       setText("dashSubtitle", `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate ${settings.points || 21} pontos`);
@@ -3202,8 +3519,8 @@
       setText("dashFinanceStatus", `${financePaidCount}/${financialRows.length} pagos - ${formatMoney(financeOpen)} em aberto`);
       setText("dashUniforms", `${uniformDelivered}/${uniformAthletes}`);
       setText("dashUniformStatus", `${uniformPct}% de entrega`);
-      setText("dashNext", next ? `Quadra ${next.court}` : "-");
-      setText("dashNextDetail", next ? `${teamName(next.teamA)} x ${teamName(next.teamB)} - ${next.scheduled}` : "Nenhum confronto pendente");
+      setText("dashNext", next ? "Pronto" : "-");
+      setText("dashNextDetail", next ? `${teamName(next.teamA)} x ${teamName(next.teamB)}` : "Nenhum confronto pendente");
       setText("dashProgressDonut", `${progressPct}%`);
       setText("dashFinanceDonut", `${financePct}%`);
       document.getElementById("dashProgressDonut")?.style.setProperty("--value", progressPct);
@@ -3225,9 +3542,6 @@
         <li class="metric-row"><span>Recebido</span><b>${formatMoney(financePaid)}</b></li>
         <li class="metric-row"><span>Em aberto</span><b>${formatMoney(financeOpen)}</b></li>
       `);
-      setHtml("dashPhaseBars", phaseRows || bar("Tabela nao gerada", 0, 1));
-      setHtml("dashUniformBars", uniformBars);
-      setHtml("dashTopRanking", topRows);
       setHtml("dashInsights", insights.join(""));
     }
 
@@ -3356,6 +3670,8 @@
     }
 
     function renderAll() {
+      document.body.classList.toggle("needs-tournament", !hasActiveTournament && !isPublic);
+      renderTournamentHistory();
       renderTeams();
       renderBracket();
       renderQueue();
@@ -3370,7 +3686,7 @@
       document.body.classList.toggle("menu-collapsed", menuCollapsed);
       const toggle = document.getElementById("toggleMenu");
       if (toggle) {
-        toggle.textContent = menuCollapsed ? ">" : "<";
+        toggle.textContent = "☰";
         toggle.title = menuCollapsed ? "Mostrar menu" : "Ocultar menu";
       }
       const adminToggle = document.getElementById("toggleAdminPanel");
@@ -3384,6 +3700,22 @@
     }
 
     function wireControls() {
+      const initialDate = document.getElementById("newTournamentDate");
+      if (initialDate && !initialDate.value) initialDate.value = new Date().toISOString().slice(0, 10);
+
+      document.getElementById("createNewTournament").addEventListener("click", () => {
+        const name = document.getElementById("newTournamentName").value.trim();
+        const date = document.getElementById("newTournamentDate").value;
+        const location = document.getElementById("newTournamentLocation").value.trim();
+        if (!name || !date || !location) {
+          alert("Preencha nome, data e local para criar o torneio.");
+          return;
+        }
+        createTournamentShell({ name, date, location });
+      });
+
+      document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
+
       document.getElementById("addTeam").addEventListener("click", () => {
         const options = [4, 8, 12, 16, 20, 24];
         const next = options.find(value => value > teamTargetCount);
@@ -3469,7 +3801,7 @@
         renderAll();
       });
 
-      ["tournamentName", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
+      ["tournamentName", "tournamentDate", "tournamentLocation", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
           persist();
@@ -3515,6 +3847,7 @@
     wireControls();
     setSettings(defaultSettings());
     loadState();
+    syncRemoteTournaments();
 
     if (tournament) setSettings(tournament);
     if (isPublic) {
