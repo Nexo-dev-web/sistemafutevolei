@@ -1611,6 +1611,17 @@
         <textarea id="notes" placeholder="Ex: final melhor de 3, aquecimento de 3 minutos..."></textarea>
       </label>
 
+      <label class="field">Quantidade de duplas
+        <select id="teamTargetCount">
+          <option value="4">4 duplas</option>
+          <option value="8">8 duplas</option>
+          <option value="12">12 duplas</option>
+          <option value="16" selected>16 duplas</option>
+          <option value="20">20 duplas</option>
+          <option value="24">24 duplas</option>
+        </select>
+      </label>
+
       <h3>Duplas inscritas</h3>
       <div class="team-header"><span>Atleta 1</span><span>Atleta 2</span><span></span></div>
       <div id="teamsList"></div>
@@ -1824,6 +1835,7 @@
     let uniforms = {};
     let tournament = null;
     let menuCollapsed = false;
+    let teamTargetCount = 16;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
 
@@ -1954,9 +1966,14 @@
 
     function createTournament() {
       const settings = getSettings();
+      syncTeamRowsWithTarget();
       const validTeams = orderedTeams(normalizeTeams());
       if (validTeams.length < 2) {
         alert("Cadastre pelo menos 2 duplas.");
+        return;
+      }
+      if (validTeams.length < teamTargetCount) {
+        alert(`Voce selecionou ${teamTargetCount} duplas. Preencha todas as duplas antes de gerar a tabela.`);
         return;
       }
 
@@ -2459,7 +2476,7 @@
     }
 
     function persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed, teamTargetCount }));
     }
 
     function loadState() {
@@ -2477,6 +2494,8 @@
         mode = state.mode || "single";
         activeView = state.activeView || "bracketView";
         menuCollapsed = Boolean(state.menuCollapsed);
+        teamTargetCount = Number(state.teamTargetCount) || Math.max(16, teams.length || 16);
+        if (mode === "double") teamTargetCount = 16;
       } catch {
         loadSample(true);
       }
@@ -2486,6 +2505,7 @@
       teams = samplePairs.map(pair => ({ id: uid(), a: pair[0], b: pair[1] }));
       finances = {};
       uniforms = {};
+      teamTargetCount = 16;
       setSettings(defaultSettings());
       mode = "double";
       if (!keepTournament) tournament = null;
@@ -2501,7 +2521,9 @@
     function renderTeams() {
       const list = document.getElementById("teamsList");
       if (!list) return;
-      if (!teams.length) teams = [{ id: uid(), a: "", b: "" }, { id: uid(), a: "", b: "" }];
+      const targetSelect = document.getElementById("teamTargetCount");
+      if (targetSelect) targetSelect.value = String(teamTargetCount);
+      syncTeamRowsWithTarget();
       list.innerHTML = teams.map((team, index) => `
         <div class="team-row">
           <input value="${team.a || ""}" placeholder="Atleta ${index + 1}A" data-team="${team.id}" data-field="a">
@@ -2526,6 +2548,13 @@
           renderAll();
         });
       });
+    }
+
+    function syncTeamRowsWithTarget() {
+      const target = Number(teamTargetCount) || 16;
+      while (teams.length < target) teams.push({ id: uid(), a: "", b: "" });
+      if (teams.length > target) teams = teams.slice(0, target);
+      if (!teams.length) teams = [{ id: uid(), a: "", b: "" }, { id: uid(), a: "", b: "" }];
     }
 
     function renderBracket() {
@@ -2760,7 +2789,7 @@
       const pending = matches.filter(match => match.teamA && match.teamB && match.status !== "Finalizado").length;
       const next = nextPlayableMatch();
 
-      document.getElementById("teamCount").textContent = validTeams;
+      document.getElementById("teamCount").textContent = `${validTeams}/${teamTargetCount}`;
       document.getElementById("roundCount").textContent = rounds;
       document.getElementById("matchCount").textContent = matches.length;
       document.getElementById("nextMatchLabel").textContent = next ? `Q${next.court}` : "-";
@@ -2799,7 +2828,7 @@
 
       document.getElementById("dashTournament").textContent = settings.name || "Torneio";
       document.getElementById("dashSubtitle").textContent = `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate ${settings.points || 21} pontos`;
-      document.getElementById("dashTeams").textContent = validTeams;
+      document.getElementById("dashTeams").textContent = `${validTeams}/${teamTargetCount}`;
       document.getElementById("dashCourts").textContent = `${settings.courts || 0} quadras - ${settings.matchMinutes || 0} min por jogo`;
       document.getElementById("dashMatches").textContent = matches.length;
       document.getElementById("dashMatchStatus").textContent = `${finished} finalizados, ${pending} pendentes`;
@@ -2961,7 +2990,13 @@
 
     function wireControls() {
       document.getElementById("addTeam").addEventListener("click", () => {
-        teams.push({ id: uid(), a: "", b: "" });
+        const options = [4, 8, 12, 16, 20, 24];
+        const next = options.find(value => value > teamTargetCount);
+        if (!next) {
+          alert("O limite deste modelo e 24 duplas.");
+          return;
+        }
+        teamTargetCount = next;
         persist();
         renderAll();
       });
@@ -2986,7 +3021,9 @@
 
       document.getElementById("clear").addEventListener("click", () => {
         if (!confirm("Limpar torneio, duplas e placares?")) return;
-        teams = [{ id: uid(), a: "", b: "" }, { id: uid(), a: "", b: "" }];
+        teamTargetCount = 16;
+        teams = [];
+        syncTeamRowsWithTarget();
         finances = {};
         uniforms = {};
         tournament = null;
@@ -3002,6 +3039,10 @@
       document.querySelectorAll("[data-mode]").forEach(tab => {
         tab.addEventListener("click", () => {
           mode = tab.dataset.mode;
+          if (mode === "double") {
+            teamTargetCount = 16;
+            syncTeamRowsWithTarget();
+          }
           persist();
           renderAll();
         });
@@ -3013,6 +3054,14 @@
           persist();
           renderAll();
         });
+      });
+
+      document.getElementById("teamTargetCount").addEventListener("change", event => {
+        teamTargetCount = Number(event.target.value) || 16;
+        syncTeamRowsWithTarget();
+        tournament = null;
+        persist();
+        renderAll();
       });
 
       ["tournamentName", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
