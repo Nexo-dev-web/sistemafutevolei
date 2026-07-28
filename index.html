@@ -4128,7 +4128,7 @@
         ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
         ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
         connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, semi1X, semisRowY + boxH / 2),
-        cornerConnector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, semi2X, semisRowY + boxH / 2)
+        `<path class="line" d="M${leftX[2] + boxW} ${leftRound3Y[1] + boxH / 2} V190 H${semi2X + 30} V${semisRowY}" />`
       ].join("");
 
       const rightConnectors = [
@@ -4151,7 +4151,7 @@
         cornerConnector(accessX, accessY[0] + boxH / 2, semi1ExitX, semiCenterY, "line-feed"),
         connector(semi2ExitX, semiCenterY, accessX, accessY[1] + boxH / 2, "line-feed"),
         connectorV(semi1BottomX, semisBottomY, finalCenterX, grandFinalY),
-        `<path class="line" d="M${semi2BottomX} ${semisBottomY} V${(semisBottomY + grandFinalY) / 2} H${semi2X + 9} A9 9 0 0 1 ${semi2X - 9} ${(semisBottomY + grandFinalY) / 2} H${finalCenterX} V${grandFinalY}" />`,
+        connectorV(semi2BottomX, semisBottomY, finalCenterX, grandFinalY),
         `<path class="line-soft" d="M${semi1BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`,
         `<path class="line-soft" d="M${semi2BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`
       ].join("");
