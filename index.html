@@ -259,6 +259,32 @@
       margin-top: 12px;
     }
 
+    .aside-actions-dock {
+      position: sticky;
+      bottom: -18px;
+      z-index: 40;
+      margin: 16px -18px -18px;
+      padding: 12px 18px 14px;
+      border-top: 1px solid rgba(230, 199, 109, 0.28);
+      background:
+        linear-gradient(180deg, rgba(8, 17, 14, 0.72), rgba(8, 17, 14, 0.98) 42%),
+        rgba(8, 17, 14, 0.96);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 -18px 34px rgba(0, 0, 0, 0.36);
+    }
+
+    .aside-actions-dock .actions {
+      margin-top: 0;
+    }
+
+    .aside-actions-dock .actions + .actions {
+      margin-top: 8px;
+    }
+
+    #teamsList {
+      padding-bottom: 10px;
+    }
+
     .primary, .secondary, .ghost {
       min-height: 44px;
       border-radius: 8px;
@@ -1138,13 +1164,15 @@
       <div class="team-header"><span>Atleta 1</span><span>Atleta 2</span><span>Seed</span><span></span></div>
       <div id="teamsList"></div>
 
-      <div class="actions">
-        <button class="secondary" type="button" id="addTeam">Adicionar dupla</button>
-        <button class="primary" type="button" id="generate">Gerar tabela</button>
-      </div>
-      <div class="actions">
-        <button class="secondary" type="button" id="sample">Modelo teste</button>
-        <button class="ghost" type="button" id="clear">Limpar tudo</button>
+      <div class="aside-actions-dock">
+        <div class="actions">
+          <button class="secondary" type="button" id="addTeam">Adicionar dupla</button>
+          <button class="primary" type="button" id="generate">Gerar tabela</button>
+        </div>
+        <div class="actions">
+          <button class="secondary" type="button" id="sample">Modelo teste</button>
+          <button class="ghost" type="button" id="clear">Limpar tudo</button>
+        </div>
       </div>
     </aside>
 
