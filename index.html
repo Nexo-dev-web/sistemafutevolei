@@ -1212,19 +1212,23 @@
     }
 
     .public-mode.double-public .phase-panel .team {
-      min-height: 34px;
+      grid-template-columns: minmax(0, 1fr) 24px;
+      min-height: 42px;
       padding: 3px 5px;
       gap: 5px;
     }
 
     .public-mode.double-public .phase-panel .team-name {
-      font-size: clamp(0.58rem, 0.68vw, 0.74rem);
+      -webkit-line-clamp: 3;
+      font-size: clamp(0.54rem, 0.62vw, 0.68rem);
+      line-height: 1.08;
     }
 
     .public-mode.double-public .phase-panel .score-input {
-      width: 30px;
+      width: 24px;
       min-height: 22px;
-      font-size: 0.64rem;
+      padding: 0 2px;
+      font-size: 0.58rem;
     }
 
     .public-mode.double-public {
@@ -1623,7 +1627,9 @@
     }
 
     .public-mode .team-name {
-      font-size: 1.02rem;
+      -webkit-line-clamp: 3;
+      font-size: clamp(0.82rem, 1vw, 1.02rem);
+      line-height: 1.08;
     }
 
     .public-mode.groups-public .round {
@@ -1642,7 +1648,7 @@
     }
 
     .public-mode.groups-public .team-name {
-      font-size: 0.9rem;
+      font-size: 0.82rem;
     }
 
     .public-mode .team.winner {
@@ -1705,8 +1711,9 @@
     }
 
     .public-mode.score-focus .match.score-live .team-name {
-      font-size: clamp(2rem, 5.4vw, 5.8rem);
-      line-height: 1;
+      -webkit-line-clamp: 2;
+      font-size: clamp(1.65rem, 4.3vw, 4.9rem);
+      line-height: 1.02;
     }
 
     .public-mode.score-focus .match.score-live .score-input {
