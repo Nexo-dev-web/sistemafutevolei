@@ -4012,12 +4012,12 @@
       const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
       const leftRound2Y = [142, 286, 464, 608];
       const leftRound3Y = [214, 536];
-      const leftFinalY = 374;
+      const leftFinalY = 430;
       const rightY = [106, 250, 428, 572];
       const rightRound2Y = [142, 286, 464, 608];
       const rightRound3Y = [214, 536];
       const repFinalY = 188;
-      const grandFinalY = 578;
+      const grandFinalY = 610;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4094,12 +4094,12 @@
           <text class="legend-text" x="1840" y="102">Primeira rodada</text>
           <text class="legend-text" x="1582" y="102">Quartas dos perdedores</text>
           <text class="legend-text" x="1322" y="102">Semi</text>
-          <text class="label-text" x="895" y="552">Grande Final</text>
+          <text class="label-text" x="895" y="586">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
           ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
           ${grandFinal}
-          <line class="line champion-line" x1="${leftX[3] + boxW}" y1="${grandFinalY + boxH / 2}" x2="${leftX[3] + boxW + 75}" y2="${grandFinalY + boxH / 2}" />
-          <text class="label-text" x="1088" y="607">Campeao</text>
+          <line class="line champion-line" x1="${leftX[3] + boxW}" y1="${grandFinalY + boxH / 2}" x2="${leftX[3] + boxW + 105}" y2="${grandFinalY + boxH / 2}" />
+          <text class="label-text" x="1130" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
           <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Final principal</text>
           <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Final da repescagem</text>
         </svg>
