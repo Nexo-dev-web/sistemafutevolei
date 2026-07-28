@@ -677,7 +677,7 @@
       min-width: 0;
       transform: scale(var(--public-scale, 1));
       transform-origin: top left;
-      animation: bracketReveal 900ms ease both;
+      animation: none;
     }
 
     .public-mode .bracket-wrap {
@@ -747,6 +747,25 @@
 
     .public-mode .team-name {
       font-size: 1.02rem;
+    }
+
+    .public-mode.groups-public .round {
+      min-width: 220px;
+      gap: 16px;
+    }
+
+    .public-mode.groups-public .match {
+      min-height: 96px;
+      padding: 8px;
+    }
+
+    .public-mode.groups-public .team {
+      min-height: 36px;
+      padding: 5px 7px;
+    }
+
+    .public-mode.groups-public .team-name {
+      font-size: 0.9rem;
     }
 
     .public-mode .team.winner {
@@ -1722,6 +1741,7 @@
       }
 
       document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
+      document.body.classList.toggle("groups-public", Boolean(isPublic && tournament.mode === "groups"));
       if (tournament.mode === "double") {
         bracket.innerHTML = doubleEliminationSvg(tournament.teams || []);
         return;
@@ -1957,8 +1977,8 @@
       const naturalHeight = bracket.scrollHeight || 1;
       const availableWidth = Math.max(wrap.clientWidth - 10, 1);
       const availableHeight = Math.max(wrap.clientHeight - 10, 1);
-      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.28);
-      bracket.style.setProperty("--public-scale", Math.max(scale, 0.42).toFixed(3));
+      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.18);
+      bracket.style.setProperty("--public-scale", Math.max(scale, 0.2).toFixed(3));
     }
 
     function renderModeHelp() {
