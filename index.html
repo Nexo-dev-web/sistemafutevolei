@@ -532,6 +532,22 @@
       border: 1px solid rgba(255, 71, 71, 0.38);
     }
 
+    .delete-row-btn {
+      min-height: 36px;
+      min-width: 82px;
+      padding: 0 10px;
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(122, 31, 31, 0.92);
+      border: 1px solid rgba(255, 113, 113, 0.48);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .delete-row-btn:hover {
+      background: rgba(158, 42, 42, 0.98);
+    }
+
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -2378,7 +2394,7 @@
           <div class="table-scroll">
             <table class="control-table">
               <thead>
-                <tr><th>Dupla</th><th>Status</th><th class="money-cell">Valor</th><th>Forma</th><th>Data</th><th>Observacao</th><th></th></tr>
+                <tr><th>Dupla</th><th>Status</th><th class="money-cell">Valor</th><th>Forma</th><th>Data</th><th>Observacao</th><th>Acao</th></tr>
               </thead>
               <tbody id="financeBody"></tbody>
             </table>
@@ -4077,7 +4093,7 @@
             </td>
             <td><input type="date" value="${escapeAttr(record.date)}" data-finance="${record.id}" data-field="date"></td>
             <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." data-finance="${record.id}" data-field="note"></td>
-            <td><button class="danger-btn" type="button" title="Remover linha" data-remove-finance="${record.id}">x</button></td>
+            <td><button class="delete-row-btn" type="button" title="Apagar esta linha do financeiro" data-remove-finance="${record.id}">Apagar</button></td>
           </tr>
         `;
       }).join("") : '<tr><td colspan="7">Adicione linhas para controlar pagamentos.</td></tr>';
