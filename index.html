@@ -4007,20 +4007,20 @@
       const boxH = 56;
       const rowH = 24;
       const scoreW = 32;
-      const leftX = [55, 325, 595, 760];
-      const rightX = [1740, 1480, 1220, 1030];
+      const leftX = [55, 325, 595, 790];
+      const rightX = [1840, 1600, 1360, 1120];
       const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
       const leftRound2Y = [142, 286, 464, 608];
       const leftRound3Y = [214, 536];
-      const leftFinalY = 330;
-      const leftFinal2Y = 520;
+      const leftFinalY = 295;
+      const leftFinal2Y = 525;
       const rightY = [106, 250, 428, 572];
       const rightRound2Y = [142, 286, 464, 608];
       const rightRound3Y = [214, 536];
-      const repFinalY = 250;
-      const repFinal2Y = 520;
-      const grandFinalY = 425;
-      const thirdPlaceY = 625;
+      const repFinalY = 295;
+      const repFinal2Y = 525;
+      const grandFinalY = 410;
+      const thirdPlaceY = 630;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4068,7 +4068,7 @@
       const rightR3 = [23, 24].map((codeNumber, index) => matchBox(rightX[2], rightRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightFinal = matchBox(rightX[3], repFinalY, boxW, boxH, matchSlot("J25", "A", "A definir"), matchSlot("J25", "B", "A definir"), "J25");
       const rightFinal2 = matchBox(rightX[3], repFinal2Y, boxW, boxH, matchSlot("J26", "A", "A definir"), matchSlot("J26", "B", "A definir"), "J26");
-      const grandFinalX = 895;
+      const grandFinalX = 950;
       const grandFinal = matchBox(grandFinalX, grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
       const thirdPlace = matchBox(grandFinalX, thirdPlaceY, boxW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
 
@@ -4087,28 +4087,29 @@
       ].join("");
 
       const finalsConnectors = [
-        connector(rightX[3], repFinalY + boxH / 2, leftX[3] + boxW, leftFinalY + boxH / 2),
-        connector(rightX[3], repFinal2Y + boxH / 2, leftX[3] + boxW, leftFinal2Y + boxH / 2),
-        connector(leftX[3] + boxW, leftFinalY + boxH / 2, grandFinalX, grandFinalY + boxH / 2),
-        connector(leftX[3] + boxW, leftFinal2Y + boxH / 2, grandFinalX, grandFinalY + boxH / 2),
-        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 35} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`,
-        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 35} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`
+        `<line class="line" x1="${rightX[3]}" y1="${repFinalY + boxH / 2}" x2="${leftX[3] + boxW}" y2="${leftFinalY + boxH / 2}" />`,
+        `<line class="line" x1="${rightX[3]}" y1="${repFinal2Y + boxH / 2}" x2="${leftX[3] + boxW}" y2="${leftFinal2Y + boxH / 2}" />`,
+        `<path class="line" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 42} V${grandFinalY + boxH / 2} H${grandFinalX}" />`,
+        `<path class="line" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 42} V${grandFinalY + boxH / 2} H${grandFinalX}" />`,
+        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 62} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`,
+        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 62} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`
       ].join("");
 
       return `
-        <svg class="double-diagram" viewBox="0 0 2000 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="2000" height="780" fill="#06100c" />
-          <text class="title-text" x="1000" y="30">TABELA DE JOGOS</text>
-          <text class="subtitle-text" x="1000" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
+        <svg class="double-diagram" viewBox="0 0 2100 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="2100" height="780" fill="#06100c" />
+          <text class="title-text" x="1050" y="30">TABELA DE JOGOS</text>
+          <text class="subtitle-text" x="1050" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
           <text class="label-text" x="500" y="82">Classificatoria</text>
           <text class="legend-text" x="158" y="102">Primeira rodada</text>
           <text class="legend-text" x="428" y="102">Oitavas</text>
           <text class="legend-text" x="698" y="102">Quartas</text>
-          <text class="label-text" x="1490" y="82">Repescagem</text>
-          <text class="legend-text" x="1840" y="102">Primeira rodada</text>
-          <text class="legend-text" x="1582" y="102">Oitavas</text>
-          <text class="legend-text" x="1322" y="102">Quartas</text>
-          <text class="legend-text" x="1050" y="102">Semi</text>
+          <text class="label-text" x="1580" y="82">Repescagem</text>
+          <text class="legend-text" x="1940" y="102">Primeira rodada</text>
+          <text class="legend-text" x="1702" y="102">Oitavas</text>
+          <text class="legend-text" x="1462" y="102">Quartas</text>
+          <text class="legend-text" x="1222" y="102">Quartas finais</text>
+          <text class="legend-text" x="895" y="102">Semis</text>
           <text class="label-text" x="${grandFinalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
           <text class="small-text" x="${grandFinalX}" y="${thirdPlaceY - 14}">3o lugar</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftFinal2}${leftConnectors}
