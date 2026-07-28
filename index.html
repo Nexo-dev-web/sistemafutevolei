@@ -1142,8 +1142,8 @@
 
     .double-admin {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
+      grid-template-columns: 1fr;
+      gap: 12px;
       width: 100%;
       min-width: 0;
       padding: 8px 0 20px;
@@ -1151,9 +1151,9 @@
 
     .phase-panel {
       display: grid;
-      gap: 14px;
+      gap: 10px;
       align-content: start;
-      padding: 16px;
+      padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.045);
@@ -1175,7 +1175,25 @@
 
     .phase-panel .match {
       min-height: 0;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    .phase-panel .team {
+      grid-template-columns: minmax(0, 1fr) 52px;
+      min-height: 38px;
+      padding: 6px 8px;
+    }
+
+    .phase-panel .team-name {
+      -webkit-line-clamp: 1;
+      font-size: clamp(0.78rem, 0.86vw, 0.96rem);
+      line-height: 1.06;
+    }
+
+    .phase-panel .score-input {
+      width: 52px;
+      min-height: 30px;
+      font-size: 0.88rem;
     }
 
     .phase-panel .match::after {
@@ -1220,9 +1238,13 @@
 
     .double-section-rounds {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 8px;
       min-width: 0;
+    }
+
+    .double-section[data-section="Finais"] .double-section-rounds {
+      grid-template-columns: 1fr;
     }
 
     .public-mode.double-public .double-admin {
