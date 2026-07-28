@@ -1098,14 +1098,26 @@
         position: static;
         height: auto;
         max-height: none;
+        overflow: visible;
       }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .grid-2 { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 680px) {
-      .app-shell { padding: 10px; }
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+      .app-shell {
+        min-height: auto;
+        padding: 10px;
+      }
       aside, main, .panel { padding: 12px; }
+      .aside-actions-dock {
+        margin: 16px -12px -12px;
+        padding: 12px;
+      }
       .brand, .topbar, .public-mode .public-banner { flex-direction: column; display: flex; }
       .nav-tabs { grid-template-columns: 1fr 1fr; }
       .field-row, .actions, .mode-tabs, .team-row { grid-template-columns: 1fr; }
