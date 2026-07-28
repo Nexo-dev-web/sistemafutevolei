@@ -3093,42 +3093,42 @@
       });
       const rounds = [
         {
-          name: "Oitavas de final",
+          name: "1a Rodada",
           bracketSide: "Principal",
           matches: Array.from({ length: 8 }, (_, index) => match(`J${index + 1}`, slots[index * 2], slots[index * 2 + 1], "Pendente"))
         },
         {
-          name: "Quartas de final",
+          name: "Oitavas de final",
           bracketSide: "Principal",
           matches: ["J13", "J14", "J15", "J16"].map(code => match(code))
         },
         {
-          name: "Semifinal classificatoria",
+          name: "Quartas de final",
           bracketSide: "Principal",
           matches: ["J21", "J22"].map(code => match(code))
         },
         {
-          name: "Oitavas da repescagem",
+          name: "1a Repescagem",
           bracketSide: "Repescagem",
           matches: ["J9", "J10", "J11", "J12"].map(code => match(code))
         },
         {
-          name: "Quartas da repescagem",
+          name: "Oitavas da repescagem",
           bracketSide: "Repescagem",
           matches: ["J17", "J18", "J19", "J20"].map(code => match(code))
         },
         {
-          name: "Semifinal da repescagem",
+          name: "Quartas da repescagem",
           bracketSide: "Repescagem",
           matches: ["J23", "J24"].map(code => match(code))
         },
         {
-          name: "Final da repescagem",
+          name: "Semifinal da repescagem",
           bracketSide: "Repescagem",
           matches: ["J25", "J26"].map(code => match(code))
         },
         {
-          name: "Semifinal",
+          name: "Semifinais",
           bracketSide: "Finais",
           matches: ["J27", "J28"].map(code => match(code))
         },
@@ -3317,10 +3317,10 @@
         J18: { V: ["J23", "d1"] },
         J19: { V: ["J24", "d2"] },
         J20: { V: ["J24", "d1"] },
-        J21: { V: ["J27", "d1"], P: ["J25", "d2"] },
-        J22: { V: ["J28", "d2"], P: ["J26", "d2"] },
-        J23: { V: ["J25", "d1"] },
-        J24: { V: ["J26", "d1"] },
+        J21: { V: ["J27", "d1"], P: ["J25", "d1"] },
+        J22: { V: ["J28", "d2"], P: ["J26", "d1"] },
+        J23: { V: ["J25", "d2"] },
+        J24: { V: ["J26", "d2"] },
         J25: { V: ["J27", "d2"] },
         J26: { V: ["J28", "d1"] },
         J27: { V: ["J30", "d1"], P: ["J29", "d1"] },
@@ -3916,14 +3916,14 @@
       };
       const sections = ["Principal", "Repescagem", "Finais"];
       const displayRoundName = name => ({
-        "Principal - 1a Rodada": "Oitavas de final",
-        "Principal - Oitavas": "Quartas de final",
-        "Principal - Quartas": "Semifinal classificatoria",
-        "Repescagem - 1a Rodada": "Primeira rodada da repescagem",
+        "Principal - 1a Rodada": "1a Rodada",
+        "Principal - Oitavas": "Oitavas de final",
+        "Principal - Quartas": "Quartas de final",
+        "Repescagem - 1a Rodada": "1a Repescagem",
         "Repescagem - Oitavas": "Oitavas da repescagem",
         "Repescagem - Quartas": "Quartas da repescagem",
         "Repescagem - Semifinal": "Semifinal da repescagem",
-        "Finais - Semifinais": "Semifinal",
+        "Finais - Semifinais": "Semifinais",
         "Finais": "Final e 3o lugar"
       })[name] || name;
       return `
