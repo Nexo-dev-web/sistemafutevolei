@@ -272,19 +272,35 @@
       text-align: center;
     }
 
+    .nav-tabs button[data-view] {
+      position: relative;
+    }
+
     body.menu-collapsed .nav-tabs {
       padding: 8px;
     }
 
     body.menu-collapsed .nav-tabs button {
       padding: 0;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      font-size: 0.72rem;
+      font-size: 0;
+      min-height: 64px;
+    }
+
+    body.menu-collapsed .nav-tabs button[data-short]::after {
+      content: attr(data-short);
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0;
     }
 
     body.menu-collapsed .menu-toggle {
       font-size: 1rem;
+      min-height: 42px;
     }
 
     .mode-tabs {
@@ -739,6 +755,14 @@
       font-size: 0.95rem;
     }
 
+    .phase-panel h3 small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
     .phase-panel .match {
       min-height: 0;
       gap: 10px;
@@ -763,6 +787,27 @@
       letter-spacing: 0.03em;
     }
 
+    .double-section-title span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+      border-radius: 999px;
+      color: #06100c;
+      background: var(--sand);
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .double-section-note {
+      margin: -4px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
     .double-section-rounds {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -784,6 +829,22 @@
       border: 1px solid rgba(230, 199, 109, 0.18);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.035);
+    }
+
+    .public-mode.double-public .double-section-title {
+      font-size: 0.74rem;
+    }
+
+    .public-mode.double-public .double-section-title span {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      font-size: 0.68rem;
+    }
+
+    .public-mode.double-public .double-section-note {
+      font-size: 0.58rem;
+      line-height: 1.2;
     }
 
     .public-mode.double-public .double-section-rounds {
@@ -910,6 +971,19 @@
       gap: 8px;
       color: var(--muted);
       font-size: 0.78rem;
+    }
+
+    .match-meta strong {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      margin-right: 5px;
+      padding: 2px 5px;
+      border-radius: 5px;
+      color: #06100c;
+      background: rgba(230, 199, 109, 0.92);
+      font-size: 0.68rem;
     }
 
     .match-save {
@@ -1463,12 +1537,12 @@
   <div class="app-shell">
     <nav class="nav-tabs">
       <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">&lt;</button>
-      <button class="active" type="button" data-view="bracketView">Chave</button>
-      <button type="button" data-view="queueView">Jogos</button>
-      <button type="button" data-view="rankingView">Ranking</button>
-      <button type="button" data-view="financeView">Financeiro</button>
-      <button type="button" data-view="uniformView">Uniformes</button>
-      <button type="button" data-view="settingsView">Dashboard</button>
+      <button class="active" type="button" data-view="bracketView" data-short="CH">Chave</button>
+      <button type="button" data-view="queueView" data-short="JG">Jogos</button>
+      <button type="button" data-view="rankingView" data-short="RK">Ranking</button>
+      <button type="button" data-view="financeView" data-short="R$">Financeiro</button>
+      <button type="button" data-view="uniformView" data-short="UN">Uniformes</button>
+      <button type="button" data-view="settingsView" data-short="DB">Dashboard</button>
     </nav>
 
     <aside>
@@ -2488,18 +2562,24 @@
     }
 
     function doubleAdminHtml() {
+      const sectionInfo = {
+        Principal: { step: "A", title: "Chave Principal", note: "Venceu, continua por cima. Perdeu, cai para a repescagem." },
+        Repescagem: { step: "B", title: "Repescagem", note: "Quem perder aqui sai do torneio. Quem vencer segue vivo." },
+        Finais: { step: "C", title: "Finais", note: "Semifinais, disputa de 3o lugar e grande final." }
+      };
       const sections = ["Principal", "Repescagem", "Finais"];
       return `
         <div class="double-admin">
           ${sections.map(section => `
             <section class="double-section" data-section="${section}">
-              <h2 class="double-section-title">${section === "Finais" ? "Finais" : section}</h2>
+              <h2 class="double-section-title"><span>${sectionInfo[section].step}</span>${sectionInfo[section].title}</h2>
+              <p class="double-section-note">${sectionInfo[section].note}</p>
               <div class="double-section-rounds">
                 ${tournament.rounds.map((round, roundIndex) => ({ round, roundIndex }))
                   .filter(item => item.round.bracketSide === section)
                   .map(({ round, roundIndex }) => `
                     <div class="phase-panel">
-                      <h3>${round.name}</h3>
+                      <h3>${round.name}<small>${round.matches.map(match => match.code).join(" / ")}</small></h3>
                       ${round.matches.map((match, matchIndex) => matchHtml(match, roundIndex, matchIndex)).join("")}
                     </div>
                   `).join("")}
@@ -2616,7 +2696,7 @@
       return `
         <article class="match">
           <div class="match-meta">
-            <span>${match.code ? `${match.code} - ` : ""}${match.status}</span>
+            <span>${match.code ? `<strong>${match.code}</strong> ` : ""}${match.status}</span>
             <span>Quadra ${match.court || "-"} - ${match.scheduled || "--:--"}</span>
           </div>
           <div class="team${aWinner}">
