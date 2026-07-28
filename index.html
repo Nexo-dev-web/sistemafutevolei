@@ -1226,8 +1226,8 @@
     }
 
     .public-mode.double-public .double-admin {
-      grid-template-columns: 1.16fr 1.05fr 0.74fr;
-      gap: 8px;
+      grid-template-columns: 1.22fr 1.08fr 0.64fr;
+      gap: 5px;
       height: 100%;
       padding: 0;
       overflow: hidden;
@@ -1235,7 +1235,7 @@
 
     .public-mode.double-public .double-section {
       min-height: 0;
-      padding: 6px;
+      padding: 4px;
       border: 1px solid rgba(230, 199, 109, 0.18);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.035);
@@ -1260,7 +1260,7 @@
 
     .public-mode.double-public .double-section-rounds {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
+      gap: 4px;
       min-height: 0;
     }
 
@@ -1269,14 +1269,14 @@
     }
 
     .public-mode.double-public .phase-panel {
-      padding: 7px;
-      gap: 5px;
+      padding: 5px;
+      gap: 4px;
       min-width: 0;
       overflow: hidden;
     }
 
     .public-mode.double-public .phase-panel h3 {
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
@@ -1284,35 +1284,35 @@
     }
 
     .public-mode.double-public .phase-panel .match {
-      padding: 4px;
-      gap: 3px;
+      padding: 3px;
+      gap: 2px;
       border-radius: 6px;
     }
 
     .public-mode.double-public .phase-panel .match-meta {
-      font-size: 0.5rem;
+      font-size: 0.46rem;
       gap: 4px;
       line-height: 1;
     }
 
     .public-mode.double-public .phase-panel .team {
-      grid-template-columns: minmax(0, 1fr) 34px;
-      min-height: 34px;
-      padding: 3px 4px;
-      gap: 4px;
+      grid-template-columns: minmax(0, 1fr) 42px;
+      min-height: 32px;
+      padding: 2px 5px;
+      gap: 6px;
     }
 
     .public-mode.double-public .phase-panel .team-name {
-      -webkit-line-clamp: 2;
-      font-size: clamp(0.6rem, 0.78vw, 0.82rem);
-      line-height: 1.08;
+      -webkit-line-clamp: 1;
+      font-size: clamp(0.62rem, 0.88vw, 0.9rem);
+      line-height: 1.05;
     }
 
     .public-mode.double-public .phase-panel .score-input {
-      width: 34px;
+      width: 42px;
       min-height: 24px;
       padding: 0 2px;
-      font-size: 0.68rem;
+      font-size: 0.72rem;
     }
 
     .public-mode.double-public {
@@ -4131,14 +4131,15 @@
       if (!wrap || !bracket) return;
       bracket.style.setProperty("--public-scale", "1");
       const svg = bracket.querySelector("svg");
+      const doubleAdmin = bracket.querySelector(".double-admin");
       const viewBox = svg?.viewBox?.baseVal;
-      const naturalWidth = viewBox?.width || bracket.scrollWidth || 1;
-      const naturalHeight = viewBox?.height || bracket.scrollHeight || 1;
+      const naturalWidth = viewBox?.width || doubleAdmin?.scrollWidth || bracket.scrollWidth || 1;
+      const naturalHeight = viewBox?.height || doubleAdmin?.scrollHeight || bracket.scrollHeight || 1;
       const top = wrap.getBoundingClientRect().top;
-      const availableWidth = Math.max(window.innerWidth - 28, 1);
-      const availableHeight = Math.max(window.innerHeight - top - 12, 1);
+      const availableWidth = Math.max(window.innerWidth - 34, 1);
+      const availableHeight = Math.max(window.innerHeight - top - 8, 1);
       wrap.style.height = `${availableHeight}px`;
-      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.18);
+      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.12);
       bracket.style.setProperty("--public-scale", Math.max(scale, 0.2).toFixed(3));
     }
 
