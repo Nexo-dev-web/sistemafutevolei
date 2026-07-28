@@ -1627,6 +1627,66 @@
       animation: winnerPulse 1.8s ease-in-out infinite;
     }
 
+    .public-mode.score-focus .public-banner,
+    .public-mode.score-focus .double-section,
+    .public-mode.score-focus .round {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .public-mode.score-focus .match.score-live {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(18px, 3vw, 34px);
+      width: 100vw;
+      height: 100vh;
+      padding: clamp(28px, 6vw, 90px);
+      border: 0;
+      border-radius: 0;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(230, 199, 109, 0.22), transparent 34%),
+        radial-gradient(circle at 82% 72%, rgba(53, 228, 138, 0.22), transparent 30%),
+        linear-gradient(145deg, #06100c, #071a12 48%, #111307);
+      box-shadow: inset 0 0 0 2px rgba(230, 199, 109, 0.36), 0 0 80px rgba(53, 228, 138, 0.26);
+      animation: none;
+    }
+
+    .public-mode.score-focus .match.score-live .match-meta {
+      color: var(--sand);
+      font-size: clamp(1rem, 2vw, 1.8rem);
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .public-mode.score-focus .match.score-live .team {
+      grid-template-columns: minmax(0, 1fr) clamp(96px, 13vw, 180px);
+      min-height: clamp(92px, 18vh, 190px);
+      padding: clamp(16px, 3vw, 34px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+        rgba(0, 0, 0, 0.36);
+    }
+
+    .public-mode.score-focus .match.score-live .team-name {
+      font-size: clamp(2rem, 5.4vw, 5.8rem);
+      line-height: 1;
+    }
+
+    .public-mode.score-focus .match.score-live .score-input {
+      width: 100%;
+      min-height: clamp(74px, 13vh, 146px);
+      border-radius: 8px;
+      color: var(--sand);
+      font-size: clamp(2.4rem, 6vw, 6.5rem);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
     .public-mode .round-title {
       color: var(--sand);
       text-shadow: 0 0 18px rgba(230, 199, 109, 0.5);
@@ -1963,8 +2023,8 @@
           <select id="pointsToWin">
             <option value="11">11 pontos</option>
             <option value="15">15 pontos</option>
-            <option value="18">18 pontos</option>
-            <option value="21" selected>21 pontos</option>
+            <option value="18" selected>18 pontos</option>
+            <option value="21">21 pontos</option>
           </select>
         </label>
         <label class="field">Tempo estimado
@@ -2017,7 +2077,7 @@
             <p class="muted" id="publicSubtitle"></p>
           </div>
         </div>
-        <span class="pill sand">Atualiza a cada 30s</span>
+        <span class="pill sand">Atualiza a cada 5s</span>
         <div class="refresh-clock">
           <span>Proximo refresh</span>
           <strong id="refreshCountdown">30s</strong>
@@ -2220,7 +2280,8 @@
     const SUPABASE_URL = "https://bucyqoczsximiythoztw.supabase.co";
     const SUPABASE_KEY = "sb_publishable_3JjJZUCsQXk6vK1Ka0VEqg_Kr4zinnb";
     const SUPABASE_TABLE = "futevolei_tournaments";
-    const REFRESH_MS = 30000;
+    const REFRESH_MS = 5000;
+    const SCORE_ADVANTAGE = 2;
     const params = new URLSearchParams(window.location.search);
     const isPublic = params.get("view") === "chaveamento";
 
@@ -2238,6 +2299,8 @@
     let teamTargetCount = 16;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
+    let publicScoreSnapshot = "";
+    let publicLiveMatchId = "";
 
     const samplePairs = [
       ["Andre", "Lucas"],
@@ -2284,7 +2347,7 @@
         location: "",
         category: "Intermediario",
         courts: 2,
-        points: 21,
+        points: 18,
         matchMinutes: 15,
         model: "random",
         notes: "Final pode ser melhor de 3 se houver tempo. Aquecimento maximo de 3 minutos."
@@ -2681,19 +2744,55 @@
       clearFutureSlots(roundIndex + 1, Math.floor(matchIndex / 2));
     }
 
+    function scoreRule(targetPoints = 18) {
+      const target = Number(targetPoints) || 18;
+      return { target, deuceAt: Math.max(target - 1, 0), advantage: SCORE_ADVANTAGE };
+    }
+
+    function cleanScorePair(scoreA, scoreB, targetPoints) {
+      const rule = scoreRule(targetPoints);
+      let a = Math.max(0, Number(scoreA) || 0);
+      let b = Math.max(0, Number(scoreB) || 0);
+      const high = Math.max(a, b);
+      const low = Math.min(a, b);
+      if (high > rule.target && low < rule.deuceAt) {
+        if (a > b) a = rule.target;
+        else b = rule.target;
+      }
+      if (Math.max(a, b) > rule.target && Math.abs(a - b) > rule.advantage) {
+        if (a > b) a = b + rule.advantage;
+        else b = a + rule.advantage;
+      }
+      return [a, b];
+    }
+
+    function scoreFinished(scoreA, scoreB, targetPoints) {
+      const rule = scoreRule(targetPoints);
+      if (scoreA === scoreB) return false;
+      const high = Math.max(scoreA, scoreB);
+      const low = Math.min(scoreA, scoreB);
+      if (high < rule.target) return false;
+      if (high === rule.target) return high - low >= 1;
+      return low >= rule.deuceAt && high - low >= rule.advantage;
+    }
+
     function syncWinners() {
       if (!tournament) return;
       tournament.rounds.forEach((round, roundIndex) => {
         round.matches.forEach((match, matchIndex) => {
-          const scoreA = Number(match.scoreA);
-          const scoreB = Number(match.scoreB);
           const targetPoints = Number(tournament.points || 21);
-          const reachedTarget = Math.max(scoreA, scoreB) >= targetPoints;
-          if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreA !== scoreB && reachedTarget) {
+          let scoreA = Number(match.scoreA);
+          let scoreB = Number(match.scoreB);
+          if (match.scoreA !== "" && match.scoreB !== "") {
+            [scoreA, scoreB] = cleanScorePair(scoreA, scoreB, targetPoints);
+            match.scoreA = String(scoreA);
+            match.scoreB = String(scoreB);
+          }
+          if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreFinished(scoreA, scoreB, targetPoints)) {
             match.winner = scoreA > scoreB ? "A" : "B";
             match.status = "Finalizado";
           } else if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreA !== scoreB) {
-            match.winner = scoreA > scoreB ? "A" : "B";
+            match.winner = null;
             match.status = "Em jogo";
           } else if (match.teamA && match.teamB) {
             match.winner = null;
@@ -2814,6 +2913,30 @@
         roundIndex,
         matchIndex
       })));
+    }
+
+    function scoreSnapshot() {
+      return allMatches().map(match => `${match.id}:${match.scoreA || ""}-${match.scoreB || ""}`).join("|");
+    }
+
+    function detectPublicScoreMovement() {
+      if (!isPublic || !tournament) return;
+      const previous = publicScoreSnapshot;
+      const current = scoreSnapshot();
+      if (previous && previous !== current) {
+        const before = new Map(previous.split("|").map(item => item.split(":")));
+        const changed = allMatches().find(match => before.get(match.id) !== `${match.scoreA || ""}-${match.scoreB || ""}`);
+        publicLiveMatchId = changed && changed.status !== "Finalizado" ? changed.id : "";
+        document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else if (publicLiveMatchId) {
+        const live = allMatches().find(match => match.id === publicLiveMatchId);
+        if (!live || live.status === "Finalizado") {
+          publicLiveMatchId = "";
+          document.body.classList.remove("score-focus");
+        }
+      }
+      publicScoreSnapshot = current;
     }
 
     function nextPlayableMatch() {
@@ -3286,6 +3409,17 @@
         input.addEventListener("input", () => {
           const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
           match[input.dataset.field] = input.value;
+          if (match.scoreA !== "" && match.scoreB !== "") {
+            const [scoreA, scoreB] = cleanScorePair(match.scoreA, match.scoreB, tournament.points);
+            match.scoreA = String(scoreA);
+            match.scoreB = String(scoreB);
+            const container = input.closest(".match");
+            container?.querySelectorAll(".score-input").forEach(scoreInput => {
+              const field = scoreInput.dataset.field;
+              scoreInput.value = match[field];
+            });
+          }
+          match.scoreUpdatedAt = new Date().toISOString();
           if (match.status !== "Finalizado") match.status = "Em jogo";
           persist();
           renderQueue();
@@ -3384,18 +3518,19 @@
       const aWinner = match.winner === "A" ? " winner" : "";
       const bWinner = match.winner === "B" ? " winner" : "";
       const matchLabel = match.label || (match.code === "J30" ? "Final" : match.code === "J29" ? "3o lugar" : "");
+      const liveClass = isPublic && publicLiveMatchId === match.id ? " score-live" : "";
       return `
-        <article class="match">
+        <article class="match${liveClass}">
           <div class="match-meta">
             <span>${matchLabel ? `${escapeAttr(matchLabel)} - ` : ""}${match.status}</span>
           </div>
           <div class="team${aWinner}">
             <span class="team-name ${match.teamA ? "" : "bye"}">${teamName(match.teamA)}</span>
-            <input class="score-input" type="number" min="0" value="${match.scoreA}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="40" value="${match.scoreA}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
           </div>
           <div class="team${bWinner}">
             <span class="team-name ${match.teamB ? "" : "bye"}">${teamName(match.teamB)}</span>
-            <input class="score-input" type="number" min="0" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="40" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
         </article>
       `;
@@ -3866,11 +4001,15 @@
       document.body.classList.add("public-mode");
       document.title = "Chaveamento - Torneio de Futevolei";
       activeView = "bracketView";
+      publicLiveMatchId = allMatches().find(match => match.status === "Em jogo")?.id || "";
+      document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
+      publicScoreSnapshot = scoreSnapshot();
       setInterval(() => {
         loadState();
         if (tournament) setSettings(tournament);
         activeView = "bracketView";
         nextRefreshAt = Date.now() + REFRESH_MS;
+        detectPublicScoreMovement();
         renderAll();
       }, REFRESH_MS);
     }
