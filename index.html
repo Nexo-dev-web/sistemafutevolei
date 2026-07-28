@@ -1427,14 +1427,6 @@
         </label>
       </div>
 
-      <label class="field">Modelo de chave
-        <select id="bracketModel">
-          <option value="balanced" selected>Balanceado automatico</option>
-          <option value="random">Sorteio aleatorio</option>
-        </select>
-      </label>
-      <div class="help-box" id="bracketModelHelp"></div>
-
       <label class="field">Observacao do organizador
         <textarea id="notes" placeholder="Ex: final melhor de 3, aquecimento de 3 minutos..."></textarea>
       </label>
@@ -1674,17 +1666,6 @@
       ["Edu", "Kaique"]
     ];
 
-    const bracketModelTexts = {
-      balanced: {
-        title: "Balanceado automatico",
-        text: "Distribui as duplas alternando inicio e fim da lista cadastrada. E o melhor modelo para montar uma chave organizada sem precisar preencher ranking."
-      },
-      random: {
-        title: "Sorteio aleatorio",
-        text: "Embaralha todas as duplas antes de gerar a chave. Use quando quiser fazer sorteio aberto."
-      }
-    };
-
     const modeTexts = {
       single: {
         title: "Mata-mata",
@@ -1711,7 +1692,7 @@
         courts: 2,
         points: 21,
         matchMinutes: 15,
-        model: "balanced",
+        model: "random",
         notes: "Final pode ser melhor de 3 se houver tempo. Aquecimento maximo de 3 minutos."
       };
     }
@@ -1723,7 +1704,7 @@
         courts: Number(document.getElementById("courts")?.value || 1),
         points: Number(document.getElementById("pointsToWin")?.value || 21),
         matchMinutes: Number(document.getElementById("matchMinutes")?.value || 15),
-        model: document.getElementById("bracketModel")?.value || "balanced",
+        model: "random",
         notes: document.getElementById("notes")?.value.trim() || ""
       };
     }
@@ -1735,7 +1716,6 @@
       document.getElementById("courts").value = s.courts;
       document.getElementById("pointsToWin").value = s.points;
       document.getElementById("matchMinutes").value = s.matchMinutes;
-      document.getElementById("bracketModel").value = s.model;
       document.getElementById("notes").value = s.notes;
     }
 
@@ -1787,22 +1767,14 @@
         .filter(team => team.a || team.b);
     }
 
-    function orderedTeams(list, model) {
+    function orderedTeams(list) {
       const copy = [...list];
-      if (model === "random") return copy.sort(() => Math.random() - 0.5);
-      const result = [];
-      let left = 0;
-      let right = copy.length - 1;
-      while (left <= right) {
-        result.push(copy[left++]);
-        if (left <= right) result.push(copy[right--]);
-      }
-      return result;
+      return copy.sort(() => Math.random() - 0.5);
     }
 
     function createTournament() {
       const settings = getSettings();
-      const validTeams = orderedTeams(normalizeTeams(), settings.model);
+      const validTeams = orderedTeams(normalizeTeams());
       if (validTeams.length < 2) {
         alert("Cadastre pelo menos 2 duplas.");
         return;
@@ -2732,13 +2704,6 @@
       }
     }
 
-    function renderBracketModelHelp() {
-      const help = document.getElementById("bracketModelHelp");
-      const selected = document.getElementById("bracketModel")?.value || "balanced";
-      const content = bracketModelTexts[selected] || bracketModelTexts.balanced;
-      if (help) help.innerHTML = `<strong>${content.title}</strong>${content.text}`;
-    }
-
     function fitPublicBracket() {
       if (!isPublic) return;
       const wrap = document.querySelector(".bracket-wrap");
@@ -2776,7 +2741,6 @@
       renderFinance();
       renderUniforms();
       renderClock();
-      renderBracketModelHelp();
       renderModeHelp();
       requestAnimationFrame(fitPublicBracket);
       document.body.classList.toggle("show-admin-panel", activeView === "bracketView" && !isPublic);
@@ -2847,11 +2811,10 @@
         });
       });
 
-      ["tournamentName", "category", "courts", "pointsToWin", "matchMinutes", "bracketModel", "notes"].forEach(id => {
+      ["tournamentName", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
           persist();
-          renderBracketModelHelp();
           renderSummary();
         });
       });
