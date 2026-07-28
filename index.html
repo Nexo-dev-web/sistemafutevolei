@@ -2985,11 +2985,19 @@
     }
 
     function createDoubleEliminationTournament(settings, validTeams) {
-      const size = nextPowerOfTwo(validTeams.length);
-      if (size !== 16) {
+      const builtTournament = buildDoubleEliminationTournament(settings, validTeams);
+      if (!builtTournament) {
         alert("O modelo de dupla eliminatoria desta versao esta preparado para 16 duplas. Cadastre ou carregue 16 duplas para gerar esse formato.");
         return;
       }
+      tournament = builtTournament;
+      persist();
+      renderAll();
+    }
+
+    function buildDoubleEliminationTournament(settings, validTeams) {
+      const size = nextPowerOfTwo(validTeams.length);
+      if (size !== 16) return null;
 
       const slots = Array.from({ length: 16 }, (_, index) => validTeams[index] || null);
       let scheduleIndex = 0;
@@ -3048,18 +3056,15 @@
         }
       ];
 
-      tournament = {
+      return {
         ...settings,
-        mode,
+        mode: "double",
         teams: validTeams,
         rounds,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         formatNote: "Dupla eliminatoria: a dupla so sai do torneio apos perder duas partidas. Quem perde na chave principal cai para a repescagem."
       };
-
-      persist();
-      renderAll();
     }
 
     function timeForMatch(index, settings) {
@@ -3522,13 +3527,18 @@
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        tournaments = [];
+        tournaments = [demoTournamentSnapshot()];
         hasActiveTournament = false;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
         return;
       }
       try {
         const state = JSON.parse(raw);
         tournaments = Array.isArray(state.tournaments) ? state.tournaments : [];
+        if (!tournaments.length) {
+          tournaments = [demoTournamentSnapshot()];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
+        }
         activeTournamentId = state.activeTournamentId || "";
         hasActiveTournament = false;
         const activeState = tournaments.find(item => item.id === activeTournamentId);
@@ -3560,9 +3570,36 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
         }
       } catch {
-        tournaments = [];
+        tournaments = [demoTournamentSnapshot()];
         hasActiveTournament = false;
       }
+    }
+
+    function demoTournamentSnapshot() {
+      const demoTeams = samplePairs.map(pair => ({ id: uid(), a: pair[0], b: pair[1] }));
+      const meta = {
+        ...defaultSettings(),
+        name: "Copa Futevolei Vegas",
+        date: new Date().toISOString().slice(0, 10),
+        location: "Arena Noite Vegas",
+        courts: 1,
+        matchMinutes: 15
+      };
+      const demoTournament = buildDoubleEliminationTournament(meta, demoTeams);
+      return {
+        id: "torneio-demo-vegas",
+        meta,
+        teams: demoTeams,
+        finances: demoTeams.map(team => ({ id: team.id, team: teamName(team), status: "Aberto", value: "", method: "", date: "", note: "" })),
+        uniforms: {},
+        tournament: demoTournament,
+        mode: "double",
+        activeView: "bracketView",
+        menuCollapsed,
+        adminPanelHidden: false,
+        teamTargetCount: 16,
+        savedAt: new Date().toISOString()
+      };
     }
 
     async function deleteCurrentTournament(event) {
