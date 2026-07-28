@@ -28,8 +28,39 @@
       font-family: Arial, Helvetica, sans-serif;
       color: var(--text);
       background:
-        linear-gradient(130deg, rgba(6, 16, 12, 0.96), rgba(6, 16, 12, 0.76)),
-        url("https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=1800&q=80") center/cover fixed;
+        radial-gradient(circle at 18% 16%, rgba(230, 199, 109, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 10%, rgba(53, 228, 138, 0.15), transparent 28%),
+        linear-gradient(130deg, #050807, #07130f 46%, #0b0d12);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -18%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      opacity: 0.42;
+      background:
+        linear-gradient(105deg, transparent 0 44%, rgba(230, 199, 109, 0.12) 45% 46%, transparent 47% 100%),
+        linear-gradient(75deg, transparent 0 52%, rgba(53, 228, 138, 0.10) 53% 54%, transparent 55% 100%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 86px);
+      background-size: 520px 520px, 640px 640px, 86px 86px;
+      animation: ambientCourt 26s linear infinite;
+    }
+
+    body::after {
+      opacity: 0.62;
+      background:
+        radial-gradient(circle at 18% 72%, rgba(230, 199, 109, 0.22), transparent 14%),
+        radial-gradient(circle at 72% 26%, rgba(75, 181, 255, 0.13), transparent 18%),
+        radial-gradient(circle at 82% 78%, rgba(53, 228, 138, 0.14), transparent 18%);
+      filter: blur(18px);
+      animation: ambientGlow 16s ease-in-out infinite alternate;
     }
 
     button, input, select, textarea { font: inherit; }
@@ -43,6 +74,8 @@
     h1, h2, h3, p { margin-top: 0; }
 
     .app-shell {
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: 410px minmax(0, 1fr);
       gap: 18px;
@@ -1034,6 +1067,16 @@
     @keyframes courtLights {
       from { transform: translateX(-2%) rotate(0deg); background-position: 0 0, center; }
       to { transform: translateX(2%) rotate(0.001deg); background-position: 220px 0, center; }
+    }
+
+    @keyframes ambientCourt {
+      from { transform: translate3d(-1.5%, -1%, 0) rotate(0.001deg); background-position: 0 0, 0 0, 0 0; }
+      to { transform: translate3d(1.5%, 1%, 0) rotate(0.001deg); background-position: 520px 0, -640px 0, 86px 0; }
+    }
+
+    @keyframes ambientGlow {
+      from { transform: translate3d(-18px, 12px, 0) scale(1); }
+      to { transform: translate3d(22px, -16px, 0) scale(1.06); }
     }
 
     @keyframes sandDrift {
