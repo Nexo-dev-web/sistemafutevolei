@@ -1057,11 +1057,12 @@
       height: 100%;
       min-width: 0;
       display: block;
-      transform: none;
+      transform: scale(var(--public-scale, 1));
+      transform-origin: top left;
     }
 
     .public-mode.double-public .bracket-wrap {
-      height: calc(100vh - 112px);
+      height: calc(100vh - 88px);
       padding: 0;
     }
 
@@ -1225,8 +1226,8 @@
     }
 
     .public-mode.double-public .double-admin {
-      grid-template-columns: 1.05fr 1.05fr 0.72fr;
-      gap: 10px;
+      grid-template-columns: 1.16fr 1.05fr 0.74fr;
+      gap: 8px;
       height: 100%;
       padding: 0;
       overflow: hidden;
@@ -1234,7 +1235,7 @@
 
     .public-mode.double-public .double-section {
       min-height: 0;
-      padding: 8px;
+      padding: 6px;
       border: 1px solid rgba(230, 199, 109, 0.18);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.035);
@@ -1252,6 +1253,7 @@
     }
 
     .public-mode.double-public .double-section-note {
+      display: none;
       font-size: 0.58rem;
       line-height: 1.2;
     }
@@ -1294,20 +1296,20 @@
     }
 
     .public-mode.double-public .phase-panel .team {
-      grid-template-columns: minmax(0, 1fr) 30px;
-      min-height: 36px;
+      grid-template-columns: minmax(0, 1fr) 34px;
+      min-height: 34px;
       padding: 3px 4px;
       gap: 4px;
     }
 
     .public-mode.double-public .phase-panel .team-name {
       -webkit-line-clamp: 2;
-      font-size: clamp(0.54rem, 0.72vw, 0.78rem);
+      font-size: clamp(0.6rem, 0.78vw, 0.82rem);
       line-height: 1.08;
     }
 
     .public-mode.double-public .phase-panel .score-input {
-      width: 30px;
+      width: 34px;
       min-height: 24px;
       padding: 0 2px;
       font-size: 0.68rem;
@@ -1856,12 +1858,12 @@
     }
 
     .public-mode.double-public .public-banner {
-      padding: 3px 0 6px;
+      padding: 2px 0 4px;
     }
 
     .public-mode.double-public .public-logo {
-      width: 48px;
-      height: 48px;
+      width: 42px;
+      height: 42px;
     }
 
     .public-mode.double-public .public-banner h2 {
@@ -3169,18 +3171,19 @@
       if (!isPublic || !tournament) return;
       const previous = publicScoreSnapshot;
       const current = scoreSnapshot();
-      if (previous && previous !== current) {
-        const before = new Map(previous.split("|").map(item => item.split(":")));
-        const changed = allMatches().find(match => before.get(match.id) !== `${match.scoreA || ""}-${match.scoreB || ""}`);
-        publicLiveMatchId = changed && changed.status !== "Finalizado" ? changed.id : "";
-        document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
-        document.documentElement.requestFullscreen?.().catch(() => {});
-      } else if (publicLiveMatchId) {
+      if (publicLiveMatchId) {
         const live = allMatches().find(match => match.id === publicLiveMatchId);
-        if (!live || live.status === "Finalizado") {
+        if (!live || live.status !== "Em jogo" || live.scoreA === "" || live.scoreB === "") {
           publicLiveMatchId = "";
           document.body.classList.remove("score-focus");
         }
+      }
+      if (previous && previous !== current) {
+        const before = new Map(previous.split("|").map(item => item.split(":")));
+        const changed = allMatches().find(match => before.get(match.id) !== `${match.scoreA || ""}-${match.scoreB || ""}`);
+        publicLiveMatchId = changed && changed.status === "Em jogo" ? changed.id : "";
+        document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
+        document.documentElement.requestFullscreen?.().catch(() => {});
       }
       publicScoreSnapshot = current;
     }
@@ -4345,7 +4348,7 @@
       document.body.classList.add("public-mode");
       document.title = "Chaveamento - Torneio de Futevolei";
       activeView = "bracketView";
-      publicLiveMatchId = allMatches().find(match => match.status === "Em jogo")?.id || "";
+      publicLiveMatchId = allMatches().find(match => match.status === "Em jogo" && match.scoreA !== "" && match.scoreB !== "")?.id || "";
       document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
       publicScoreSnapshot = scoreSnapshot();
       setInterval(() => {

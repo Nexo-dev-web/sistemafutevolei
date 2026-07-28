@@ -6,6 +6,11 @@ create table if not exists public.futevolei_tournaments (
 
 alter table public.futevolei_tournaments enable row level security;
 
+drop policy if exists "futevolei_select" on public.futevolei_tournaments;
+drop policy if exists "futevolei_insert" on public.futevolei_tournaments;
+drop policy if exists "futevolei_update" on public.futevolei_tournaments;
+drop policy if exists "futevolei_delete" on public.futevolei_tournaments;
+
 create policy "futevolei_select"
 on public.futevolei_tournaments
 for select
