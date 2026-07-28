@@ -227,8 +227,10 @@
       flex-direction: column;
       align-self: start;
       gap: 8px;
-      height: calc(100vh - 32px);
-      padding: 12px;
+      width: 58px;
+      height: auto;
+      max-height: calc(100vh - 32px);
+      padding: 8px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background:
@@ -240,7 +242,8 @@
 
     .menu-toggle {
       flex: 0 0 auto;
-      min-height: 42px;
+      width: 40px;
+      min-height: 40px;
       border-radius: 8px;
       color: var(--text);
       background: rgba(255, 255, 255, 0.08);
@@ -267,13 +270,55 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex: 1 1 0;
-      padding: 0 12px;
+      flex: 0 0 auto;
+      width: 40px;
+      min-height: 40px;
+      padding: 0;
+      font-size: 0;
       text-align: center;
     }
 
     .nav-tabs button[data-view] {
       position: relative;
+    }
+
+    .nav-tabs button[data-view]::before {
+      content: attr(data-icon);
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      color: inherit;
+      font-size: 1.05rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .nav-tabs button[data-view]::after {
+      content: attr(aria-label);
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      z-index: 30;
+      min-width: max-content;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(8, 17, 14, 0.98);
+      font-size: 0.78rem;
+      font-weight: 900;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%) translateX(-4px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .nav-tabs button[data-view]:hover::after,
+    .nav-tabs button[data-view]:focus-visible::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
     }
 
     body.menu-collapsed .nav-tabs {
@@ -283,19 +328,7 @@
     body.menu-collapsed .nav-tabs button {
       padding: 0;
       font-size: 0;
-      min-height: 64px;
-    }
-
-    body.menu-collapsed .nav-tabs button[data-short]::after {
-      content: attr(data-short);
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 900;
-      letter-spacing: 0;
+      min-height: 40px;
     }
 
     body.menu-collapsed .menu-toggle {
@@ -1746,12 +1779,12 @@
   <div class="app-shell">
     <nav class="nav-tabs">
       <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">&lt;</button>
-      <button class="active" type="button" data-view="bracketView" data-short="CH">Chave</button>
-      <button type="button" data-view="queueView" data-short="JG">Jogos</button>
-      <button type="button" data-view="rankingView" data-short="RK">Ranking</button>
-      <button type="button" data-view="financeView" data-short="R$">Financeiro</button>
-      <button type="button" data-view="uniformView" data-short="UN">Uniformes</button>
-      <button type="button" data-view="settingsView" data-short="DB">Dashboard</button>
+      <button class="active" type="button" data-view="bracketView" data-icon="🏆" aria-label="Chave" title="Chave">Chave</button>
+      <button type="button" data-view="queueView" data-icon="▶" aria-label="Jogos" title="Jogos">Jogos</button>
+      <button type="button" data-view="rankingView" data-icon="★" aria-label="Ranking" title="Ranking">Ranking</button>
+      <button type="button" data-view="financeView" data-icon="$" aria-label="Financeiro" title="Financeiro">Financeiro</button>
+      <button type="button" data-view="uniformView" data-icon="👕" aria-label="Uniformes" title="Uniformes">Uniformes</button>
+      <button type="button" data-view="settingsView" data-icon="📈" aria-label="Dashboard" title="Dashboard">Dashboard</button>
     </nav>
 
     <aside>
