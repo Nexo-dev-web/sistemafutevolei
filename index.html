@@ -1517,8 +1517,8 @@
           bracketSide: "Repescagem",
           matches: Array.from({ length: 1 }, () => ({
             ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Vencedor", b: "Repescagem 3" },
-            teamB: { a: "Perdedor", b: "Final Principal" }
+            teamA: { a: "Vencedor", b: "Rep. 3A" },
+            teamB: { a: "Vencedor", b: "Rep. 3B" }
           }))
         },
         {
@@ -1608,8 +1608,67 @@
         });
       });
       tournament.updatedAt = new Date().toISOString();
+      if (tournament.mode === "double") syncDoubleEliminationSlots();
       persist();
       renderAll();
+    }
+
+    function matchWinnerTeam(match) {
+      if (!match) return null;
+      if (match.winner === "A") return match.teamA;
+      if (match.winner === "B") return match.teamB;
+      return null;
+    }
+
+    function matchLoserTeam(match) {
+      if (!match) return null;
+      if (match.winner === "A") return match.teamB;
+      if (match.winner === "B") return match.teamA;
+      return null;
+    }
+
+    function putTeam(roundIndex, matchIndex, slot, team) {
+      const match = tournament?.rounds?.[roundIndex]?.matches?.[matchIndex];
+      if (!match || !team) return;
+      if (slot === "A") match.teamA = team;
+      if (slot === "B") match.teamB = team;
+      if (match.teamA && match.teamB && match.status === "Aguardando") match.status = "Pendente";
+    }
+
+    function syncDoubleEliminationSlots() {
+      if (!tournament || tournament.mode !== "double") return;
+      const rounds = tournament.rounds;
+
+      rounds[0].matches.forEach((match, index) => {
+        putTeam(1, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
+        putTeam(4, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchLoserTeam(match));
+      });
+
+      rounds[1].matches.forEach((match, index) => {
+        putTeam(2, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
+        putTeam(5, index, "B", matchLoserTeam(match));
+      });
+
+      rounds[2].matches.forEach((match, index) => {
+        putTeam(3, 0, index === 0 ? "A" : "B", matchWinnerTeam(match));
+        putTeam(6, index, "B", matchLoserTeam(match));
+      });
+
+      putTeam(8, 0, "A", matchWinnerTeam(rounds[3].matches[0]));
+
+      rounds[4].matches.forEach((match, index) => {
+        putTeam(5, index, "A", matchWinnerTeam(match));
+      });
+
+      rounds[5].matches.forEach((match, index) => {
+        putTeam(6, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
+      });
+
+      rounds[6].matches.forEach((match, index) => {
+        putTeam(7, 0, index === 0 ? "A" : "B", matchWinnerTeam(match));
+      });
+
+      putTeam(8, 0, "B", matchWinnerTeam(rounds[7].matches[0]));
     }
 
     function allMatches() {
@@ -1742,7 +1801,7 @@
 
       document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
       document.body.classList.toggle("groups-public", Boolean(isPublic && tournament.mode === "groups"));
-      if (tournament.mode === "double") {
+      if (isPublic && tournament.mode === "double") {
         bracket.innerHTML = doubleEliminationSvg(tournament.teams || []);
         return;
       }
