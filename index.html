@@ -461,6 +461,14 @@
       font-size: 0.78rem;
     }
 
+    .match-save {
+      min-height: 30px;
+      border-radius: 6px;
+      color: #06100c;
+      background: var(--green);
+      font-size: 0.8rem;
+    }
+
     .team {
       display: grid;
       grid-template-columns: 1fr 50px;
@@ -1121,6 +1129,7 @@
     let teams = [];
     let tournament = null;
     let nextRefreshAt = Date.now() + REFRESH_MS;
+    let scoreSaveTimer = null;
 
     const samplePairs = [
       ["Andre", "Lucas", 1],
@@ -1826,7 +1835,13 @@
             if (match.status !== "Finalizado") match.status = "Em jogo";
             persist();
             renderQueue();
+            clearTimeout(scoreSaveTimer);
+            scoreSaveTimer = setTimeout(syncWinners, 650);
           });
+        });
+
+        bracket.querySelectorAll("[data-save-match]").forEach(button => {
+          button.addEventListener("click", syncWinners);
         });
       }
     }
@@ -1929,6 +1944,7 @@
             <span class="team-name ${match.teamB ? "" : "bye"}">${teamName(match.teamB)}</span>
             <input class="score-input" type="number" min="0" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
+          ${isPublic ? "" : `<button class="match-save" type="button" data-save-match="${roundIndex}-${matchIndex}">Salvar jogo</button>`}
         </article>
       `;
     }
