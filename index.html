@@ -1918,10 +1918,10 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: clamp(18px, 3vw, 34px);
+      gap: clamp(14px, 2.4vw, 28px);
       width: 100vw;
       height: 100vh;
-      padding: clamp(28px, 6vw, 90px);
+      padding: clamp(24px, 4vw, 58px);
       border: 0;
       border-radius: 0;
       background:
@@ -1940,8 +1940,8 @@
     }
 
     .public-mode.score-focus .match.score-live .team {
-      grid-template-columns: minmax(0, 1fr) clamp(96px, 13vw, 180px);
-      min-height: clamp(92px, 18vh, 190px);
+      grid-template-columns: minmax(0, 1fr) clamp(86px, 11vw, 150px);
+      min-height: clamp(110px, 22vh, 220px);
       padding: clamp(16px, 3vw, 34px);
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 8px;
@@ -1952,13 +1952,13 @@
 
     .public-mode.score-focus .match.score-live .team-name {
       -webkit-line-clamp: 2;
-      font-size: clamp(1.65rem, 4.3vw, 4.9rem);
+      font-size: clamp(1.7rem, 4vw, 4.4rem);
       line-height: 1.02;
     }
 
     .public-mode.score-focus .match.score-live .score-input {
       width: 100%;
-      min-height: clamp(74px, 13vh, 146px);
+      min-height: clamp(72px, 11vh, 128px);
       border-radius: 8px;
       color: var(--sand);
       font-size: clamp(2.4rem, 6vw, 6.5rem);
@@ -4004,20 +4004,20 @@
       });
 
       const boxW = 205;
-      const boxH = 58;
-      const rowH = 25;
-      const scoreW = 28;
+      const boxH = 56;
+      const rowH = 24;
+      const scoreW = 32;
       const leftX = [55, 325, 595, 790];
       const rightX = [1740, 1480, 1220, 950];
-      const leftY = [112, 190, 268, 346, 454, 532, 610, 688];
-      const leftRound2Y = [151, 307, 493, 649];
-      const leftRound3Y = [229, 571];
-      const leftFinalY = 392;
-      const rightY = [112, 268, 454, 610];
-      const rightRound2Y = [151, 307, 493, 649];
-      const rightRound3Y = [229, 571];
-      const repFinalY = 205;
-      const grandFinalY = 604;
+      const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
+      const leftRound2Y = [142, 286, 464, 608];
+      const leftRound3Y = [214, 536];
+      const leftFinalY = 374;
+      const rightY = [106, 250, 428, 572];
+      const rightRound2Y = [142, 286, 464, 608];
+      const rightRound3Y = [214, 536];
+      const repFinalY = 188;
+      const grandFinalY = 578;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4028,17 +4028,21 @@
         return { name: slotName(team, fallback), score: score ?? "", winner };
       };
 
-      const matchBox = (x, y, w, h, a, b, id) => `
-        <text class="small-text" x="${x}" y="${y - 6}">${id}</text>
-        <rect class="team-node${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${rowH}" rx="7" />
-        <rect class="team-node${b.winner ? " winner-node" : ""}" x="${x}" y="${y + rowH + 6}" width="${w}" height="${rowH}" rx="7" />
-        <rect class="score-node" x="${x + w - scoreW - 8}" y="${y + 7}" width="${scoreW}" height="${rowH - 12}" rx="5" />
-        <rect class="score-node" x="${x + w - scoreW - 8}" y="${y + rowH + 13}" width="${scoreW}" height="${rowH - 12}" rx="5" />
-        <text class="slot-text" x="${x + 10}" y="${y + 19}">${trimSvgText(a.name, 21)}</text>
-        <text class="slot-text" x="${x + 10}" y="${y + rowH + 25}">${trimSvgText(b.name, 21)}</text>
-        <text class="score-text" x="${x + w - 22}" y="${y + 19}">${svgEscape(a.score)}</text>
-        <text class="score-text" x="${x + w - 22}" y="${y + rowH + 25}">${svgEscape(b.score)}</text>
-      `;
+      const matchBox = (x, y, w, h, a, b, id) => {
+        const scoreX = x + w - scoreW - 6;
+        const nameMax = 17;
+        return `
+          <text class="small-text" x="${x}" y="${y - 6}">${id}</text>
+          <rect class="team-node${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${rowH}" rx="7" />
+          <rect class="team-node${b.winner ? " winner-node" : ""}" x="${x}" y="${y + rowH + 5}" width="${w}" height="${rowH}" rx="7" />
+          <rect class="score-node" x="${scoreX}" y="${y + 3}" width="${scoreW}" height="${rowH - 6}" rx="6" />
+          <rect class="score-node" x="${scoreX}" y="${y + rowH + 8}" width="${scoreW}" height="${rowH - 6}" rx="6" />
+          <text class="slot-text" x="${x + 10}" y="${y + 18}">${trimSvgText(a.name, nameMax)}</text>
+          <text class="slot-text" x="${x + 10}" y="${y + rowH + 23}">${trimSvgText(b.name, nameMax)}</text>
+          <text class="score-text" x="${scoreX + scoreW / 2}" y="${y + 18}">${svgEscape(a.score)}</text>
+          <text class="score-text" x="${scoreX + scoreW / 2}" y="${y + rowH + 23}">${svgEscape(b.score)}</text>
+        `;
+      };
 
       const connector = (x1, y1, x2, y2) => `
         <path class="line" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
@@ -4090,12 +4094,12 @@
           <text class="legend-text" x="1840" y="102">Primeira rodada</text>
           <text class="legend-text" x="1582" y="102">Quartas dos perdedores</text>
           <text class="legend-text" x="1322" y="102">Semi</text>
-          <text class="label-text" x="895" y="578">Grande Final</text>
+          <text class="label-text" x="895" y="552">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
           ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
           ${grandFinal}
           <line class="line champion-line" x1="${leftX[3] + boxW}" y1="${grandFinalY + boxH / 2}" x2="${leftX[3] + boxW + 75}" y2="${grandFinalY + boxH / 2}" />
-          <text class="label-text" x="1088" y="633">Campeao</text>
+          <text class="label-text" x="1088" y="607">Campeao</text>
           <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Final principal</text>
           <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Final da repescagem</text>
         </svg>
