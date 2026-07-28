@@ -1072,7 +1072,7 @@
 
     .double-diagram {
       width: 1800px;
-      height: 1020px;
+      height: 820px;
       display: block;
       background: #06100c;
       border-radius: 6px;
@@ -1191,6 +1191,15 @@
       filter: drop-shadow(0 0 7px rgba(53, 228, 138, 0.55));
     }
 
+    .public-mode.double-public .double-diagram .line {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+
+    .public-mode.double-public main::after {
+      display: none;
+    }
     .double-admin {
       display: grid;
       grid-template-columns: 1fr;
@@ -2549,7 +2558,7 @@
     const SUPABASE_URL = "https://bucyqoczsximiythoztw.supabase.co";
     const SUPABASE_KEY = "sb_publishable_3JjJZUCsQXk6vK1Ka0VEqg_Kr4zinnb";
     const SUPABASE_TABLE = "futevolei_tournaments";
-    const REFRESH_MS = 5000;
+    const REFRESH_MS = 10000;
     const SCORE_ADVANTAGE = 2;
     const params = new URLSearchParams(window.location.search);
     const isPublic = params.get("view") === "chaveamento";
@@ -3918,13 +3927,22 @@
       allMatches().forEach(match => {
         if (match.code) matchByCode.set(match.code, match);
       });
-      const leftY = [135, 235, 335, 435, 565, 665, 765, 865];
-      const leftRound2Y = [185, 385, 615, 815];
-      const leftRound3Y = [285, 715];
-      const leftFinalY = 500;
-      const rightY = [140, 240, 340, 440, 570, 670, 770, 870];
-      const rightRound2Y = [190, 390, 620, 820];
-      const rightRound3Y = [290, 720];
+
+      const boxW = 210;
+      const boxH = 58;
+      const rowH = 25;
+      const scoreW = 28;
+      const leftX = [55, 325, 595, 820];
+      const rightX = [1535, 1265, 1010, 860];
+      const leftY = [112, 190, 268, 346, 454, 532, 610, 688];
+      const leftRound2Y = [151, 307, 493, 649];
+      const leftRound3Y = [229, 571];
+      const leftFinalY = 400;
+      const rightY = [112, 268, 454, 610];
+      const rightRound2Y = [151, 307, 493, 649];
+      const rightRound3Y = [229, 571];
+      const repFinalY = 235;
+      const grandFinalY = 600;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -3936,15 +3954,15 @@
       };
 
       const matchBox = (x, y, w, h, a, b, id) => `
-        <text class="small-text" x="${x}" y="${y - 8}">${id}</text>
-        <rect class="team-node${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${h / 2 - 3}" rx="8" />
-        <rect class="team-node${b.winner ? " winner-node" : ""}" x="${x}" y="${y + h / 2 + 3}" width="${w}" height="${h / 2 - 3}" rx="8" />
-        <rect class="score-node" x="${x + w - 34}" y="${y + 8}" width="28" height="${h / 2 - 19}" rx="5" />
-        <rect class="score-node" x="${x + w - 34}" y="${y + h / 2 + 11}" width="28" height="${h / 2 - 19}" rx="5" />
-        <text class="slot-text" x="${x + 10}" y="${y + 27}">${trimSvgText(a.name, 16)}</text>
-        <text class="slot-text" x="${x + 10}" y="${y + h - 13}">${trimSvgText(b.name, 16)}</text>
-        <text class="score-text" x="${x + w - 20}" y="${y + 27}">${svgEscape(a.score)}</text>
-        <text class="score-text" x="${x + w - 20}" y="${y + h - 13}">${svgEscape(b.score)}</text>
+        <text class="small-text" x="${x}" y="${y - 6}">${id}</text>
+        <rect class="team-node${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${rowH}" rx="7" />
+        <rect class="team-node${b.winner ? " winner-node" : ""}" x="${x}" y="${y + rowH + 6}" width="${w}" height="${rowH}" rx="7" />
+        <rect class="score-node" x="${x + w - scoreW - 8}" y="${y + 7}" width="${scoreW}" height="${rowH - 12}" rx="5" />
+        <rect class="score-node" x="${x + w - scoreW - 8}" y="${y + rowH + 13}" width="${scoreW}" height="${rowH - 12}" rx="5" />
+        <text class="slot-text" x="${x + 10}" y="${y + 19}">${trimSvgText(a.name, 21)}</text>
+        <text class="slot-text" x="${x + 10}" y="${y + rowH + 25}">${trimSvgText(b.name, 21)}</text>
+        <text class="score-text" x="${x + w - 22}" y="${y + 19}">${svgEscape(a.score)}</text>
+        <text class="score-text" x="${x + w - 22}" y="${y + rowH + 25}">${svgEscape(b.score)}</text>
       `;
 
       const connector = (x1, y1, x2, y2) => `
@@ -3953,56 +3971,61 @@
 
       const leftR1 = leftY.map((y, index) => {
         const code = `J${index + 1}`;
-        return matchBox(40, y, 170, 66, matchSlot(code, "A", shortTeamName(teamsForSvg[index * 2], "A definir")), matchSlot(code, "B", shortTeamName(teamsForSvg[index * 2 + 1], "A definir")), code);
+        return matchBox(leftX[0], y, boxW, boxH, matchSlot(code, "A", shortTeamName(teamsForSvg[index * 2], "A definir")), matchSlot(code, "B", shortTeamName(teamsForSvg[index * 2 + 1], "A definir")), code);
       }).join("");
       const leftR2 = leftRound2Y.map((y, index) => {
         const code = `J${index + 13}`;
-        return matchBox(305, y, 170, 66, matchSlot(code, "A", "A definir"), matchSlot(code, "B", "A definir"), code);
+        return matchBox(leftX[1], y, boxW, boxH, matchSlot(code, "A", "A definir"), matchSlot(code, "B", "A definir"), code);
       }).join("");
-      const leftR3 = [21, 22].map((codeNumber, index) => matchBox(570, leftRound3Y[index], 170, 66, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const leftFinal = matchBox(820, leftFinalY, 180, 70, matchSlot("J27", "A", "A definir"), matchSlot("J27", "B", "A definir"), "J27");
+      const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], leftRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const leftFinal = matchBox(leftX[3], leftFinalY, boxW, boxH, matchSlot("J27", "A", "A definir"), matchSlot("J27", "B", "A definir"), "J27");
 
-      const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(1590, rightY[index * 2], 170, 66, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(1330, rightRound2Y[index], 170, 66, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const rightR3 = [23, 24].map((codeNumber, index) => matchBox(1080, rightRound3Y[index], 170, 66, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const rightFinal = matchBox(910, 250, 180, 70, matchSlot("J25", "A", "A definir"), matchSlot("J25", "B", "A definir"), "J25");
-      const grandFinal = matchBox(810, 665, 190, 74, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
+      const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(rightX[1], rightRound2Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const rightR3 = [23, 24].map((codeNumber, index) => matchBox(rightX[2], rightRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const rightFinal = matchBox(rightX[3], repFinalY, boxW, boxH, matchSlot("J25", "A", "A definir"), matchSlot("J25", "B", "A definir"), "J25");
+      const grandFinal = matchBox(leftX[3], grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
 
       const leftConnectors = [
-        ...leftY.map((y, i) => connector(210, y + 33, 305, leftRound2Y[Math.floor(i / 2)] + 33)),
-        ...leftRound2Y.map((y, i) => connector(475, y + 33, 570, leftRound3Y[Math.floor(i / 2)] + 33)),
-        connector(740, leftRound3Y[0] + 33, 820, leftFinalY + 35),
-        connector(740, leftRound3Y[1] + 33, 820, leftFinalY + 35),
-        `<line class="line champion-line" x1="1000" y1="${leftFinalY + 35}" x2="1050" y2="${leftFinalY + 35}" />`
+        ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
+        ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
+        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, leftX[3], leftFinalY + boxH / 2),
+        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, leftX[3], leftFinalY + boxH / 2),
+        `<line class="line champion-line" x1="${leftX[3] + boxW}" y1="${leftFinalY + boxH / 2}" x2="${leftX[3] + boxW + 55}" y2="${leftFinalY + boxH / 2}" />`
       ].join("");
 
       const rightConnectors = [
-        ...[0, 1, 2, 3].map((_, i) => connector(1590, rightY[i * 2] + 33, 1500, rightRound2Y[i] + 33)),
-        ...rightRound2Y.map((y, i) => connector(1330, y + 33, 1250, rightRound3Y[Math.floor(i / 2)] + 33)),
-        connector(1080, rightRound3Y[0] + 33, 1090, 285),
-        connector(1080, rightRound3Y[1] + 33, 1090, 285),
-        `<line class="line champion-line" x1="910" y1="285" x2="850" y2="285" />`
+        ...rightY.map((y, i) => connector(rightX[0], y + boxH / 2, rightX[1] + boxW, rightRound2Y[i] + boxH / 2)),
+        ...rightRound2Y.map((y, i) => connector(rightX[1], y + boxH / 2, rightX[2] + boxW, rightRound3Y[Math.floor(i / 2)] + boxH / 2)),
+        connector(rightX[2], rightRound3Y[0] + boxH / 2, rightX[3] + boxW, repFinalY + boxH / 2),
+        connector(rightX[2], rightRound3Y[1] + boxH / 2, rightX[3] + boxW, repFinalY + boxH / 2),
+        `<line class="line champion-line" x1="${rightX[3]}" y1="${repFinalY + boxH / 2}" x2="${rightX[3] - 55}" y2="${repFinalY + boxH / 2}" />`
       ].join("");
 
       return `
-        <svg class="double-diagram" viewBox="0 0 1800 940" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="1800" height="940" fill="#06100c" />
-          <text class="title-text" x="900" y="44">TABELA DE JOGOS</text>
-          <text class="subtitle-text" x="900" y="74">16 DUPLAS - DUPLA ELIMINATORIA</text>
-          <text class="label-text" x="455" y="115">Classificatoria</text>
-          <text class="label-text" x="1360" y="115">Repescagem</text>
-          <text class="label-text" x="900" y="610">Grande Final</text>
+        <svg class="double-diagram" viewBox="0 0 1800 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="1800" height="780" fill="#06100c" />
+          <text class="title-text" x="900" y="30">TABELA DE JOGOS</text>
+          <text class="subtitle-text" x="900" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
+          <text class="label-text" x="465" y="88">Classificatoria</text>
+          <text class="legend-text" x="160" y="102">Primeira rodada</text>
+          <text class="legend-text" x="430" y="102">Oitavas</text>
+          <text class="legend-text" x="700" y="102">Quartas</text>
+          <text class="label-text" x="1380" y="88">Repescagem</text>
+          <text class="legend-text" x="1640" y="102">Primeira rodada</text>
+          <text class="legend-text" x="1370" y="102">Quartas dos perdedores</text>
+          <text class="legend-text" x="1115" y="102">Semi</text>
+          <text class="label-text" x="925" y="575">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
           ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
           ${grandFinal}
-          <line class="line champion-line" x1="1000" y1="702" x2="1058" y2="702" />
-          <text class="label-text" x="1138" y="690">Campeao</text>
-          <text class="small-text" x="790" y="478">Final principal</text>
-          <text class="small-text" x="910" y="222">Final da repescagem</text>
+          <line class="line champion-line" x1="${leftX[3] + boxW}" y1="${grandFinalY + boxH / 2}" x2="${leftX[3] + boxW + 75}" y2="${grandFinalY + boxH / 2}" />
+          <text class="label-text" x="1130" y="608">Campeao</text>
+          <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Final principal</text>
+          <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Final da repescagem</text>
         </svg>
       `;
     }
-
     function matchHtml(match, roundIndex, matchIndex) {
       const aWinner = match.winner === "A" ? " winner" : "";
       const bWinner = match.winner === "B" ? " winner" : "";
