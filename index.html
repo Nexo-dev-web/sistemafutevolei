@@ -357,12 +357,38 @@
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
     }
 
+    .public-mode.double-public .bracket {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      display: block;
+      transform: none;
+    }
+
+    .public-mode.double-public .bracket-wrap {
+      height: calc(100vh - 112px);
+      padding: 0;
+    }
+
+    .public-mode.double-public .double-diagram {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border: 1px solid rgba(230, 199, 109, 0.18);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(53, 228, 138, 0.055), transparent 42%),
+        #06100c;
+    }
+
     .double-diagram .line {
       fill: none;
       stroke: rgba(230, 199, 109, 0.9);
       stroke-width: 2;
       stroke-linecap: square;
       stroke-linejoin: miter;
+      stroke-dasharray: 900;
+      stroke-dashoffset: 900;
+      animation: drawLine 1.8s ease forwards;
     }
 
     .double-diagram .line-soft {
@@ -408,6 +434,7 @@
     .double-diagram .champion-line {
       stroke: #35e48a;
       stroke-width: 2.4;
+      filter: drop-shadow(0 0 7px rgba(53, 228, 138, 0.55));
     }
 
     .double-admin {
@@ -458,6 +485,14 @@
       box-shadow:
         0 26px 90px rgba(0, 0, 0, 0.55),
         inset 0 0 60px rgba(53, 228, 138, 0.06);
+    }
+
+    .public-mode.double-public main::after {
+      width: 46px;
+      height: 46px;
+      right: 18px;
+      bottom: 18px;
+      opacity: 0.68;
     }
 
     .round {
@@ -882,6 +917,23 @@
       animation: titleSlide 850ms ease both;
     }
 
+    .public-mode.double-public .public-banner {
+      padding: 3px 0 6px;
+    }
+
+    .public-mode.double-public .public-logo {
+      width: 48px;
+      height: 48px;
+    }
+
+    .public-mode.double-public .public-banner h2 {
+      font-size: clamp(1.1rem, 1.8vw, 1.8rem);
+    }
+
+    .public-mode.double-public .pill.sand {
+      display: none;
+    }
+
     .clock {
       color: var(--sand);
       font-weight: 900;
@@ -965,6 +1017,10 @@
     @keyframes titleSlide {
       from { opacity: 0; transform: translateX(-18px); }
       to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
     }
 
     @media (max-width: 1120px) {
@@ -2150,6 +2206,10 @@
       const wrap = document.querySelector(".bracket-wrap");
       const bracket = document.getElementById("bracket");
       if (!wrap || !bracket) return;
+      if (tournament?.mode === "double") {
+        bracket.style.setProperty("--public-scale", "1");
+        return;
+      }
       bracket.style.setProperty("--public-scale", "1");
       const svg = bracket.querySelector("svg");
       const viewBox = svg?.viewBox?.baseVal;
