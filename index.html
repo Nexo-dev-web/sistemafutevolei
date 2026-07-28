@@ -2018,13 +2018,13 @@
 
     function doubleEliminationSvg(teamList) {
       const teamsForSvg = Array.from({ length: 16 }, (_, index) => teamList[index] || null);
-      const leftY = [150, 260, 370, 480, 620, 730, 840, 950];
-      const leftRound2Y = [205, 425, 675, 895];
-      const leftRound3Y = [315, 785];
-      const leftFinalY = 550;
-      const rightY = [155, 265, 375, 485, 625, 735, 845, 955];
-      const rightRound2Y = [210, 430, 680, 900];
-      const rightRound3Y = [320, 790];
+      const leftY = [135, 235, 335, 435, 565, 665, 765, 865];
+      const leftRound2Y = [185, 385, 615, 815];
+      const leftRound3Y = [285, 715];
+      const leftFinalY = 500;
+      const rightY = [140, 240, 340, 440, 570, 670, 770, 870];
+      const rightRound2Y = [190, 390, 620, 820];
+      const rightRound3Y = [290, 720];
 
       const matchBox = (x, y, w, h, a, b, id) => `
         <path class="line" d="M${x} ${y} H${x + w} V${y + h} H${x}" />
@@ -2046,8 +2046,8 @@
       const rightR1 = rightY.map((y, index) => matchBox(1610, y, 150, 66, `P${index + 1}`, `P${index + 2}`, `R${index + 1}`)).join("");
       const rightR2 = rightRound2Y.map((y, index) => matchBox(1360, y, 150, 66, `VR${index * 2 + 1}`, `P${index + 9}`, `R${index + 9}`)).join("");
       const rightR3 = rightRound3Y.map((y, index) => matchBox(1110, y, 150, 66, `VR${index * 2 + 9}`, `VR${index * 2 + 10}`, `R${index + 13}`)).join("");
-      const rightFinal = matchBox(910, 270, 170, 70, "VR13", "P15", "R15");
-      const grandFinal = matchBox(810, 735, 190, 74, "V15", "VR15", "J16");
+      const rightFinal = matchBox(910, 250, 170, 70, "VR13", "P15", "R15");
+      const grandFinal = matchBox(810, 665, 190, 74, "V15", "VR15", "J16");
 
       const leftConnectors = [
         ...leftY.map((y, i) => connector(190, y + 33, 290, leftRound2Y[Math.floor(i / 2)] + 33)),
@@ -2060,24 +2060,24 @@
       const rightConnectors = [
         ...rightY.map((y, i) => connector(1610, y + 33, 1510, rightRound2Y[Math.floor(i / 2)] + 33)),
         ...rightRound2Y.map((y, i) => connector(1360, y + 33, 1260, rightRound3Y[Math.floor(i / 2)] + 33)),
-        connector(1110, rightRound3Y[0] + 33, 1080, 305),
-        connector(1110, rightRound3Y[1] + 33, 1080, 305),
-        `<line class="line champion-line" x1="910" y1="305" x2="850" y2="305" />`
+        connector(1110, rightRound3Y[0] + 33, 1080, 285),
+        connector(1110, rightRound3Y[1] + 33, 1080, 285),
+        `<line class="line champion-line" x1="910" y1="285" x2="850" y2="285" />`
       ].join("");
 
       return `
-        <svg class="double-diagram" viewBox="0 0 1800 1020" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="1800" height="1020" fill="#06100c" />
+        <svg class="double-diagram" viewBox="0 0 1800 940" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="1800" height="940" fill="#06100c" />
           <text class="title-text" x="900" y="44">TABELA DE JOGOS</text>
           <text class="subtitle-text" x="900" y="74">16 DUPLAS - DUPLA ELIMINATORIA</text>
           <text class="label-text" x="455" y="115">Chave Principal</text>
           <text class="label-text" x="1360" y="115">Repescagem</text>
-          <text class="label-text" x="900" y="705">Grande Final</text>
+          <text class="label-text" x="900" y="635">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
           ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
           ${grandFinal}
-          <line class="line champion-line" x1="1000" y1="772" x2="1095" y2="772" />
-          <text class="label-text" x="1135" y="778">Campeao</text>
+          <line class="line champion-line" x1="1000" y1="702" x2="1095" y2="702" />
+          <text class="label-text" x="1135" y="708">Campeao</text>
           <text class="small-text" x="790" y="525">Final principal</text>
           <text class="small-text" x="910" y="248">Final da repescagem</text>
         </svg>
