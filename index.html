@@ -1628,10 +1628,17 @@
     }
 
     .public-mode.score-focus .public-banner,
-    .public-mode.score-focus .double-section,
-    .public-mode.score-focus .round {
+    .public-mode.score-focus .double-section-title,
+    .public-mode.score-focus .double-section-note,
+    .public-mode.score-focus .phase-panel h3,
+    .public-mode.score-focus .match:not(.score-live) {
       opacity: 0;
       pointer-events: none;
+    }
+
+    .public-mode.score-focus .double-section:not(:has(.score-live)),
+    .public-mode.score-focus .phase-panel:not(:has(.score-live)) {
+      display: none;
     }
 
     .public-mode.score-focus .match.score-live {
@@ -2092,6 +2099,7 @@
             <p class="muted" id="subtitle">Gere a tabela para visualizar os confrontos.</p>
           </div>
           <div class="topbar-actions">
+            <button class="secondary" type="button" id="exitTournamentButton">Sair do torneio</button>
             <button class="secondary" type="button" id="newTournamentButton">Novo torneio</button>
             <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
             <button class="secondary" type="button" id="openPublic">Abrir telao</button>
@@ -3862,6 +3870,7 @@
       });
 
       document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
+      document.getElementById("exitTournamentButton").addEventListener("click", openNewTournamentScreen);
 
       document.getElementById("addTeam").addEventListener("click", () => {
         const options = [4, 8, 12, 16, 20, 24];
