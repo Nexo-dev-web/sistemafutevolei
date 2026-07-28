@@ -1989,76 +1989,58 @@
       }
 
       const slots = Array.from({ length: 16 }, (_, index) => validTeams[index] || null);
-      let matchCounter = 0;
+      let scheduleIndex = 0;
+      const match = (code, teamA = null, teamB = null, status = "Aguardando") => ({
+        ...createEmptyMatch(settings, scheduleIndex++, status),
+        code,
+        teamA,
+        teamB
+      });
       const rounds = [
+        {
+          name: "Principal - 1a Rodada",
+          bracketSide: "Principal",
+          matches: Array.from({ length: 8 }, (_, index) => match(`J${index + 1}`, slots[index * 2], slots[index * 2 + 1], "Pendente"))
+        },
         {
           name: "Principal - Oitavas",
           bracketSide: "Principal",
-          matches: Array.from({ length: 8 }, (_, index) => ({
-            ...createEmptyMatch(settings, matchCounter++, "Pendente"),
-            teamA: slots[index * 2],
-            teamB: slots[index * 2 + 1]
-          }))
+          matches: ["J13", "J14", "J15", "J16"].map(code => match(code))
         },
         {
           name: "Principal - Quartas",
           bracketSide: "Principal",
-          matches: Array.from({ length: 4 }, () => createEmptyMatch(settings, matchCounter++))
+          matches: ["J21", "J22"].map(code => match(code))
         },
         {
-          name: "Principal - Semifinal",
-          bracketSide: "Principal",
-          matches: Array.from({ length: 2 }, () => createEmptyMatch(settings, matchCounter++))
-        },
-        {
-          name: "Final da Principal",
-          bracketSide: "Principal",
-          matches: Array.from({ length: 1 }, () => createEmptyMatch(settings, matchCounter++))
-        },
-        {
-          name: "Repescagem 1",
+          name: "Repescagem - 1a Rodada",
           bracketSide: "Repescagem",
-          matches: Array.from({ length: 4 }, (_, index) => ({
-            ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Perdedor", b: `Jogo ${index * 2 + 1}` },
-            teamB: { a: "Perdedor", b: `Jogo ${index * 2 + 2}` }
-          }))
+          matches: ["J9", "J10", "J11", "J12"].map(code => match(code))
         },
         {
-          name: "Repescagem 2",
+          name: "Repescagem - Oitavas",
           bracketSide: "Repescagem",
-          matches: Array.from({ length: 4 }, (_, index) => ({
-            ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Vencedor", b: `Rep. ${index + 1}` },
-            teamB: { a: "Perdedor", b: `Quartas ${index + 1}` }
-          }))
+          matches: ["J17", "J18", "J19", "J20"].map(code => match(code))
         },
         {
-          name: "Repescagem 3",
+          name: "Repescagem - Quartas",
           bracketSide: "Repescagem",
-          matches: Array.from({ length: 2 }, (_, index) => ({
-            ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Vencedor", b: `Rep. ${index * 2 + 1}` },
-            teamB: { a: "Vencedor", b: `Rep. ${index * 2 + 2}` }
-          }))
+          matches: ["J23", "J24"].map(code => match(code))
         },
         {
-          name: "Final da Repescagem",
+          name: "Repescagem - Semifinal",
           bracketSide: "Repescagem",
-          matches: Array.from({ length: 1 }, () => ({
-            ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Vencedor", b: "Rep. 3A" },
-            teamB: { a: "Vencedor", b: "Rep. 3B" }
-          }))
+          matches: ["J25", "J26"].map(code => match(code))
         },
         {
-          name: "Grande Final",
-          bracketSide: "Final",
-          matches: Array.from({ length: 1 }, () => ({
-            ...createEmptyMatch(settings, matchCounter++),
-            teamA: { a: "Campeao", b: "Principal" },
-            teamB: { a: "Campeao", b: "Repescagem" }
-          }))
+          name: "Finais - Semifinais",
+          bracketSide: "Finais",
+          matches: ["J27", "J28"].map(code => match(code))
+        },
+        {
+          name: "Finais",
+          bracketSide: "Finais",
+          matches: [match("J30"), match("J29")]
         }
       ];
 
@@ -2150,6 +2132,7 @@
 
     function matchWinnerTeam(match) {
       if (!match) return null;
+      if (tournament?.mode === "double" && match.status !== "Finalizado") return null;
       if (match.winner === "A") return match.teamA;
       if (match.winner === "B") return match.teamB;
       return null;
@@ -2157,6 +2140,7 @@
 
     function matchLoserTeam(match) {
       if (!match) return null;
+      if (tournament?.mode === "double" && match.status !== "Finalizado") return null;
       if (match.winner === "A") return match.teamB;
       if (match.winner === "B") return match.teamA;
       return null;
@@ -2172,38 +2156,66 @@
 
     function syncDoubleEliminationSlots() {
       if (!tournament || tournament.mode !== "double") return;
-      const rounds = tournament.rounds;
-
-      rounds[0].matches.forEach((match, index) => {
-        putTeam(1, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
-        putTeam(4, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchLoserTeam(match));
+      const matchByCode = new Map();
+      tournament.rounds.forEach(round => {
+        round.matches.forEach(match => {
+          if (match.code) matchByCode.set(match.code, match);
+        });
       });
+      const setSlot = (code, slot, team) => {
+        const match = matchByCode.get(code);
+        if (!match || !team) return;
+        match[slot === "d1" ? "teamA" : "teamB"] = team;
+        if (match.teamA && match.teamB && match.status === "Aguardando") match.status = "Pendente";
+      };
+      const clearDynamicSlots = () => {
+        tournament.rounds.flatMap(round => round.matches).forEach(match => {
+          if (!match.code || /^J[1-8]$/.test(match.code)) return;
+          if (match.status === "Finalizado") return;
+          match.teamA = null;
+          match.teamB = null;
+          match.status = "Aguardando";
+        });
+      };
+      const flow = {
+        J1: { V: ["J13", "d1"], P: ["J9", "d1"] },
+        J2: { V: ["J13", "d2"], P: ["J9", "d2"] },
+        J3: { V: ["J14", "d1"], P: ["J10", "d1"] },
+        J4: { V: ["J14", "d2"], P: ["J10", "d2"] },
+        J5: { V: ["J15", "d1"], P: ["J11", "d1"] },
+        J6: { V: ["J15", "d2"], P: ["J11", "d2"] },
+        J7: { V: ["J16", "d1"], P: ["J12", "d1"] },
+        J8: { V: ["J16", "d2"], P: ["J12", "d2"] },
+        J9: { V: ["J20", "d2"] },
+        J10: { V: ["J19", "d2"] },
+        J11: { V: ["J18", "d2"] },
+        J12: { V: ["J17", "d2"] },
+        J13: { V: ["J21", "d1"], P: ["J17", "d1"] },
+        J14: { V: ["J21", "d2"], P: ["J18", "d1"] },
+        J15: { V: ["J22", "d1"], P: ["J19", "d1"] },
+        J16: { V: ["J22", "d2"], P: ["J20", "d1"] },
+        J17: { V: ["J23", "d2"] },
+        J18: { V: ["J23", "d1"] },
+        J19: { V: ["J24", "d2"] },
+        J20: { V: ["J24", "d1"] },
+        J21: { V: ["J27", "d1"], P: ["J25", "d2"] },
+        J22: { V: ["J28", "d2"], P: ["J26", "d2"] },
+        J23: { V: ["J25", "d1"] },
+        J24: { V: ["J26", "d1"] },
+        J25: { V: ["J27", "d2"] },
+        J26: { V: ["J28", "d1"] },
+        J27: { V: ["J30", "d1"], P: ["J29", "d1"] },
+        J28: { V: ["J30", "d2"], P: ["J29", "d2"] }
+      };
 
-      rounds[1].matches.forEach((match, index) => {
-        putTeam(2, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
-        putTeam(5, index, "B", matchLoserTeam(match));
+      clearDynamicSlots();
+      Object.entries(flow).forEach(([sourceCode, destinations]) => {
+        const source = matchByCode.get(sourceCode);
+        const winner = matchWinnerTeam(source);
+        const loser = matchLoserTeam(source);
+        if (winner && destinations.V) setSlot(destinations.V[0], destinations.V[1], winner);
+        if (loser && destinations.P) setSlot(destinations.P[0], destinations.P[1], loser);
       });
-
-      rounds[2].matches.forEach((match, index) => {
-        putTeam(3, 0, index === 0 ? "A" : "B", matchWinnerTeam(match));
-        putTeam(6, index, "B", matchLoserTeam(match));
-      });
-
-      putTeam(8, 0, "A", matchWinnerTeam(rounds[3].matches[0]));
-
-      rounds[4].matches.forEach((match, index) => {
-        putTeam(5, index, "A", matchWinnerTeam(match));
-      });
-
-      rounds[5].matches.forEach((match, index) => {
-        putTeam(6, Math.floor(index / 2), index % 2 === 0 ? "A" : "B", matchWinnerTeam(match));
-      });
-
-      rounds[6].matches.forEach((match, index) => {
-        putTeam(7, 0, index === 0 ? "A" : "B", matchWinnerTeam(match));
-      });
-
-      putTeam(8, 0, "B", matchWinnerTeam(rounds[7].matches[0]));
     }
 
     function allMatches() {
@@ -2363,7 +2375,7 @@
       document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
       document.body.classList.toggle("groups-public", Boolean(isPublic && tournament.mode === "groups"));
       if (isPublic && tournament.mode === "double") {
-        bracket.innerHTML = doubleEliminationSvg(tournament.teams || []);
+        bracket.innerHTML = doubleAdminHtml();
         return;
       }
 
@@ -2504,7 +2516,7 @@
       return `
         <article class="match">
           <div class="match-meta">
-            <span>${match.status}</span>
+            <span>${match.code ? `${match.code} - ` : ""}${match.status}</span>
             <span>Quadra ${match.court || "-"} - ${match.scheduled || "--:--"}</span>
           </div>
           <div class="team${aWinner}">
