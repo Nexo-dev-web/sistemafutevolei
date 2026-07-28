@@ -333,6 +333,105 @@
       padding: 8px 22px 24px 4px;
     }
 
+    .double-diagram {
+      width: 1800px;
+      height: 1020px;
+      display: block;
+      background: #f8f7f1;
+      border-radius: 6px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    .double-diagram .line {
+      fill: none;
+      stroke: #222;
+      stroke-width: 2;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .double-diagram .line-soft {
+      fill: none;
+      stroke: #555;
+      stroke-width: 1.4;
+    }
+
+    .double-diagram .slot-text {
+      fill: #111;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .double-diagram .small-text {
+      fill: #222;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .double-diagram .label-text {
+      fill: #111;
+      font-size: 16px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .double-diagram .title-text {
+      fill: #111;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      text-anchor: middle;
+    }
+
+    .double-diagram .subtitle-text {
+      fill: #111;
+      font-size: 18px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .double-diagram .champion-line {
+      stroke: #111;
+      stroke-width: 2.4;
+    }
+
+    .public-mode.double-public {
+      background: #f8f7f1;
+    }
+
+    .public-mode.double-public::before,
+    .public-mode.double-public::after,
+    .public-mode.double-public main::before,
+    .public-mode.double-public main::after {
+      display: none;
+    }
+
+    .public-mode.double-public main {
+      border-color: #d8d2c2;
+      background: #f8f7f1;
+      box-shadow: none;
+    }
+
+    .public-mode.double-public .public-banner {
+      color: #111;
+      border-bottom: 1px solid #d8d2c2;
+      margin-bottom: 8px;
+    }
+
+    .public-mode.double-public .public-banner h2,
+    .public-mode.double-public .public-banner .muted,
+    .public-mode.double-public .clock {
+      color: #111;
+      text-shadow: none;
+    }
+
+    .public-mode.double-public .pill,
+    .public-mode.double-public .refresh-clock {
+      color: #111;
+      background: #ece5cf;
+      border-color: #d8d2c2;
+    }
+
     .round {
       display: flex;
       flex-direction: column;
@@ -1641,6 +1740,12 @@
         return;
       }
 
+      document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
+      if (tournament.mode === "double") {
+        bracket.innerHTML = doubleEliminationSvg(tournament.teams || []);
+        return;
+      }
+
       bracket.innerHTML = tournament.rounds.map((round, roundIndex) => `
         <section class="round">
           <div class="round-title">${round.name}</div>
@@ -1659,6 +1764,87 @@
           });
         });
       }
+    }
+
+    function svgEscape(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function shortTeamName(team, fallback) {
+      if (!team) return fallback;
+      return svgEscape(`${team.a || ""} / ${team.b || ""}`.trim() || fallback);
+    }
+
+    function doubleEliminationSvg(teamList) {
+      const teamsForSvg = Array.from({ length: 16 }, (_, index) => teamList[index] || null);
+      const leftY = [150, 260, 370, 480, 620, 730, 840, 950];
+      const leftRound2Y = [205, 425, 675, 895];
+      const leftRound3Y = [315, 785];
+      const leftFinalY = 550;
+      const rightY = [155, 265, 375, 485, 625, 735, 845, 955];
+      const rightRound2Y = [210, 430, 680, 900];
+      const rightRound3Y = [320, 790];
+
+      const matchBox = (x, y, w, h, a, b, id) => `
+        <path class="line" d="M${x} ${y} H${x + w} V${y + h} H${x}" />
+        <line class="line-soft" x1="${x}" y1="${y + h / 2}" x2="${x + w}" y2="${y + h / 2}" />
+        <text class="small-text" x="${x}" y="${y - 8}">${id}</text>
+        <text class="slot-text" x="${x + 10}" y="${y + 28}">${a}</text>
+        <text class="slot-text" x="${x + 10}" y="${y + h - 14}">${b}</text>
+      `;
+
+      const connector = (x1, y1, x2, y2) => `
+        <path class="line" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
+      `;
+
+      const leftR1 = leftY.map((y, index) => matchBox(40, y, 150, 66, shortTeamName(teamsForSvg[index * 2], `Jogo ${index * 2 + 1}`), shortTeamName(teamsForSvg[index * 2 + 1], `Jogo ${index * 2 + 2}`), `J${index + 1}`)).join("");
+      const leftR2 = leftRound2Y.map((y, index) => matchBox(290, y, 150, 66, `V${index * 2 + 1}`, `V${index * 2 + 2}`, `J${index + 9}`)).join("");
+      const leftR3 = leftRound3Y.map((y, index) => matchBox(540, y, 150, 66, `V${index * 2 + 9}`, `V${index * 2 + 10}`, `J${index + 13}`)).join("");
+      const leftFinal = matchBox(790, leftFinalY, 170, 70, "V13", "V14", "J15");
+
+      const rightR1 = rightY.map((y, index) => matchBox(1610, y, 150, 66, `P${index + 1}`, `P${index + 2}`, `R${index + 1}`)).join("");
+      const rightR2 = rightRound2Y.map((y, index) => matchBox(1360, y, 150, 66, `VR${index * 2 + 1}`, `P${index + 9}`, `R${index + 9}`)).join("");
+      const rightR3 = rightRound3Y.map((y, index) => matchBox(1110, y, 150, 66, `VR${index * 2 + 9}`, `VR${index * 2 + 10}`, `R${index + 13}`)).join("");
+      const rightFinal = matchBox(910, 270, 170, 70, "VR13", "P15", "R15");
+      const grandFinal = matchBox(810, 735, 190, 74, "V15", "VR15", "J16");
+
+      const leftConnectors = [
+        ...leftY.map((y, i) => connector(190, y + 33, 290, leftRound2Y[Math.floor(i / 2)] + 33)),
+        ...leftRound2Y.map((y, i) => connector(440, y + 33, 540, leftRound3Y[Math.floor(i / 2)] + 33)),
+        connector(690, leftRound3Y[0] + 33, 790, leftFinalY + 35),
+        connector(690, leftRound3Y[1] + 33, 790, leftFinalY + 35),
+        `<line class="line champion-line" x1="960" y1="${leftFinalY + 35}" x2="1045" y2="${leftFinalY + 35}" />`
+      ].join("");
+
+      const rightConnectors = [
+        ...rightY.map((y, i) => connector(1610, y + 33, 1510, rightRound2Y[Math.floor(i / 2)] + 33)),
+        ...rightRound2Y.map((y, i) => connector(1360, y + 33, 1260, rightRound3Y[Math.floor(i / 2)] + 33)),
+        connector(1110, rightRound3Y[0] + 33, 1080, 305),
+        connector(1110, rightRound3Y[1] + 33, 1080, 305),
+        `<line class="line champion-line" x1="910" y1="305" x2="850" y2="305" />`
+      ].join("");
+
+      return `
+        <svg class="double-diagram" viewBox="0 0 1800 1020" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="1800" height="1020" fill="#f8f7f1" />
+          <text class="title-text" x="900" y="44">TABELA DE JOGOS</text>
+          <text class="subtitle-text" x="900" y="74">16 DUPLAS - DUPLA ELIMINATORIA</text>
+          <text class="label-text" x="455" y="115">Chave Principal</text>
+          <text class="label-text" x="1360" y="115">Repescagem</text>
+          <text class="label-text" x="900" y="705">Grande Final</text>
+          ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
+          ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
+          ${grandFinal}
+          <line class="line champion-line" x1="1000" y1="772" x2="1095" y2="772" />
+          <text class="label-text" x="1135" y="778">Campeao</text>
+          <text class="small-text" x="790" y="525">Final principal</text>
+          <text class="small-text" x="910" y="248">Final da repescagem</text>
+        </svg>
+      `;
     }
 
     function matchHtml(match, roundIndex, matchIndex) {
