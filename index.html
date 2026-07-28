@@ -1723,9 +1723,10 @@
         <div class="topbar">
           <div>
             <h2>Controle financeiro</h2>
-            <p class="muted">Preenchimento manual: marque uma dupla por vez conforme o pagamento for confirmado.</p>
+            <p class="muted">Planilha manual: digite as duplas, preencha pagamento e adicione novas linhas quando precisar.</p>
           </div>
           <div class="topbar-actions">
+            <button class="secondary" type="button" id="addFinanceRow">Adicionar linha</button>
             <button class="primary" type="button" id="saveFinance">Salvar financeiro</button>
           </div>
         </div>
@@ -1739,7 +1740,7 @@
           <div class="table-scroll">
             <table class="control-table">
               <thead>
-                <tr><th>Dupla</th><th>Status</th><th class="money-cell">Valor</th><th>Forma</th><th>Data</th><th>Observacao</th></tr>
+                <tr><th>Dupla</th><th>Status</th><th class="money-cell">Valor</th><th>Forma</th><th>Data</th><th>Observacao</th><th></th></tr>
               </thead>
               <tbody id="financeBody"></tbody>
             </table>
@@ -1831,7 +1832,7 @@
     let activeView = "bracketView";
     let mode = "single";
     let teams = [];
-    let finances = {};
+    let finances = [];
     let uniforms = {};
     let tournament = null;
     let menuCollapsed = false;
@@ -2456,13 +2457,26 @@
       return tournament?.teams?.length ? tournament.teams : normalizeTeams();
     }
 
-    function financeRecord(team) {
-      const key = teamKey(team);
-      if (!key) return null;
-      if (!finances[key]) {
-        finances[key] = { status: "Aberto", value: "", method: "", date: "", note: "" };
-      }
-      return finances[key];
+    function defaultFinanceRows() {
+      return samplePairs.slice(0, 16).map(pair => ({
+        id: uid(),
+        team: `${pair[0]} / ${pair[1]}`,
+        status: "Aberto",
+        value: "",
+        method: "",
+        date: "",
+        note: ""
+      }));
+    }
+
+    function emptyFinanceRow() {
+      return { id: uid(), team: "", status: "Aberto", value: "", method: "", date: "", note: "" };
+    }
+
+    function financeRows() {
+      if (!Array.isArray(finances)) finances = [];
+      if (!finances.length) finances = defaultFinanceRows();
+      return finances;
     }
 
     function uniformRecord(team, athleteIndex) {
@@ -2488,7 +2502,24 @@
       try {
         const state = JSON.parse(raw);
         teams = Array.isArray(state.teams) ? state.teams : [];
-        finances = state.finances && typeof state.finances === "object" ? state.finances : {};
+        if (Array.isArray(state.finances)) {
+          finances = state.finances;
+        } else if (state.finances && typeof state.finances === "object") {
+          finances = Object.entries(state.finances).map(([teamId, record]) => {
+            const team = teams.find(item => item.id === teamId);
+            return {
+              id: uid(),
+              team: team ? teamName(team) : "",
+              status: record.status || "Aberto",
+              value: record.value || "",
+              method: record.method || "",
+              date: record.date || "",
+              note: record.note || ""
+            };
+          });
+        } else {
+          finances = [];
+        }
         uniforms = state.uniforms && typeof state.uniforms === "object" ? state.uniforms : {};
         tournament = state.tournament || null;
         mode = state.mode || "single";
@@ -2503,7 +2534,7 @@
 
     function loadSample(keepTournament) {
       teams = samplePairs.map(pair => ({ id: uid(), a: pair[0], b: pair[1] }));
-      finances = {};
+      finances = defaultFinanceRows();
       uniforms = {};
       teamTargetCount = 16;
       setSettings(defaultSettings());
@@ -2808,8 +2839,8 @@
       let financeTotal = 0;
       let financePaid = 0;
       let financePaidCount = 0;
-      dashboardTeams.forEach(team => {
-        const record = financeRecord(team);
+      const financialRows = financeRows();
+      financialRows.forEach(record => {
         const value = moneyValue(record.value);
         financeTotal += value;
         if (record.status === "Pago") {
@@ -2833,7 +2864,7 @@
       document.getElementById("dashMatches").textContent = matches.length;
       document.getElementById("dashMatchStatus").textContent = `${finished} finalizados, ${pending} pendentes`;
       document.getElementById("dashFinance").textContent = formatMoney(financePaid);
-      document.getElementById("dashFinanceStatus").textContent = `${financePaidCount}/${dashboardTeams.length} duplas pagas - ${formatMoney(financeTotal - financePaid)} em aberto`;
+      document.getElementById("dashFinanceStatus").textContent = `${financePaidCount}/${financialRows.length} linhas pagas - ${formatMoney(financeTotal - financePaid)} em aberto`;
       document.getElementById("dashUniforms").textContent = `${uniformDelivered}/${uniformAthletes}`;
       document.getElementById("dashUniformStatus").textContent = "uniformes entregues";
       document.getElementById("dashNext").textContent = next ? `Quadra ${next.court}` : "-";
@@ -2844,13 +2875,12 @@
     function renderFinance() {
       const body = document.getElementById("financeBody");
       if (!body) return;
-      const rows = activeTeams();
+      const rows = financeRows();
       let total = 0;
       let paid = 0;
       let paidCount = 0;
 
-      body.innerHTML = rows.length ? rows.map(team => {
-        const record = financeRecord(team);
+      body.innerHTML = rows.length ? rows.map(record => {
         const value = moneyValue(record.value);
         total += value;
         if (record.status === "Pago") {
@@ -2859,23 +2889,24 @@
         }
         return `
           <tr>
-            <th>${teamName(team)}</th>
+            <td><input value="${escapeAttr(record.team)}" placeholder="Nome da dupla" data-finance="${record.id}" data-field="team"></td>
             <td>
-              <select data-finance="${team.id}" data-field="status">
+              <select data-finance="${record.id}" data-field="status">
                 ${["Aberto", "Pago", "Parcial", "Cortesia"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
               </select>
             </td>
-            <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" data-finance="${team.id}" data-field="value"></td>
+            <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" data-finance="${record.id}" data-field="value"></td>
             <td>
-              <select data-finance="${team.id}" data-field="method">
+              <select data-finance="${record.id}" data-field="method">
                 ${["", "Pix", "Dinheiro", "Cartao", "Transferencia", "Outro"].map(option => `<option value="${option}" ${record.method === option ? "selected" : ""}>${option || "Forma"}</option>`).join("")}
               </select>
             </td>
-            <td><input type="date" value="${escapeAttr(record.date)}" data-finance="${team.id}" data-field="date"></td>
-            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." data-finance="${team.id}" data-field="note"></td>
+            <td><input type="date" value="${escapeAttr(record.date)}" data-finance="${record.id}" data-field="date"></td>
+            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." data-finance="${record.id}" data-field="note"></td>
+            <td><button class="danger-btn" type="button" title="Remover linha" data-remove-finance="${record.id}">x</button></td>
           </tr>
         `;
-      }).join("") : '<tr><td colspan="6">Cadastre duplas para controlar pagamentos.</td></tr>';
+      }).join("") : '<tr><td colspan="7">Adicione linhas para controlar pagamentos.</td></tr>';
 
       document.getElementById("financeTotal").textContent = formatMoney(total);
       document.getElementById("financePaid").textContent = formatMoney(paid);
@@ -3011,6 +3042,11 @@
       document.getElementById("saveFinance").addEventListener("click", () => {
         persist();
         renderFinance();
+        renderSummary();
+      });
+      document.getElementById("addFinanceRow").addEventListener("click", () => {
+        financeRows().push(emptyFinanceRow());
+        renderFinance();
       });
       document.getElementById("saveUniforms").addEventListener("click", () => {
         persist();
@@ -3024,7 +3060,7 @@
         teamTargetCount = 16;
         teams = [];
         syncTeamRowsWithTarget();
-        finances = {};
+        finances = defaultFinanceRows();
         uniforms = {};
         tournament = null;
         persist();
@@ -3072,13 +3108,27 @@
         });
       });
 
-      document.getElementById("financeView").addEventListener("change", event => {
-        const teamId = event.target.dataset.finance;
-        if (!teamId) return;
-        const team = activeTeams().find(item => item.id === teamId);
-        const record = financeRecord(team);
+      document.getElementById("financeView").addEventListener("input", event => {
+        const rowId = event.target.dataset.finance;
+        if (!rowId) return;
+        const record = financeRows().find(row => row.id === rowId);
         if (!record) return;
         record[event.target.dataset.field] = event.target.value;
+      });
+
+      document.getElementById("financeView").addEventListener("change", event => {
+        const rowId = event.target.dataset.finance;
+        if (!rowId) return;
+        const record = financeRows().find(row => row.id === rowId);
+        if (!record) return;
+        record[event.target.dataset.field] = event.target.value;
+        renderFinance();
+      });
+
+      document.getElementById("financeView").addEventListener("click", event => {
+        const rowId = event.target.dataset.removeFinance;
+        if (!rowId) return;
+        finances = financeRows().filter(row => row.id !== rowId);
         renderFinance();
       });
 
