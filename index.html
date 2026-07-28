@@ -337,14 +337,14 @@
       width: 1800px;
       height: 1020px;
       display: block;
-      background: #f8f7f1;
+      background: #06100c;
       border-radius: 6px;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
     }
 
     .double-diagram .line {
       fill: none;
-      stroke: #222;
+      stroke: rgba(230, 199, 109, 0.9);
       stroke-width: 2;
       stroke-linecap: square;
       stroke-linejoin: miter;
@@ -352,31 +352,31 @@
 
     .double-diagram .line-soft {
       fill: none;
-      stroke: #555;
+      stroke: rgba(255, 255, 255, 0.2);
       stroke-width: 1.4;
     }
 
     .double-diagram .slot-text {
-      fill: #111;
+      fill: #f7fff9;
       font-size: 18px;
       font-weight: 700;
     }
 
     .double-diagram .small-text {
-      fill: #222;
+      fill: #adc0b4;
       font-size: 13px;
       font-weight: 700;
     }
 
     .double-diagram .label-text {
-      fill: #111;
+      fill: #35e48a;
       font-size: 16px;
       font-weight: 800;
       text-anchor: middle;
     }
 
     .double-diagram .title-text {
-      fill: #111;
+      fill: #f7fff9;
       font-size: 22px;
       font-weight: 900;
       letter-spacing: 0.3px;
@@ -384,52 +384,32 @@
     }
 
     .double-diagram .subtitle-text {
-      fill: #111;
+      fill: #e6c76d;
       font-size: 18px;
       font-weight: 800;
       text-anchor: middle;
     }
 
     .double-diagram .champion-line {
-      stroke: #111;
+      stroke: #35e48a;
       stroke-width: 2.4;
     }
 
     .public-mode.double-public {
-      background: #f8f7f1;
-    }
-
-    .public-mode.double-public::before,
-    .public-mode.double-public::after,
-    .public-mode.double-public main::before,
-    .public-mode.double-public main::after {
-      display: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(230, 199, 109, 0.2), transparent 24%),
+        radial-gradient(circle at 82% 12%, rgba(53, 228, 138, 0.18), transparent 22%),
+        linear-gradient(140deg, #03110b, #07100c 44%, #1b1508);
     }
 
     .public-mode.double-public main {
-      border-color: #d8d2c2;
-      background: #f8f7f1;
-      box-shadow: none;
-    }
-
-    .public-mode.double-public .public-banner {
-      color: #111;
-      border-bottom: 1px solid #d8d2c2;
-      margin-bottom: 8px;
-    }
-
-    .public-mode.double-public .public-banner h2,
-    .public-mode.double-public .public-banner .muted,
-    .public-mode.double-public .clock {
-      color: #111;
-      text-shadow: none;
-    }
-
-    .public-mode.double-public .pill,
-    .public-mode.double-public .refresh-clock {
-      color: #111;
-      background: #ece5cf;
-      border-color: #d8d2c2;
+      border-color: rgba(230, 199, 109, 0.24);
+      background:
+        linear-gradient(180deg, rgba(3, 17, 11, 0.92), rgba(5, 9, 8, 0.96)),
+        repeating-linear-gradient(90deg, rgba(230, 199, 109, 0.04) 0 1px, transparent 1px 76px);
+      box-shadow:
+        0 26px 90px rgba(0, 0, 0, 0.55),
+        inset 0 0 60px rgba(53, 228, 138, 0.06);
     }
 
     .round {
@@ -630,6 +610,7 @@
 
     .public-mode aside,
     .public-mode .nav-tabs,
+    .public-mode .topbar,
     .public-mode .topbar-actions,
     .public-mode #adminOnlyStats {
       display: none;
@@ -1830,7 +1811,7 @@
 
       return `
         <svg class="double-diagram" viewBox="0 0 1800 1020" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="1800" height="1020" fill="#f8f7f1" />
+          <rect x="0" y="0" width="1800" height="1020" fill="#06100c" />
           <text class="title-text" x="900" y="44">TABELA DE JOGOS</text>
           <text class="subtitle-text" x="900" y="74">16 DUPLAS - DUPLA ELIMINATORIA</text>
           <text class="label-text" x="455" y="115">Chave Principal</text>
