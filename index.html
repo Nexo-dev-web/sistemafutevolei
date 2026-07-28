@@ -1084,8 +1084,6 @@
       height: 100%;
       min-width: 0;
       display: block;
-      transform: scale(var(--public-scale, 1));
-      transform-origin: top left;
     }
 
     .public-mode.double-public .bracket-wrap {
@@ -1118,6 +1116,15 @@
       fill: none;
       stroke: rgba(255, 255, 255, 0.2);
       stroke-width: 1.4;
+    }
+
+    .double-diagram .line-feed {
+      fill: none;
+      stroke: rgba(230, 199, 109, 0.6);
+      stroke-width: 2;
+      stroke-dasharray: 6 5;
+      stroke-linecap: round;
+      animation: none;
     }
 
     .double-diagram .team-node {
@@ -1538,6 +1545,7 @@
     }
 
     .score-input {
+      min-width: 0;
       min-height: 28px;
       padding: 0 5px;
       text-align: center;
@@ -1958,6 +1966,7 @@
 
     .public-mode.score-focus .match.score-live .score-input {
       width: 100%;
+      min-width: 0;
       min-height: clamp(72px, 11vh, 128px);
       border-radius: 8px;
       color: var(--sand);
@@ -2301,6 +2310,9 @@
             <option value="20">20 min</option>
           </select>
         </label>
+        <label class="field">Valor da inscricao (R$)
+          <input id="entryFee" type="number" min="0" step="0.01" placeholder="Ex: 50,00">
+        </label>
       </div>
 
       <label class="field">Observacao do organizador
@@ -2474,6 +2486,9 @@
                   </select>
                 </label>
               </div>
+              <label class="field">Valor da inscricao (R$)
+                <input id="editEntryFee" type="number" min="0" step="0.01" placeholder="Ex: 50,00">
+              </label>
               <label class="field">Observação
                 <textarea id="editNotes" placeholder="Ex: final melhor de 3, aquecimento de 3 minutos..."></textarea>
               </label>
@@ -2708,6 +2723,7 @@
         points: 18,
         matchMinutes: 15,
         model: "random",
+        entryFee: "",
         notes: "Final pode ser melhor de 3 se houver tempo. Aquecimento maximo de 3 minutos."
       };
     }
@@ -2722,6 +2738,7 @@
         points: 18,
         matchMinutes: Number(document.getElementById("matchMinutes")?.value || 15),
         model: "random",
+        entryFee: document.getElementById("entryFee")?.value || "",
         notes: document.getElementById("notes")?.value.trim() || ""
       };
     }
@@ -2735,6 +2752,7 @@
         category: s.category,
         courts: s.courts,
         matchMinutes: s.matchMinutes,
+        entryFee: s.entryFee || "",
         notes: s.notes
       };
       Object.entries(fields).forEach(([id, value]) => {
@@ -2752,6 +2770,7 @@
         editCategory: s.category,
         editCourts: s.courts,
         editMatchMinutes: s.matchMinutes,
+        editEntryFee: s.entryFee || "",
         editNotes: s.notes
       };
       Object.entries(fields).forEach(([id, value]) => {
@@ -2770,6 +2789,7 @@
         points: 18,
         matchMinutes: Number(document.getElementById("editMatchMinutes")?.value || 15),
         model: "random",
+        entryFee: document.getElementById("editEntryFee")?.value || "",
         notes: document.getElementById("editNotes")?.value.trim() || ""
       };
     }
@@ -3461,11 +3481,15 @@
         finances = [];
         return;
       }
+      const feeSetting = tournament?.entryFee ?? getSettings().entryFee ?? "";
+      const defaultValue = feeSetting === "" ? "" : String(feeSetting);
       const synced = validTeams.map(team => {
         const current = existing.get(team.id);
-        return current
-          ? { ...current, id: team.id, team: teamName(team) }
-          : { id: team.id, team: teamName(team), status: "Aberto", value: "", method: "", date: "", note: "" };
+        if (current) {
+          const value = current.value === "" ? defaultValue : current.value;
+          return { ...current, id: team.id, team: teamName(team), value };
+        }
+        return { id: team.id, team: teamName(team), status: "Aberto", value: defaultValue, method: "", date: "", note: "" };
       });
       const manualRows = finances.filter(row => !teams.some(team => team.id === row.id) && row.team);
       finances = [...synced, ...manualRows];
@@ -4004,23 +4028,26 @@
       });
 
       const boxW = 205;
-      const boxH = 56;
       const rowH = 24;
+      const boxH = rowH * 2 + 5;
       const scoreW = 32;
-      const leftX = [55, 325, 595, 790];
-      const rightX = [1840, 1600, 1360, 1120];
+      const leftX = [55, 300, 545];
+      const semiX = 790;
+      const rightX = [1840, 1600, 1360];
+      const accessX = 1120;
+      const finalX = 955;
+      const canvasW = 2100;
+      const canvasH = 780;
       const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
       const leftRound2Y = [142, 286, 464, 608];
       const leftRound3Y = [214, 536];
-      const leftFinalY = 295;
-      const leftFinal2Y = 525;
+      const semiY = [258, 506];
       const rightY = [106, 250, 428, 572];
       const rightRound2Y = [142, 286, 464, 608];
       const rightRound3Y = [214, 536];
-      const repFinalY = 295;
-      const repFinal2Y = 525;
-      const grandFinalY = 410;
-      const thirdPlaceY = 630;
+      const accessY = [258, 506];
+      const grandFinalY = 382;
+      const thirdPlaceY = 640;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4050,6 +4077,7 @@
       const connector = (x1, y1, x2, y2) => `
         <path class="line" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
       `;
+      const straight = (x1, y1, x2, y2, cls = "line") => `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
 
       const leftR1 = leftY.map((y, index) => {
         const code = `J${index + 1}`;
@@ -4060,71 +4088,75 @@
         return matchBox(leftX[1], y, boxW, boxH, matchSlot(code, "A", "A definir"), matchSlot(code, "B", "A definir"), code);
       }).join("");
       const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], leftRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const leftFinal = matchBox(leftX[3], leftFinalY, boxW, boxH, matchSlot("J27", "A", "A definir"), matchSlot("J27", "B", "A definir"), "J27");
-      const leftFinal2 = matchBox(leftX[3], leftFinal2Y, boxW, boxH, matchSlot("J28", "A", "A definir"), matchSlot("J28", "B", "A definir"), "J28");
+      const semis = [27, 28].map((codeNumber, index) => matchBox(semiX, semiY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
 
       const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(rightX[1], rightRound2Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR3 = [23, 24].map((codeNumber, index) => matchBox(rightX[2], rightRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const rightFinal = matchBox(rightX[3], repFinalY, boxW, boxH, matchSlot("J25", "A", "A definir"), matchSlot("J25", "B", "A definir"), "J25");
-      const rightFinal2 = matchBox(rightX[3], repFinal2Y, boxW, boxH, matchSlot("J26", "A", "A definir"), matchSlot("J26", "B", "A definir"), "J26");
-      const grandFinalX = 950;
-      const grandFinal = matchBox(grandFinalX, grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
-      const thirdPlace = matchBox(grandFinalX, thirdPlaceY, boxW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
+      const accessMatches = [25, 26].map((codeNumber, index) => matchBox(accessX, accessY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const grandFinal = matchBox(finalX, grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
+      const thirdPlace = matchBox(finalX, thirdPlaceY, boxW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
 
       const leftConnectors = [
         ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
         ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
-        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, leftX[3], leftFinalY + boxH / 2),
-        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, leftX[3], leftFinal2Y + boxH / 2)
+        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, semiX, semiY[0] + boxH / 2),
+        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, semiX, semiY[1] + boxH / 2)
       ].join("");
 
       const rightConnectors = [
         ...rightY.map((y, i) => connector(rightX[0], y + boxH / 2, rightX[1] + boxW, rightRound2Y[i] + boxH / 2)),
         ...rightRound2Y.map((y, i) => connector(rightX[1], y + boxH / 2, rightX[2] + boxW, rightRound3Y[Math.floor(i / 2)] + boxH / 2)),
-        connector(rightX[2], rightRound3Y[0] + boxH / 2, rightX[3] + boxW, repFinalY + boxH / 2),
-        connector(rightX[2], rightRound3Y[1] + boxH / 2, rightX[3] + boxW, repFinal2Y + boxH / 2)
+        connector(rightX[2], rightRound3Y[0] + boxH / 2, accessX + boxW, accessY[0] + boxH / 2),
+        connector(rightX[2], rightRound3Y[1] + boxH / 2, accessX + boxW, accessY[1] + boxH / 2)
       ].join("");
 
+      const semiExitX = semiX + boxW;
+      const semiCenterY = semiY.map(y => y + boxH / 2);
+      const finalEntryY = grandFinalY + boxH / 2;
+      const thirdEntryY = thirdPlaceY + boxH / 2;
+      const corridorFinalTop = (semiY[0] + boxH + grandFinalY) / 2;
+      const corridorFinalBottom = (grandFinalY + boxH + semiY[1]) / 2;
+      const corridorThird = (semiY[1] + boxH + thirdPlaceY) / 2;
       const finalsConnectors = [
-        `<line class="line" x1="${rightX[3]}" y1="${repFinalY + boxH / 2}" x2="${leftX[3] + boxW}" y2="${leftFinalY + boxH / 2}" />`,
-        `<line class="line" x1="${rightX[3]}" y1="${repFinal2Y + boxH / 2}" x2="${leftX[3] + boxW}" y2="${leftFinal2Y + boxH / 2}" />`,
-        `<path class="line" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 42} V${grandFinalY + boxH / 2} H${grandFinalX}" />`,
-        `<path class="line" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 42} V${grandFinalY + boxH / 2} H${grandFinalX}" />`,
-        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 62} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`,
-        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 62} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`
+        straight(accessX, semiCenterY[0], semiExitX, semiCenterY[0], "line-feed"),
+        straight(accessX, semiCenterY[1], semiExitX, semiCenterY[1], "line-feed"),
+        `<path class="line" d="M${semiExitX} ${semiCenterY[0]} V${corridorFinalTop} H${finalX} V${finalEntryY}" />`,
+        `<path class="line" d="M${semiExitX} ${semiCenterY[1]} V${corridorFinalBottom} H${finalX} V${finalEntryY}" />`,
+        `<path class="line-soft" d="M${semiExitX} ${semiCenterY[0]} V${corridorThird} H${finalX} V${thirdEntryY}" />`,
+        `<path class="line-soft" d="M${semiExitX} ${semiCenterY[1]} V${corridorThird} H${finalX} V${thirdEntryY}" />`
       ].join("");
 
       return `
-        <svg class="double-diagram" viewBox="0 0 2100 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="2100" height="780" fill="#06100c" />
-          <text class="title-text" x="1050" y="30">TABELA DE JOGOS</text>
-          <text class="subtitle-text" x="1050" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
-          <text class="label-text" x="500" y="82">Classificatoria</text>
+        <svg class="double-diagram" viewBox="0 0 ${canvasW} ${canvasH}" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="${canvasW}" height="${canvasH}" fill="#06100c" />
+          <text class="title-text" x="${canvasW / 2}" y="30">TABELA DE JOGOS</text>
+          <text class="subtitle-text" x="${canvasW / 2}" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
+          <text class="label-text" x="505" y="82">Classificatoria</text>
           <text class="legend-text" x="158" y="102">Primeira rodada</text>
-          <text class="legend-text" x="428" y="102">Oitavas</text>
-          <text class="legend-text" x="698" y="102">Quartas</text>
-          <text class="label-text" x="1580" y="82">Repescagem</text>
-          <text class="legend-text" x="1940" y="102">Primeira rodada</text>
-          <text class="legend-text" x="1702" y="102">Oitavas</text>
-          <text class="legend-text" x="1462" y="102">Quartas</text>
-          <text class="legend-text" x="1222" y="102">Quartas finais</text>
-          <text class="legend-text" x="895" y="102">Semis</text>
-          <text class="label-text" x="${grandFinalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
-          <text class="small-text" x="${grandFinalX}" y="${thirdPlaceY - 14}">3o lugar</text>
-          ${leftR1}${leftR2}${leftR3}${leftFinal}${leftFinal2}${leftConnectors}
-          ${rightR1}${rightR2}${rightR3}${rightFinal}${rightFinal2}${rightConnectors}
-          ${finalsConnectors}${grandFinal}${thirdPlace}
-          <line class="line champion-line" x1="${grandFinalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${grandFinalX + boxW + 118}" y2="${grandFinalY + boxH / 2}" />
-          <text class="label-text" x="${grandFinalX + boxW + 154}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
-          <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Semi 1</text>
-          <text class="small-text" x="${leftX[3]}" y="${leftFinal2Y - 14}">Semi 2</text>
-          <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Quartas repescagem 1</text>
-          <text class="small-text" x="${rightX[3]}" y="${repFinal2Y - 14}">Quartas repescagem 2</text>
+          <text class="legend-text" x="405" y="102">Oitavas</text>
+          <text class="legend-text" x="652" y="102">Quartas</text>
+          <text class="legend-text" x="880" y="102">Semifinais</text>
+          <text class="label-text" x="${(accessX + rightX[0] + boxW) / 2}" y="82">Repescagem</text>
+          <text class="legend-text" x="${rightX[0] + boxW / 2}" y="102">Primeira rodada</text>
+          <text class="legend-text" x="${rightX[1] + boxW / 2}" y="102">Oitavas</text>
+          <text class="legend-text" x="${rightX[2] + boxW / 2}" y="102">Quartas</text>
+          <text class="legend-text" x="${accessX + boxW / 2}" y="102">Quartas finais</text>
+          ${leftConnectors}${rightConnectors}${finalsConnectors}
+          ${leftR1}${leftR2}${leftR3}${semis}
+          ${rightR1}${rightR2}${rightR3}${accessMatches}
+          ${grandFinal}${thirdPlace}
+          <line class="line champion-line" x1="${finalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${finalX + boxW + 118}" y2="${grandFinalY + boxH / 2}" />
+          <text class="label-text" x="${finalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
+          <text class="small-text" x="${finalX + boxW / 2}" y="${thirdPlaceY - 14}" text-anchor="middle">3o lugar</text>
+          <text class="label-text" x="${finalX + boxW + 154}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
+          <text class="small-text" x="${semiX + boxW / 2}" y="${semiY[0] - 14}" text-anchor="middle">Semi 1</text>
+          <text class="small-text" x="${semiX + boxW / 2}" y="${semiY[1] - 14}" text-anchor="middle">Semi 2</text>
+          <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[0] - 14}" text-anchor="middle">Acesso semi 1</text>
+          <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[1] - 14}" text-anchor="middle">Acesso semi 2</text>
         </svg>
       `;
-    }
-    function matchHtml(match, roundIndex, matchIndex) {
+    }    function matchHtml(match, roundIndex, matchIndex) {
       const aWinner = match.winner === "A" ? " winner" : "";
       const bWinner = match.winner === "B" ? " winner" : "";
       const matchLabel = match.label || (match.code === "J30" ? "Final" : match.code === "J29" ? "3o lugar" : "");
@@ -4441,10 +4473,10 @@
       if (!wrap || !bracket) return;
       bracket.style.setProperty("--public-scale", "1");
       const svg = bracket.querySelector("svg");
+      if (svg) return;
       const doubleAdmin = bracket.querySelector(".double-admin");
-      const viewBox = svg?.viewBox?.baseVal;
-      const naturalWidth = viewBox?.width || doubleAdmin?.scrollWidth || bracket.scrollWidth || 1;
-      const naturalHeight = viewBox?.height || doubleAdmin?.scrollHeight || bracket.scrollHeight || 1;
+      const naturalWidth = doubleAdmin?.scrollWidth || bracket.scrollWidth || 1;
+      const naturalHeight = doubleAdmin?.scrollHeight || bracket.scrollHeight || 1;
       const top = wrap.getBoundingClientRect().top;
       const availableWidth = Math.max(window.innerWidth - 34, 1);
       const availableHeight = Math.max(window.innerHeight - top - 8, 1);
