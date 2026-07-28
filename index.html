@@ -4012,12 +4012,15 @@
       const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
       const leftRound2Y = [142, 286, 464, 608];
       const leftRound3Y = [214, 536];
-      const leftFinalY = 390;
+      const leftFinalY = 330;
+      const leftFinal2Y = 520;
       const rightY = [106, 250, 428, 572];
       const rightRound2Y = [142, 286, 464, 608];
       const rightRound3Y = [214, 536];
-      const repFinalY = 220;
-      const grandFinalY = 580;
+      const repFinalY = 250;
+      const repFinal2Y = 520;
+      const grandFinalY = 425;
+      const thirdPlaceY = 625;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4058,26 +4061,38 @@
       }).join("");
       const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], leftRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const leftFinal = matchBox(leftX[3], leftFinalY, boxW, boxH, matchSlot("J27", "A", "A definir"), matchSlot("J27", "B", "A definir"), "J27");
+      const leftFinal2 = matchBox(leftX[3], leftFinal2Y, boxW, boxH, matchSlot("J28", "A", "A definir"), matchSlot("J28", "B", "A definir"), "J28");
 
       const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(rightX[1], rightRound2Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR3 = [23, 24].map((codeNumber, index) => matchBox(rightX[2], rightRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightFinal = matchBox(rightX[3], repFinalY, boxW, boxH, matchSlot("J25", "A", "A definir"), matchSlot("J25", "B", "A definir"), "J25");
+      const rightFinal2 = matchBox(rightX[3], repFinal2Y, boxW, boxH, matchSlot("J26", "A", "A definir"), matchSlot("J26", "B", "A definir"), "J26");
       const grandFinalX = 895;
       const grandFinal = matchBox(grandFinalX, grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
+      const thirdPlace = matchBox(grandFinalX, thirdPlaceY, boxW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
 
       const leftConnectors = [
         ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
         ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
         connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, leftX[3], leftFinalY + boxH / 2),
-        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, leftX[3], leftFinalY + boxH / 2)
+        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, leftX[3], leftFinal2Y + boxH / 2)
       ].join("");
 
       const rightConnectors = [
         ...rightY.map((y, i) => connector(rightX[0], y + boxH / 2, rightX[1] + boxW, rightRound2Y[i] + boxH / 2)),
         ...rightRound2Y.map((y, i) => connector(rightX[1], y + boxH / 2, rightX[2] + boxW, rightRound3Y[Math.floor(i / 2)] + boxH / 2)),
         connector(rightX[2], rightRound3Y[0] + boxH / 2, rightX[3] + boxW, repFinalY + boxH / 2),
-        connector(rightX[2], rightRound3Y[1] + boxH / 2, rightX[3] + boxW, repFinalY + boxH / 2)
+        connector(rightX[2], rightRound3Y[1] + boxH / 2, rightX[3] + boxW, repFinal2Y + boxH / 2)
+      ].join("");
+
+      const finalsConnectors = [
+        connector(rightX[3], repFinalY + boxH / 2, leftX[3] + boxW, leftFinalY + boxH / 2),
+        connector(rightX[3], repFinal2Y + boxH / 2, leftX[3] + boxW, leftFinal2Y + boxH / 2),
+        connector(leftX[3] + boxW, leftFinalY + boxH / 2, grandFinalX, grandFinalY + boxH / 2),
+        connector(leftX[3] + boxW, leftFinal2Y + boxH / 2, grandFinalX, grandFinalY + boxH / 2),
+        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 35} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`,
+        `<path class="line-soft" d="M${leftX[3] + boxW} ${leftFinal2Y + boxH / 2} H${grandFinalX - 35} V${thirdPlaceY + boxH / 2} H${grandFinalX}" />`
       ].join("");
 
       return `
@@ -4095,15 +4110,16 @@
           <text class="legend-text" x="1322" y="102">Quartas</text>
           <text class="legend-text" x="1050" y="102">Semi</text>
           <text class="label-text" x="${grandFinalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
-          ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
-          ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
-          ${grandFinal}
-          <path class="line champion-line" d="M${leftX[3] + boxW} ${leftFinalY + boxH / 2} H${grandFinalX - 42} V${grandFinalY + boxH / 2} H${grandFinalX}" />
-          <path class="line champion-line" d="M${rightX[3]} ${repFinalY + boxH / 2} H${grandFinalX + boxW + 42} V${grandFinalY + boxH / 2} H${grandFinalX + boxW}" />
+          <text class="small-text" x="${grandFinalX}" y="${thirdPlaceY - 14}">3o lugar</text>
+          ${leftR1}${leftR2}${leftR3}${leftFinal}${leftFinal2}${leftConnectors}
+          ${rightR1}${rightR2}${rightR3}${rightFinal}${rightFinal2}${rightConnectors}
+          ${finalsConnectors}${grandFinal}${thirdPlace}
           <line class="line champion-line" x1="${grandFinalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${grandFinalX + boxW + 118}" y2="${grandFinalY + boxH / 2}" />
           <text class="label-text" x="${grandFinalX + boxW + 154}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
-          <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Final principal</text>
-          <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Final da repescagem</text>
+          <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Semi 1</text>
+          <text class="small-text" x="${leftX[3]}" y="${leftFinal2Y - 14}">Semi 2</text>
+          <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Quartas repescagem 1</text>
+          <text class="small-text" x="${rightX[3]}" y="${repFinal2Y - 14}">Quartas repescagem 2</text>
         </svg>
       `;
     }
