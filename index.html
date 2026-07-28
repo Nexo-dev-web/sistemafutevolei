@@ -1587,9 +1587,14 @@
         round.matches.forEach((match, matchIndex) => {
           const scoreA = Number(match.scoreA);
           const scoreB = Number(match.scoreB);
-          if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreA !== scoreB) {
+          const targetPoints = Number(tournament.points || 21);
+          const reachedTarget = Math.max(scoreA, scoreB) >= targetPoints;
+          if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreA !== scoreB && reachedTarget) {
             match.winner = scoreA > scoreB ? "A" : "B";
             match.status = "Finalizado";
+          } else if (match.teamA && match.teamB && match.scoreA !== "" && match.scoreB !== "" && scoreA !== scoreB) {
+            match.winner = scoreA > scoreB ? "A" : "B";
+            match.status = "Em jogo";
           } else if (match.teamA && match.teamB) {
             match.winner = null;
             match.status = match.scoreA !== "" || match.scoreB !== "" ? "Em jogo" : "Pendente";
@@ -1818,7 +1823,7 @@
           input.addEventListener("input", () => {
             const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
             match[input.dataset.field] = input.value;
-            match.status = "Em jogo";
+            if (match.status !== "Finalizado") match.status = "Em jogo";
             persist();
             renderQueue();
           });
