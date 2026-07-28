@@ -748,6 +748,96 @@
       display: none;
     }
 
+    .double-section {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .double-section-title {
+      margin: 0;
+      color: var(--sand);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .double-section-rounds {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .public-mode.double-public .double-admin {
+      grid-template-columns: 1.05fr 1.05fr 0.72fr;
+      gap: 10px;
+      height: 100%;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .public-mode.double-public .double-section {
+      min-height: 0;
+      padding: 8px;
+      border: 1px solid rgba(230, 199, 109, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .public-mode.double-public .double-section-rounds {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      min-height: 0;
+    }
+
+    .public-mode.double-public .double-section[data-section="Finais"] .double-section-rounds {
+      grid-template-columns: 1fr;
+    }
+
+    .public-mode.double-public .phase-panel {
+      padding: 8px;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .public-mode.double-public .phase-panel h3 {
+      font-size: 0.68rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .public-mode.double-public .phase-panel .match {
+      padding: 5px;
+      gap: 4px;
+      border-radius: 6px;
+    }
+
+    .public-mode.double-public .phase-panel .match-meta {
+      font-size: 0.55rem;
+      gap: 4px;
+    }
+
+    .public-mode.double-public .phase-panel .team {
+      min-height: 25px;
+      padding: 3px 5px;
+      gap: 5px;
+    }
+
+    .public-mode.double-public .phase-panel .team-name {
+      font-size: clamp(0.54rem, 0.66vw, 0.72rem);
+    }
+
+    .public-mode.double-public .phase-panel .score-input {
+      width: 30px;
+      min-height: 22px;
+      font-size: 0.64rem;
+    }
+
     .public-mode.double-public {
       background:
         radial-gradient(circle at 18% 18%, rgba(230, 199, 109, 0.2), transparent 24%),
@@ -2398,12 +2488,22 @@
     }
 
     function doubleAdminHtml() {
+      const sections = ["Principal", "Repescagem", "Finais"];
       return `
         <div class="double-admin">
-          ${tournament.rounds.map((round, roundIndex) => `
-            <section class="phase-panel">
-              <h3>${round.name}</h3>
-              ${round.matches.map((match, matchIndex) => matchHtml(match, roundIndex, matchIndex)).join("")}
+          ${sections.map(section => `
+            <section class="double-section" data-section="${section}">
+              <h2 class="double-section-title">${section === "Finais" ? "Finais" : section}</h2>
+              <div class="double-section-rounds">
+                ${tournament.rounds.map((round, roundIndex) => ({ round, roundIndex }))
+                  .filter(item => item.round.bracketSide === section)
+                  .map(({ round, roundIndex }) => `
+                    <div class="phase-panel">
+                      <h3>${round.name}</h3>
+                      ${round.matches.map((match, matchIndex) => matchHtml(match, roundIndex, matchIndex)).join("")}
+                    </div>
+                  `).join("")}
+              </div>
             </section>
           `).join("")}
         </div>
@@ -2737,10 +2837,6 @@
       const wrap = document.querySelector(".bracket-wrap");
       const bracket = document.getElementById("bracket");
       if (!wrap || !bracket) return;
-      if (tournament?.mode === "double") {
-        bracket.style.setProperty("--public-scale", "1");
-        return;
-      }
       bracket.style.setProperty("--public-scale", "1");
       const svg = bracket.querySelector("svg");
       const viewBox = svg?.viewBox?.baseVal;
