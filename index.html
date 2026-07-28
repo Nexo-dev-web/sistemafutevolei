@@ -1201,7 +1201,7 @@
 
     .public-mode.double-public .double-section-rounds {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      gap: 6px;
       min-height: 0;
     }
 
@@ -1210,8 +1210,8 @@
     }
 
     .public-mode.double-public .phase-panel {
-      padding: 8px;
-      gap: 6px;
+      padding: 7px;
+      gap: 5px;
       min-width: 0;
       overflow: hidden;
     }
@@ -1225,34 +1225,35 @@
     }
 
     .public-mode.double-public .phase-panel .match {
-      padding: 5px;
-      gap: 4px;
+      padding: 4px;
+      gap: 3px;
       border-radius: 6px;
     }
 
     .public-mode.double-public .phase-panel .match-meta {
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       gap: 4px;
+      line-height: 1;
     }
 
     .public-mode.double-public .phase-panel .team {
-      grid-template-columns: minmax(0, 1fr) 24px;
-      min-height: 42px;
-      padding: 3px 5px;
-      gap: 5px;
+      grid-template-columns: minmax(0, 1fr) 30px;
+      min-height: 36px;
+      padding: 3px 4px;
+      gap: 4px;
     }
 
     .public-mode.double-public .phase-panel .team-name {
-      -webkit-line-clamp: 3;
-      font-size: clamp(0.54rem, 0.62vw, 0.68rem);
+      -webkit-line-clamp: 2;
+      font-size: clamp(0.54rem, 0.72vw, 0.78rem);
       line-height: 1.08;
     }
 
     .public-mode.double-public .phase-panel .score-input {
-      width: 24px;
-      min-height: 22px;
+      width: 30px;
+      min-height: 24px;
       padding: 0 2px;
-      font-size: 0.58rem;
+      font-size: 0.68rem;
     }
 
     .public-mode.double-public {
@@ -2911,16 +2912,8 @@
       const rule = scoreRule(targetPoints);
       let a = Math.max(0, Number(scoreA) || 0);
       let b = Math.max(0, Number(scoreB) || 0);
-      const high = Math.max(a, b);
-      const low = Math.min(a, b);
-      if (high > rule.target && low < rule.deuceAt) {
-        if (a > b) a = rule.target;
-        else b = rule.target;
-      }
-      if (Math.max(a, b) > rule.target && Math.abs(a - b) > rule.advantage) {
-        if (a > b) a = b + rule.advantage;
-        else b = a + rule.advantage;
-      }
+      a = Math.min(a, rule.target);
+      b = Math.min(b, rule.target);
       return [a, b];
     }
 
@@ -2930,8 +2923,7 @@
       const high = Math.max(scoreA, scoreB);
       const low = Math.min(scoreA, scoreB);
       if (high < rule.target) return false;
-      if (high === rule.target) return high - low >= 1;
-      return low >= rule.deuceAt && high - low >= rule.advantage;
+      return high === rule.target && high - low >= 1;
     }
 
     function syncWinners() {
@@ -3617,6 +3609,7 @@
       scope.querySelectorAll(".score-input").forEach(input => {
         input.addEventListener("input", () => {
           const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
+          if (input.value !== "") input.value = String(Math.min(18, Math.max(0, Number(input.value) || 0)));
           match[input.dataset.field] = input.value;
           if (match.scoreA !== "" && match.scoreB !== "") {
             const [scoreA, scoreB] = cleanScorePair(match.scoreA, match.scoreB, 18);
@@ -3735,11 +3728,11 @@
           </div>
           <div class="team${aWinner}">
             <span class="team-name ${match.teamA ? "" : "bye"}">${teamName(match.teamA)}</span>
-            <input class="score-input" type="number" min="0" max="40" value="${match.scoreA}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="18" value="${match.scoreA}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
           </div>
           <div class="team${bWinner}">
             <span class="team-name ${match.teamB ? "" : "bye"}">${teamName(match.teamB)}</span>
-            <input class="score-input" type="number" min="0" max="40" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="18" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
         </article>
       `;
