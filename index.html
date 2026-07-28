@@ -1192,6 +1192,24 @@
       text-anchor: middle;
     }
 
+    .double-diagram .legend-note-title {
+      fill: #e6c76d;
+      font-size: 15px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .double-diagram .legend-note {
+      fill: #adc0b4;
+      font-size: 12px;
+      font-weight: 600;
+      text-anchor: middle;
+    }
+
+    .public-mode.double-public .double-diagram .legend-note {
+      font-size: 11px;
+    }
+
     .double-diagram .champion-line {
       stroke: #35e48a;
       stroke-width: 2.4;
@@ -4031,23 +4049,28 @@
       const rowH = 24;
       const boxH = rowH * 2 + 5;
       const scoreW = 32;
+      const colGap = 40;
       const leftX = [55, 300, 545];
-      const semiX = 790;
-      const rightX = [1840, 1600, 1360];
-      const accessX = 1120;
-      const finalX = 955;
-      const canvasW = 2100;
-      const canvasH = 780;
+      const semi1X = 790;
+      const semi2X = semi1X + boxW + colGap;
+      const semisRowY = 382;
+      const finalX = (semi1X + semi2X + boxW) / 2 - boxW / 2;
+      const grandFinalY = semisRowY + boxH + 85;
+      const thirdPlaceY = grandFinalY + boxH + 90;
+      const accessX = semi2X + boxW + colGap;
+      const rightX2 = accessX + boxW + colGap;
+      const rightX1 = rightX2 + boxW + colGap;
+      const rightX0 = rightX1 + boxW + colGap;
+      const rightX = [rightX0, rightX1, rightX2];
+      const canvasW = rightX0 + boxW + 55;
+      const canvasH = 900;
       const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
       const leftRound2Y = [142, 286, 464, 608];
       const leftRound3Y = [214, 536];
-      const semiY = [258, 506];
       const rightY = [106, 250, 428, 572];
       const rightRound2Y = [142, 286, 464, 608];
       const rightRound3Y = [214, 536];
       const accessY = [258, 506];
-      const grandFinalY = 382;
-      const thirdPlaceY = 640;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4074,10 +4097,12 @@
         `;
       };
 
-      const connector = (x1, y1, x2, y2) => `
-        <path class="line" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
+      const connector = (x1, y1, x2, y2, cls = "line") => `
+        <path class="${cls}" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
       `;
       const straight = (x1, y1, x2, y2, cls = "line") => `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
+      const cornerConnector = (x1, y1, x2, y2, cls = "line") => `<path class="${cls}" d="M${x1} ${y1} H${x2} V${y2}" />`;
+      const connectorV = (x1, y1, x2, y2, cls = "line") => `<path class="${cls}" d="M${x1} ${y1} V${(y1 + y2) / 2} H${x2} V${y2}" />`;
 
       const leftR1 = leftY.map((y, index) => {
         const code = `J${index + 1}`;
@@ -4088,7 +4113,8 @@
         return matchBox(leftX[1], y, boxW, boxH, matchSlot(code, "A", "A definir"), matchSlot(code, "B", "A definir"), code);
       }).join("");
       const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], leftRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const semis = [27, 28].map((codeNumber, index) => matchBox(semiX, semiY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const semiPositions = [semi1X, semi2X];
+      const semis = [27, 28].map((codeNumber, index) => matchBox(semiPositions[index], semisRowY, boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
 
       const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(rightX[1], rightRound2Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
@@ -4100,8 +4126,8 @@
       const leftConnectors = [
         ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
         ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
-        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, semiX, semiY[0] + boxH / 2),
-        connector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, semiX, semiY[1] + boxH / 2)
+        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, semi1X, semisRowY + boxH / 2),
+        cornerConnector(leftX[2] + boxW, leftRound3Y[1] + boxH / 2, semi2X, semisRowY + boxH / 2)
       ].join("");
 
       const rightConnectors = [
@@ -4111,20 +4137,22 @@
         connector(rightX[2], rightRound3Y[1] + boxH / 2, accessX + boxW, accessY[1] + boxH / 2)
       ].join("");
 
-      const semiExitX = semiX + boxW;
-      const semiCenterY = semiY.map(y => y + boxH / 2);
-      const finalEntryY = grandFinalY + boxH / 2;
-      const thirdEntryY = thirdPlaceY + boxH / 2;
-      const corridorFinalTop = (semiY[0] + boxH + grandFinalY) / 2;
-      const corridorFinalBottom = (grandFinalY + boxH + semiY[1]) / 2;
-      const corridorThird = (semiY[1] + boxH + thirdPlaceY) / 2;
+      const semiCenterY = semisRowY + boxH / 2;
+      const semi1ExitX = semi1X + boxW;
+      const semi2ExitX = semi2X + boxW;
+      const semi1BottomX = semi1X + boxW / 2;
+      const semi2BottomX = semi2X + boxW / 2;
+      const semisBottomY = semisRowY + boxH;
+      const finalCenterX = finalX + boxW / 2;
+      const finalBottomY = grandFinalY + boxH;
+      const thirdCorridorY = (finalBottomY + thirdPlaceY) / 2;
       const finalsConnectors = [
-        straight(accessX, semiCenterY[0], semiExitX, semiCenterY[0], "line-feed"),
-        straight(accessX, semiCenterY[1], semiExitX, semiCenterY[1], "line-feed"),
-        `<path class="line" d="M${semiExitX} ${semiCenterY[0]} V${corridorFinalTop} H${finalX} V${finalEntryY}" />`,
-        `<path class="line" d="M${semiExitX} ${semiCenterY[1]} V${corridorFinalBottom} H${finalX} V${finalEntryY}" />`,
-        `<path class="line-soft" d="M${semiExitX} ${semiCenterY[0]} V${corridorThird} H${finalX} V${thirdEntryY}" />`,
-        `<path class="line-soft" d="M${semiExitX} ${semiCenterY[1]} V${corridorThird} H${finalX} V${thirdEntryY}" />`
+        cornerConnector(accessX, accessY[0] + boxH / 2, semi1ExitX, semiCenterY, "line-feed"),
+        connector(semi2ExitX, semiCenterY, accessX, accessY[1] + boxH / 2, "line-feed"),
+        connectorV(semi1BottomX, semisBottomY, finalCenterX, grandFinalY),
+        connectorV(semi2BottomX, semisBottomY, finalCenterX, grandFinalY),
+        `<path class="line-soft" d="M${semi1BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`,
+        `<path class="line-soft" d="M${semi2BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`
       ].join("");
 
       return `
@@ -4136,7 +4164,7 @@
           <text class="legend-text" x="158" y="102">Primeira rodada</text>
           <text class="legend-text" x="405" y="102">Oitavas</text>
           <text class="legend-text" x="652" y="102">Quartas</text>
-          <text class="legend-text" x="880" y="102">Semifinais</text>
+          <text class="legend-text" x="${(semi1X + semi2X + boxW) / 2}" y="102">Semifinais</text>
           <text class="label-text" x="${(accessX + rightX[0] + boxW) / 2}" y="82">Repescagem</text>
           <text class="legend-text" x="${rightX[0] + boxW / 2}" y="102">Primeira rodada</text>
           <text class="legend-text" x="${rightX[1] + boxW / 2}" y="102">Oitavas</text>
@@ -4146,14 +4174,20 @@
           ${leftR1}${leftR2}${leftR3}${semis}
           ${rightR1}${rightR2}${rightR3}${accessMatches}
           ${grandFinal}${thirdPlace}
-          <line class="line champion-line" x1="${finalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${finalX + boxW + 118}" y2="${grandFinalY + boxH / 2}" />
+          <line class="line champion-line" x1="${finalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${finalX + boxW + 30}" y2="${grandFinalY + boxH / 2}" />
           <text class="label-text" x="${finalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
           <text class="small-text" x="${finalX + boxW / 2}" y="${thirdPlaceY - 14}" text-anchor="middle">3o lugar</text>
-          <text class="label-text" x="${finalX + boxW + 154}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
-          <text class="small-text" x="${semiX + boxW / 2}" y="${semiY[0] - 14}" text-anchor="middle">Semi 1</text>
-          <text class="small-text" x="${semiX + boxW / 2}" y="${semiY[1] - 14}" text-anchor="middle">Semi 2</text>
+          <text class="label-text" x="${finalX + boxW + 85}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
+          <text class="small-text" x="${semi1X + boxW / 2}" y="${semisRowY - 14}" text-anchor="middle">Semi 1</text>
+          <text class="small-text" x="${semi2X + boxW / 2}" y="${semisRowY - 14}" text-anchor="middle">Semi 2</text>
           <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[0] - 14}" text-anchor="middle">Acesso semi 1</text>
           <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[1] - 14}" text-anchor="middle">Acesso semi 2</text>
+          <g class="diagram-legend">
+            <text class="legend-note-title" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 46}" text-anchor="middle">Como funciona a repescagem</text>
+            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 70}" text-anchor="middle">Quem perde na Classificatoria nao sai do torneio: cai na Repescagem e tenta voltar.</text>
+            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 90}" text-anchor="middle">"Acesso semi 1/2" e a ultima rodada da Repescagem: quem vence garante vaga na Semifinal, ao lado de quem venceu a Classificatoria.</text>
+            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 110}" text-anchor="middle">Perdeu 2 vezes, esta fora. As semifinais definem a Grande Final (1o lugar) e o duelo de 3o lugar.</text>
+          </g>
         </svg>
       `;
     }    function matchHtml(match, roundIndex, matchIndex) {
@@ -4643,7 +4677,7 @@
         renderAll();
       });
 
-      ["tournamentName", "category", "courts", "matchMinutes", "notes"].forEach(id => {
+      ["tournamentName", "category", "courts", "matchMinutes", "entryFee", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
           persist();
@@ -4652,7 +4686,7 @@
         });
       });
 
-      ["editTournamentName", "editTournamentDate", "editTournamentLocation", "editCategory", "editCourts", "editMatchMinutes", "editNotes"].forEach(id => {
+      ["editTournamentName", "editTournamentDate", "editTournamentLocation", "editCategory", "editCourts", "editMatchMinutes", "editEntryFee", "editNotes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           const settings = getEventEditorSettings();
           setSettings(settings);
