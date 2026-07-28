@@ -12,8 +12,8 @@
       --line: rgba(255, 255, 255, 0.14);
       --text: #f7fff9;
       --muted: #adc0b4;
-      --green: #35e48a;
-      --green-dark: #0f7d4b;
+      --green: #6fbf9a;
+      --green-dark: #203d32;
       --sand: #e6c76d;
       --red: #ff4747;
       --blue: #4bb5ff;
@@ -44,8 +44,8 @@
 
     .app-shell {
       display: grid;
-      grid-template-columns: 430px minmax(0, 1fr);
-      gap: 16px;
+      grid-template-columns: 410px minmax(0, 1fr);
+      gap: 18px;
       min-height: 100vh;
       padding: 16px;
     }
@@ -115,7 +115,7 @@
       padding: 5px 9px;
       border-radius: 999px;
       color: #06100c;
-      background: var(--green);
+      background: var(--sand);
       font-size: 0.78rem;
       font-weight: 900;
       white-space: nowrap;
@@ -263,7 +263,7 @@
 
     .primary {
       color: #06100c;
-      background: var(--green);
+      background: var(--sand);
     }
 
     .secondary {
@@ -304,6 +304,11 @@
       min-height: 40px;
       padding: 0 12px;
       border-radius: 8px;
+    }
+
+    #saveScores {
+      min-width: 172px;
+      box-shadow: 0 12px 28px rgba(230, 199, 109, 0.16);
     }
 
     .stats {
@@ -439,8 +444,8 @@
 
     .double-admin {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
       width: 100%;
       min-width: 0;
       padding: 8px 0 20px;
@@ -448,9 +453,9 @@
 
     .phase-panel {
       display: grid;
-      gap: 10px;
+      gap: 14px;
       align-content: start;
-      padding: 12px;
+      padding: 16px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.045);
@@ -464,6 +469,7 @@
 
     .phase-panel .match {
       min-height: 0;
+      gap: 10px;
     }
 
     .phase-panel .match::after {
@@ -518,7 +524,7 @@
       display: grid;
       gap: 8px;
       min-height: 118px;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.08);
@@ -545,20 +551,16 @@
     }
 
     .match-save {
-      min-height: 30px;
-      border-radius: 6px;
-      color: #06100c;
-      background: var(--green);
-      font-size: 0.8rem;
+      display: none;
     }
 
     .team {
       display: grid;
-      grid-template-columns: 1fr 50px;
+      grid-template-columns: minmax(0, 1fr) 54px;
       align-items: center;
       gap: 8px;
       min-height: 36px;
-      padding: 7px 8px;
+      padding: 8px 9px;
       border-radius: 6px;
       background: rgba(0, 0, 0, 0.25);
     }
@@ -581,6 +583,7 @@
       padding: 0 5px;
       text-align: center;
       font-weight: 900;
+      background: rgba(255, 255, 255, 0.07);
     }
 
     .bye {
@@ -2098,7 +2101,6 @@
             <span class="team-name ${match.teamB ? "" : "bye"}">${teamName(match.teamB)}</span>
             <input class="score-input" type="number" min="0" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
-          ${isPublic ? "" : `<button class="match-save" type="button" data-save-match="${roundIndex}-${matchIndex}">Salvar jogo</button>`}
         </article>
       `;
     }
