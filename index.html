@@ -1037,7 +1037,7 @@
 
     .double-section-rounds {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 10px;
       min-width: 0;
     }
@@ -1111,13 +1111,13 @@
     }
 
     .public-mode.double-public .phase-panel .team {
-      min-height: 25px;
+      min-height: 34px;
       padding: 3px 5px;
       gap: 5px;
     }
 
     .public-mode.double-public .phase-panel .team-name {
-      font-size: clamp(0.54rem, 0.66vw, 0.72rem);
+      font-size: clamp(0.58rem, 0.68vw, 0.74rem);
     }
 
     .public-mode.double-public .phase-panel .score-input {
@@ -1219,11 +1219,11 @@
 
     .team {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 54px;
+      grid-template-columns: minmax(0, 1fr) 46px;
       align-items: center;
-      gap: 8px;
-      min-height: 36px;
-      padding: 8px 9px;
+      gap: 6px;
+      min-height: 42px;
+      padding: 7px 8px;
       border-radius: 6px;
       background: rgba(0, 0, 0, 0.25);
     }
@@ -1236,13 +1236,16 @@
     .team-name {
       min-width: 0;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
       font-weight: 800;
     }
 
     .score-input {
-      min-height: 30px;
+      min-height: 28px;
       padding: 0 5px;
       text-align: center;
       font-weight: 900;
