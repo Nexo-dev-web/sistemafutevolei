@@ -2025,7 +2025,7 @@
             <p class="muted">Duplas, tabela, placares e telao.</p>
           </div>
         </div>
-        <span class="pill" id="scorePill">21 pts</span>
+        <span class="pill" id="scorePill">18 pts</span>
       </div>
 
       <div class="mode-tabs">
@@ -2069,14 +2069,6 @@
       </div>
 
       <div class="field-row">
-        <label class="field">Jogo ate
-          <select id="pointsToWin">
-            <option value="11">11 pontos</option>
-            <option value="15">15 pontos</option>
-            <option value="18" selected>18 pontos</option>
-            <option value="21">21 pontos</option>
-          </select>
-        </label>
         <label class="field">Tempo estimado
           <select id="matchMinutes">
             <option value="12">12 min</option>
@@ -2226,7 +2218,7 @@
                   <input id="editTournamentLocation" type="text" placeholder="Local do evento">
                 </label>
               </div>
-              <div class="field-row">
+              <div>
                 <label class="field">Categoria
                   <select id="editCategory">
                     <option>Iniciante</option>
@@ -2234,14 +2226,6 @@
                     <option>Avancado</option>
                     <option>Misto</option>
                     <option>Open</option>
-                  </select>
-                </label>
-                <label class="field">Jogo ate
-                  <select id="editPointsToWin">
-                    <option value="11">11 pontos</option>
-                    <option value="15">15 pontos</option>
-                    <option value="18">18 pontos</option>
-                    <option value="21">21 pontos</option>
                   </select>
                 </label>
               </div>
@@ -2483,7 +2467,7 @@
         location: document.getElementById("tournamentLocation")?.value.trim() || "",
         category: document.getElementById("category")?.value || "Intermediario",
         courts: Number(document.getElementById("courts")?.value || 1),
-        points: Number(document.getElementById("pointsToWin")?.value || 21),
+        points: 18,
         matchMinutes: Number(document.getElementById("matchMinutes")?.value || 15),
         model: "random",
         notes: document.getElementById("notes")?.value.trim() || ""
@@ -2497,7 +2481,6 @@
       document.getElementById("tournamentLocation").value = s.location || "";
       document.getElementById("category").value = s.category;
       document.getElementById("courts").value = s.courts;
-      document.getElementById("pointsToWin").value = s.points;
       document.getElementById("matchMinutes").value = s.matchMinutes;
       document.getElementById("notes").value = s.notes;
     }
@@ -2510,7 +2493,6 @@
         editTournamentLocation: s.location || "",
         editCategory: s.category,
         editCourts: s.courts,
-        editPointsToWin: s.points,
         editMatchMinutes: s.matchMinutes,
         editNotes: s.notes
       };
@@ -2527,7 +2509,7 @@
         location: document.getElementById("editTournamentLocation")?.value.trim() || "",
         category: document.getElementById("editCategory")?.value || "Intermediario",
         courts: Number(document.getElementById("editCourts")?.value || 1),
-        points: Number(document.getElementById("editPointsToWin")?.value || 18),
+        points: 18,
         matchMinutes: Number(document.getElementById("editMatchMinutes")?.value || 15),
         model: "random",
         notes: document.getElementById("editNotes")?.value.trim() || ""
@@ -2942,7 +2924,7 @@
       if (!tournament) return;
       tournament.rounds.forEach((round, roundIndex) => {
         round.matches.forEach((match, matchIndex) => {
-          const targetPoints = Number(tournament.points || 21);
+          const targetPoints = 18;
           let scoreA = Number(match.scoreA);
           let scoreB = Number(match.scoreB);
           if (match.scoreA !== "" && match.scoreB !== "") {
@@ -3572,7 +3554,7 @@
           const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
           match[input.dataset.field] = input.value;
           if (match.scoreA !== "" && match.scoreB !== "") {
-            const [scoreA, scoreB] = cleanScorePair(match.scoreA, match.scoreB, tournament.points);
+            const [scoreA, scoreB] = cleanScorePair(match.scoreA, match.scoreB, 18);
             match.scoreA = String(scoreA);
             match.scoreB = String(scoreB);
             const container = input.closest(".match");
@@ -3708,7 +3690,7 @@
             <span class="pill sand">${match.roundName}</span>
           </div>
           <strong>${teamName(match.teamA)} x ${teamName(match.teamB)}</strong>
-          <span class="muted">${match.status} - jogo ate ${tournament?.points || 21} pontos</span>
+          <span class="muted">${match.status} - jogo ate 18 pontos</span>
         </article>
       `).join("") : '<div class="empty">Nenhum jogo pendente.</div>';
 
@@ -3769,10 +3751,10 @@
       document.getElementById("matchCount").textContent = matches.length;
       document.getElementById("nextMatchLabel").textContent = next ? "Pronto" : "-";
       document.getElementById("refreshLabel").textContent = isPublic ? "30s" : "manual";
-      document.getElementById("scorePill").textContent = `${settings.points || 21} pts`;
+      document.getElementById("scorePill").textContent = "18 pts";
       document.getElementById("mainTitle").textContent = settings.name || "Chaveamento";
       document.getElementById("publicTitle").textContent = settings.name || "Chaveamento";
-      const subtitle = `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate ${settings.points || 21} pontos`;
+      const subtitle = `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate 18 pontos`;
       document.getElementById("subtitle").textContent = subtitle;
       document.getElementById("publicSubtitle").textContent = subtitle;
       document.getElementById("lastSync").textContent = tournament?.updatedAt
@@ -3832,7 +3814,7 @@
       }
 
       setText("dashTournament", settings.name || "Torneio");
-      setText("dashSubtitle", `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate ${settings.points || 21} pontos`);
+      setText("dashSubtitle", `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate 18 pontos`);
       setText("dashTeams", `${validTeams}/${teamTargetCount}`);
       setText("dashCourts", `${settings.courts || 0} quadras - ${settings.matchMinutes || 0} min por jogo`);
       setText("dashMatches", matches.length);
@@ -4126,7 +4108,7 @@
         renderAll();
       });
 
-      ["tournamentName", "tournamentDate", "tournamentLocation", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
+      ["tournamentName", "tournamentDate", "tournamentLocation", "category", "courts", "matchMinutes", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
           persist();
@@ -4135,7 +4117,7 @@
         });
       });
 
-      ["editTournamentName", "editTournamentDate", "editTournamentLocation", "editCategory", "editCourts", "editPointsToWin", "editMatchMinutes", "editNotes"].forEach(id => {
+      ["editTournamentName", "editTournamentDate", "editTournamentLocation", "editCategory", "editCourts", "editMatchMinutes", "editNotes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           const settings = getEventEditorSettings();
           setSettings(settings);
