@@ -77,10 +77,30 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: 390px 168px minmax(0, 1fr);
+      grid-template-columns: 168px 390px minmax(0, 1fr);
       gap: 18px;
       min-height: 100vh;
       padding: 16px;
+    }
+
+    body.menu-collapsed .app-shell {
+      grid-template-columns: 58px 390px minmax(0, 1fr);
+    }
+
+    body:not(.show-admin-panel) .app-shell {
+      grid-template-columns: 168px minmax(0, 1fr);
+    }
+
+    body.menu-collapsed:not(.show-admin-panel) .app-shell {
+      grid-template-columns: 58px minmax(0, 1fr);
+    }
+
+    body:not(.show-admin-panel) aside {
+      display: none;
+    }
+
+    body.menu-collapsed main {
+      grid-column: auto;
     }
 
     aside, main, .panel {
@@ -193,8 +213,8 @@
     .nav-tabs {
       position: sticky;
       top: 16px;
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
       align-self: start;
       gap: 8px;
       height: calc(100vh - 32px);
@@ -206,6 +226,16 @@
         rgba(8, 17, 14, 0.94);
       box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
       backdrop-filter: blur(14px);
+    }
+
+    .menu-toggle {
+      flex: 0 0 auto;
+      min-height: 42px;
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(230, 199, 109, 0.36);
+      font-size: 1.05rem;
     }
 
     .nav-tabs button, .mode-tabs button {
@@ -227,8 +257,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex: 1 1 0;
       padding: 0 12px;
       text-align: center;
+    }
+
+    body.menu-collapsed .nav-tabs {
+      padding: 8px;
+    }
+
+    body.menu-collapsed .nav-tabs button {
+      padding: 0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 0.72rem;
+    }
+
+    body.menu-collapsed .menu-toggle {
+      font-size: 1rem;
     }
 
     .mode-tabs {
@@ -1253,7 +1299,12 @@
     }
 
     @media (max-width: 1120px) {
-      .app-shell { grid-template-columns: 1fr; }
+      .app-shell,
+      body.menu-collapsed .app-shell,
+      body:not(.show-admin-panel) .app-shell,
+      body.menu-collapsed:not(.show-admin-panel) .app-shell {
+        grid-template-columns: 1fr;
+      }
       aside {
         position: static;
         height: auto;
@@ -1262,9 +1313,12 @@
       }
       .nav-tabs {
         position: static;
+        display: grid;
         grid-template-columns: repeat(3, 1fr);
         height: auto;
       }
+      .nav-tabs button { flex: initial; }
+      .menu-toggle { display: none; }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .control-summary { grid-template-columns: repeat(2, 1fr); }
       .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1301,6 +1355,16 @@
 </head>
 <body>
   <div class="app-shell">
+    <nav class="nav-tabs">
+      <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">&lt;</button>
+      <button class="active" type="button" data-view="bracketView">Chave</button>
+      <button type="button" data-view="queueView">Jogos</button>
+      <button type="button" data-view="rankingView">Ranking</button>
+      <button type="button" data-view="financeView">Financeiro</button>
+      <button type="button" data-view="uniformView">Uniformes</button>
+      <button type="button" data-view="settingsView">Dashboard</button>
+    </nav>
+
     <aside>
       <div class="brand">
         <div class="brand-main">
@@ -1407,15 +1471,6 @@
         </div>
         <span class="clock" id="publicClock"></span>
       </div>
-
-      <nav class="nav-tabs">
-        <button class="active" type="button" data-view="bracketView">Chave</button>
-        <button type="button" data-view="queueView">Jogos</button>
-        <button type="button" data-view="rankingView">Ranking</button>
-        <button type="button" data-view="financeView">Financeiro</button>
-        <button type="button" data-view="uniformView">Uniformes</button>
-        <button type="button" data-view="settingsView">Dashboard</button>
-      </nav>
 
       <section class="view active" id="bracketView">
         <div class="topbar">
@@ -1596,6 +1651,7 @@
     let finances = {};
     let uniforms = {};
     let tournament = null;
+    let menuCollapsed = false;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
 
@@ -2239,7 +2295,7 @@
     }
 
     function persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed }));
     }
 
     function loadState() {
@@ -2256,6 +2312,7 @@
         tournament = state.tournament || null;
         mode = state.mode || "single";
         activeView = state.activeView || "bracketView";
+        menuCollapsed = Boolean(state.menuCollapsed);
       } catch {
         loadSample(true);
       }
@@ -2722,6 +2779,13 @@
       renderBracketModelHelp();
       renderModeHelp();
       requestAnimationFrame(fitPublicBracket);
+      document.body.classList.toggle("show-admin-panel", activeView === "bracketView" && !isPublic);
+      document.body.classList.toggle("menu-collapsed", menuCollapsed);
+      const toggle = document.getElementById("toggleMenu");
+      if (toggle) {
+        toggle.textContent = menuCollapsed ? ">" : "<";
+        toggle.title = menuCollapsed ? "Mostrar menu" : "Ocultar menu";
+      }
       document.querySelectorAll("[data-mode]").forEach(tab => tab.classList.toggle("active", tab.dataset.mode === mode));
       document.querySelectorAll("[data-view]").forEach(tab => tab.classList.toggle("active", tab.dataset.view === activeView));
       document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === activeView));
@@ -2736,6 +2800,11 @@
 
       document.getElementById("generate").addEventListener("click", createTournament);
       document.getElementById("saveScores").addEventListener("click", syncWinners);
+      document.getElementById("toggleMenu").addEventListener("click", () => {
+        menuCollapsed = !menuCollapsed;
+        persist();
+        renderAll();
+      });
       document.getElementById("saveFinance").addEventListener("click", () => {
         persist();
         renderFinance();
