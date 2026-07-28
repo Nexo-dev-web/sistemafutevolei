@@ -736,6 +736,17 @@
       margin-bottom: 14px;
     }
 
+    .filter-bar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) minmax(180px, 240px);
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
     .control-card {
       min-height: 88px;
       padding: 13px;
@@ -2107,7 +2118,7 @@
       }
       .bi-split { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 1fr; }
-      .field-row, .actions, .mode-tabs, .team-row, .event-form-grid { grid-template-columns: 1fr; }
+      .field-row, .actions, .mode-tabs, .team-row, .event-form-grid, .filter-bar { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr; }
       .topbar-actions { justify-content: stretch; }
       .topbar-actions button { flex: 1; }
@@ -2177,15 +2188,6 @@
       <label class="field">Nome do torneio
         <input id="tournamentName" type="text">
       </label>
-
-      <div class="field-row">
-        <label class="field">Data
-          <input id="tournamentDate" type="date">
-        </label>
-        <label class="field">Local
-          <input id="tournamentLocation" type="text" placeholder="Local do evento">
-        </label>
-      </div>
 
       <div class="field-row">
         <label class="field">Categoria
@@ -2414,6 +2416,16 @@
           <div class="control-card"><span>Em aberto</span><strong id="financeOpen">R$ 0,00</strong></div>
           <div class="control-card"><span>Duplas pagas</span><strong id="financePaidCount">0/0</strong></div>
         </div>
+        <div class="filter-bar">
+          <input id="financeSearch" type="search" placeholder="Filtrar por dupla, forma, data ou observacao">
+          <select id="financeStatusFilter">
+            <option value="">Todos os status</option>
+            <option>Aberto</option>
+            <option>Pago</option>
+            <option>Parcial</option>
+            <option>Cortesia</option>
+          </select>
+        </div>
         <div class="panel">
           <div class="table-scroll">
             <table class="control-table">
@@ -2441,6 +2453,16 @@
           <div class="control-card"><span>Camisas P/M/G/GG</span><strong id="uniformShirts">0/0/0/0</strong></div>
           <div class="control-card"><span>Shorts P/M/G/GG</span><strong id="uniformShorts">0/0/0/0</strong></div>
           <div class="control-card"><span>Entregues</span><strong id="uniformDelivered">0/0</strong></div>
+        </div>
+        <div class="filter-bar">
+          <input id="uniformSearch" type="search" placeholder="Filtrar por dupla, atleta, numero ou observacao">
+          <select id="uniformStatusFilter">
+            <option value="">Todos os status</option>
+            <option>Pendente</option>
+            <option>Separado</option>
+            <option>Entregue</option>
+            <option>Trocar</option>
+          </select>
         </div>
         <div class="panel">
           <div class="table-scroll">
@@ -2548,6 +2570,12 @@
     let scoreSaveTimer = null;
     let publicScoreSnapshot = "";
     let publicLiveMatchId = "";
+    const filters = {
+      financeSearch: "",
+      financeStatus: "",
+      uniformSearch: "",
+      uniformStatus: ""
+    };
 
     const samplePairs = [
       ["Andre", "Lucas"],
@@ -2604,8 +2632,8 @@
     function getSettings() {
       return {
         name: document.getElementById("tournamentName")?.value.trim() || "Torneio de Futevolei",
-        date: document.getElementById("tournamentDate")?.value || "",
-        location: document.getElementById("tournamentLocation")?.value.trim() || "",
+        date: document.getElementById("tournamentDate")?.value || tournament?.date || "",
+        location: document.getElementById("tournamentLocation")?.value.trim() || tournament?.location || "",
         category: document.getElementById("category")?.value || "Intermediario",
         courts: Number(document.getElementById("courts")?.value || 1),
         points: 18,
@@ -2617,13 +2645,19 @@
 
     function setSettings(settings) {
       const s = { ...defaultSettings(), ...settings };
-      document.getElementById("tournamentName").value = s.name;
-      document.getElementById("tournamentDate").value = s.date || "";
-      document.getElementById("tournamentLocation").value = s.location || "";
-      document.getElementById("category").value = s.category;
-      document.getElementById("courts").value = s.courts;
-      document.getElementById("matchMinutes").value = s.matchMinutes;
-      document.getElementById("notes").value = s.notes;
+      const fields = {
+        tournamentName: s.name,
+        tournamentDate: s.date || "",
+        tournamentLocation: s.location || "",
+        category: s.category,
+        courts: s.courts,
+        matchMinutes: s.matchMinutes,
+        notes: s.notes
+      };
+      Object.entries(fields).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+        if (field) field.value = value;
+      });
     }
 
     function setEventEditor(settings) {
@@ -4131,13 +4165,22 @@
       let paid = 0;
       let paidCount = 0;
 
-      body.innerHTML = rows.length ? rows.map(record => {
+      rows.forEach(record => {
         const value = moneyValue(record.value);
         total += value;
         if (record.status === "Pago") {
           paid += value;
           paidCount += 1;
         }
+      });
+
+      const search = filters.financeSearch.toLowerCase();
+      const visibleRows = rows.filter(record => {
+        const haystack = [record.team, record.status, record.value, record.method, record.date, record.note].join(" ").toLowerCase();
+        return (!filters.financeStatus || record.status === filters.financeStatus) && (!search || haystack.includes(search));
+      });
+
+      body.innerHTML = visibleRows.length ? visibleRows.map(record => {
         return `
           <tr>
             <td><input value="${escapeAttr(record.team)}" placeholder="Nome da dupla" data-finance="${record.id}" data-field="team"></td>
@@ -4157,7 +4200,7 @@
             <td><button class="delete-row-btn" type="button" title="Apagar esta linha do financeiro" data-remove-finance="${record.id}">Apagar</button></td>
           </tr>
         `;
-      }).join("") : '<tr><td colspan="7">Adicione linhas para controlar pagamentos.</td></tr>';
+      }).join("") : `<tr><td colspan="7">${rows.length ? "Nenhuma linha encontrada com esse filtro." : "Adicione linhas para controlar pagamentos."}</td></tr>`;
 
       document.getElementById("financeTotal").textContent = formatMoney(total);
       document.getElementById("financePaid").textContent = formatMoney(paid);
@@ -4175,13 +4218,23 @@
       let athletes = 0;
       let delivered = 0;
 
-      body.innerHTML = rows.length ? rows.flatMap(team => [0, 1].map(index => {
+      const allRows = rows.flatMap(team => [0, 1].map(index => {
         const record = uniformRecord(team, index);
         const athlete = index === 0 ? team.a : team.b;
         athletes += 1;
         if (shirtTotals[record.shirt] !== undefined) shirtTotals[record.shirt] += 1;
         if (shortTotals[record.shorts] !== undefined) shortTotals[record.shorts] += 1;
         if (record.status === "Entregue") delivered += 1;
+        return { team, index, record, athlete };
+      }));
+
+      const search = filters.uniformSearch.toLowerCase();
+      const visibleRows = allRows.filter(item => {
+        const haystack = [teamName(item.team), item.athlete, item.record.shirt, item.record.shorts, item.record.number, item.record.status, item.record.note].join(" ").toLowerCase();
+        return (!filters.uniformStatus || item.record.status === filters.uniformStatus) && (!search || haystack.includes(search));
+      });
+
+      body.innerHTML = visibleRows.length ? visibleRows.map(({ team, index, record, athlete }) => {
         return `
           <tr>
             <th>${teamName(team)}</th>
@@ -4205,7 +4258,7 @@
             <td><input value="${escapeAttr(record.note)}" placeholder="Ex: preferencia, troca, falta..." data-uniform="${team.id}" data-athlete="${index}" data-field="note"></td>
           </tr>
         `;
-      })).join("") : '<tr><td colspan="7">Cadastre duplas para controlar uniformes.</td></tr>';
+      }).join("") : `<tr><td colspan="7">${rows.length ? "Nenhum uniforme encontrado com esse filtro." : "Cadastre duplas para controlar uniformes."}</td></tr>`;
 
       document.getElementById("uniformAthletes").textContent = athletes;
       document.getElementById("uniformShirts").textContent = sizeOrder.map(size => shirtTotals[size]).join("/");
@@ -4332,8 +4385,24 @@
         financeRows().push(emptyFinanceRow());
         renderFinance();
       });
+      document.getElementById("financeSearch").addEventListener("input", event => {
+        filters.financeSearch = event.target.value;
+        renderFinance();
+      });
+      document.getElementById("financeStatusFilter").addEventListener("change", event => {
+        filters.financeStatus = event.target.value;
+        renderFinance();
+      });
       document.getElementById("saveUniforms").addEventListener("click", () => {
         persist();
+        renderUniforms();
+      });
+      document.getElementById("uniformSearch").addEventListener("input", event => {
+        filters.uniformSearch = event.target.value;
+        renderUniforms();
+      });
+      document.getElementById("uniformStatusFilter").addEventListener("change", event => {
+        filters.uniformStatus = event.target.value;
         renderUniforms();
       });
 
@@ -4384,7 +4453,7 @@
         renderAll();
       });
 
-      ["tournamentName", "tournamentDate", "tournamentLocation", "category", "courts", "matchMinutes", "notes"].forEach(id => {
+      ["tournamentName", "category", "courts", "matchMinutes", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
           persist();
