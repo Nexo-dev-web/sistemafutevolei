@@ -1907,6 +1907,7 @@
             <p class="muted" id="subtitle">Gere a tabela para visualizar os confrontos.</p>
           </div>
           <div class="topbar-actions">
+            <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
             <button class="secondary" type="button" id="openPublic">Abrir telao</button>
             <button class="primary" type="button" id="saveScores">Salvar placares</button>
           </div>
@@ -2113,6 +2114,7 @@
     let uniforms = {};
     let tournament = null;
     let menuCollapsed = false;
+    let adminPanelHidden = false;
     let teamTargetCount = 16;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
@@ -2767,7 +2769,7 @@
     }
 
     function persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed, teamTargetCount }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ teams, finances, uniforms, tournament, mode, activeView, menuCollapsed, adminPanelHidden, teamTargetCount }));
     }
 
     function loadState() {
@@ -2802,6 +2804,7 @@
         mode = state.mode || "single";
         activeView = state.activeView || "bracketView";
         menuCollapsed = Boolean(state.menuCollapsed);
+        adminPanelHidden = Boolean(state.adminPanelHidden);
         teamTargetCount = Number(state.teamTargetCount) || Math.max(16, teams.length || 16);
         if (mode === "double") teamTargetCount = 16;
       } catch {
@@ -3363,12 +3366,17 @@
       renderClock();
       renderModeHelp();
       requestAnimationFrame(fitPublicBracket);
-      document.body.classList.toggle("show-admin-panel", activeView === "bracketView" && !isPublic);
+      document.body.classList.toggle("show-admin-panel", activeView === "bracketView" && !isPublic && !adminPanelHidden);
       document.body.classList.toggle("menu-collapsed", menuCollapsed);
       const toggle = document.getElementById("toggleMenu");
       if (toggle) {
         toggle.textContent = menuCollapsed ? ">" : "<";
         toggle.title = menuCollapsed ? "Mostrar menu" : "Ocultar menu";
+      }
+      const adminToggle = document.getElementById("toggleAdminPanel");
+      if (adminToggle) {
+        adminToggle.textContent = adminPanelHidden ? "Mostrar gestor" : "Ocultar gestor";
+        adminToggle.title = adminPanelHidden ? "Mostrar painel de cadastro" : "Ocultar painel de cadastro";
       }
       document.querySelectorAll("[data-mode]").forEach(tab => tab.classList.toggle("active", tab.dataset.mode === mode));
       document.querySelectorAll("[data-view]").forEach(tab => tab.classList.toggle("active", tab.dataset.view === activeView));
@@ -3392,6 +3400,11 @@
       document.getElementById("saveScores").addEventListener("click", syncWinners);
       document.getElementById("toggleMenu").addEventListener("click", () => {
         menuCollapsed = !menuCollapsed;
+        persist();
+        renderAll();
+      });
+      document.getElementById("toggleAdminPanel").addEventListener("click", () => {
+        adminPanelHidden = !adminPanelHidden;
         persist();
         renderAll();
       });
