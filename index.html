@@ -1421,7 +1421,10 @@
         <div class="topbar">
           <div>
             <h2>Controle financeiro</h2>
-            <p class="muted">Acompanhe inscricao paga, valor, forma de pagamento e observacoes por dupla.</p>
+            <p class="muted">Preenchimento manual: marque uma dupla por vez conforme o pagamento for confirmado.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="primary" type="button" id="saveFinance">Salvar financeiro</button>
           </div>
         </div>
         <div class="control-summary">
@@ -1446,7 +1449,10 @@
         <div class="topbar">
           <div>
             <h2>Controle de uniformes</h2>
-            <p class="muted">Registre camisa, short e entrega para cada atleta das duplas cadastradas.</p>
+            <p class="muted">Preenchimento manual: escolha tamanho, numero e entrega atleta por atleta.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="primary" type="button" id="saveUniforms">Salvar uniformes</button>
           </div>
         </div>
         <div class="control-summary">
@@ -2633,6 +2639,14 @@
 
       document.getElementById("generate").addEventListener("click", createTournament);
       document.getElementById("saveScores").addEventListener("click", syncWinners);
+      document.getElementById("saveFinance").addEventListener("click", () => {
+        persist();
+        renderFinance();
+      });
+      document.getElementById("saveUniforms").addEventListener("click", () => {
+        persist();
+        renderUniforms();
+      });
 
       document.getElementById("sample").addEventListener("click", () => loadSample(false));
 
@@ -2683,7 +2697,6 @@
         const record = financeRecord(team);
         if (!record) return;
         record[event.target.dataset.field] = event.target.value;
-        persist();
         renderFinance();
       });
 
@@ -2694,7 +2707,6 @@
         const record = uniformRecord(team, Number(event.target.dataset.athlete));
         if (!record) return;
         record[event.target.dataset.field] = event.target.value;
-        persist();
         renderUniforms();
       });
     }
