@@ -112,6 +112,7 @@
     }
 
     aside {
+      grid-column: 2;
       position: sticky;
       top: 16px;
       align-self: start;
@@ -144,9 +145,18 @@
     }
 
     main {
+      grid-column: 3;
       min-width: 0;
       overflow: hidden;
       padding: 16px;
+    }
+
+    body:not(.show-admin-panel) main {
+      grid-column: 2;
+    }
+
+    body.menu-collapsed:not(.show-admin-panel) main {
+      grid-column: 2;
     }
 
     .brand {
@@ -1306,10 +1316,16 @@
         grid-template-columns: 1fr;
       }
       aside {
+        grid-column: auto;
         position: static;
         height: auto;
         max-height: none;
         overflow: visible;
+      }
+      main,
+      body:not(.show-admin-panel) main,
+      body.menu-collapsed:not(.show-admin-panel) main {
+        grid-column: auto;
       }
       .nav-tabs {
         position: static;
