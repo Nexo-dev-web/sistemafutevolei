@@ -59,6 +59,10 @@
     }
 
     aside {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      height: calc(100vh - 32px);
       max-height: calc(100vh - 32px);
       overflow: auto;
       padding: 18px;
@@ -261,7 +265,7 @@
 
     .aside-actions-dock {
       position: sticky;
-      bottom: -18px;
+      bottom: 0;
       z-index: 40;
       margin: 16px -18px -18px;
       padding: 12px 18px 14px;
@@ -1064,7 +1068,11 @@
 
     @media (max-width: 1120px) {
       .app-shell { grid-template-columns: 1fr; }
-      aside { max-height: none; }
+      aside {
+        position: static;
+        height: auto;
+        max-height: none;
+      }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .grid-2 { grid-template-columns: 1fr; }
     }
