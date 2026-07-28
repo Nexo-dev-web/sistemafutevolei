@@ -689,7 +689,7 @@
     }
 
     .public-mode .bracket-wrap {
-      height: calc(100vh - 160px);
+      height: calc(100vh - 132px);
       min-height: 0;
       overflow: hidden;
       padding: 6px 0 0;
@@ -704,6 +704,10 @@
       margin-bottom: 6px;
       font-size: 0.78rem;
       opacity: 0.78;
+    }
+
+    .public-mode.double-public #lastSync {
+      display: none;
     }
 
     .public-mode .match {
@@ -798,11 +802,12 @@
       grid-template-columns: 1fr auto auto auto;
       gap: 12px;
       align-items: center;
-      padding: 10px 0 16px;
+      padding: 6px 0 10px;
     }
 
     .public-mode .public-banner h2 {
-      font-size: clamp(1.8rem, 3vw, 3.2rem);
+      margin-bottom: 4px;
+      font-size: clamp(1.25rem, 2.2vw, 2.2rem);
       line-height: 1;
       text-transform: uppercase;
       text-shadow: 0 0 22px rgba(53, 228, 138, 0.28);
@@ -810,6 +815,7 @@
     }
 
     .public-mode .public-banner .muted {
+      font-size: 0.78rem;
       animation: titleSlide 850ms ease both;
     }
 
@@ -2053,10 +2059,14 @@
       const bracket = document.getElementById("bracket");
       if (!wrap || !bracket) return;
       bracket.style.setProperty("--public-scale", "1");
-      const naturalWidth = bracket.scrollWidth || 1;
-      const naturalHeight = bracket.scrollHeight || 1;
-      const availableWidth = Math.max(wrap.clientWidth - 10, 1);
-      const availableHeight = Math.max(wrap.clientHeight - 10, 1);
+      const svg = bracket.querySelector("svg");
+      const viewBox = svg?.viewBox?.baseVal;
+      const naturalWidth = viewBox?.width || bracket.scrollWidth || 1;
+      const naturalHeight = viewBox?.height || bracket.scrollHeight || 1;
+      const top = wrap.getBoundingClientRect().top;
+      const availableWidth = Math.max(window.innerWidth - 28, 1);
+      const availableHeight = Math.max(window.innerHeight - top - 12, 1);
+      wrap.style.height = `${availableHeight}px`;
       const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.18);
       bracket.style.setProperty("--public-scale", Math.max(scale, 0.2).toFixed(3));
     }
