@@ -939,6 +939,17 @@
       background: rgba(255, 255, 255, 0.035);
     }
 
+    .insight-list li div {
+      display: grid;
+      gap: 3px;
+    }
+
+    .insight-list li div span {
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
     .insight-dot {
       width: 20px;
       height: 20px;
@@ -2378,7 +2389,7 @@
             </div>
           </div>
           <div class="bi-card bi-panel full">
-            <h3>Pontos de atencao</h3>
+            <h3>Ações rápidas</h3>
             <ul class="insight-list" id="dashInsights"></ul>
           </div>
         </div>
@@ -3803,9 +3814,22 @@
       const uniformPct = pct(uniformDelivered, uniformAthletes);
       const progressPct = pct(finished, matches.length);
       const insights = [];
-      insights.push(`<li><span class="insight-dot"></span><div><b>Proximo:</b> ${next ? `${escapeAttr(teamName(next.teamA))} x ${escapeAttr(teamName(next.teamB))}` : "Nenhum jogo liberado."}</div></li>`);
-      insights.push(`<li><span class="insight-dot"></span><div><b>Financeiro:</b> ${formatMoney(financeOpen)} em aberto.</div></li>`);
-      insights.push(`<li><span class="insight-dot"></span><div><b>Uniformes:</b> faltam ${uniformPending} registros.</div></li>`);
+      if (next) {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Próximo jogo</b><span>${escapeAttr(teamName(next.teamA))} x ${escapeAttr(teamName(next.teamB))}</span></div></li>`);
+      } else {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Jogos</b><span>Nenhum confronto pronto agora.</span></div></li>`);
+      }
+      if (financeTotal > 0 && financeOpen > 0) {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Pagamentos</b><span>${formatMoney(financeOpen)} ainda em aberto.</span></div></li>`);
+      } else if (financeTotal === 0 && financialRows.length) {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Pagamentos</b><span>Preencha os valores das duplas no financeiro.</span></div></li>`);
+      }
+      if (uniformPending > 0) {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Uniformes</b><span>Faltam ${uniformPending} atletas para conferir tamanho/status.</span></div></li>`);
+      }
+      if (!insights.length) {
+        insights.push(`<li><span class="insight-dot"></span><div><b>Tudo certo</b><span>Nenhuma ação pendente no momento.</span></div></li>`);
+      }
 
       setText("dashTournament", settings.name || "Torneio");
       setText("dashSubtitle", `${settings.category || "Categoria"} - ${modeLabel(tournament?.mode || mode)} - jogos ate ${settings.points || 21} pontos`);
