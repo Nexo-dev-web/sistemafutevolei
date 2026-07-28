@@ -1353,6 +1353,12 @@
       min-height: calc(100vh - 148px);
     }
 
+    .event-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
     .panel {
       padding: 14px;
       min-width: 0;
@@ -1926,7 +1932,7 @@
       }
       .bi-split { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 1fr; }
-      .field-row, .actions, .mode-tabs, .team-row { grid-template-columns: 1fr; }
+      .field-row, .actions, .mode-tabs, .team-row, .event-form-grid { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr; }
       .topbar-actions { justify-content: stretch; }
       .topbar-actions button { flex: 1; }
@@ -1968,6 +1974,7 @@
       <button class="active" type="button" data-view="bracketView" data-icon="🏆" aria-label="Chave" title="Chave">Chave</button>
       <button type="button" data-view="queueView" data-icon="▶" aria-label="Jogos" title="Jogos">Jogos</button>
       <button type="button" data-view="rankingView" data-icon="★" aria-label="Ranking" title="Ranking">Ranking</button>
+      <button type="button" data-view="eventView" data-icon="⚙" aria-label="Torneio" title="Torneio">Torneio</button>
       <button type="button" data-view="financeView" data-icon="$" aria-label="Financeiro" title="Financeiro">Financeiro</button>
       <button type="button" data-view="uniformView" data-icon="👕" aria-label="Uniformes" title="Uniformes">Uniformes</button>
       <button type="button" data-view="settingsView" data-icon="📈" aria-label="Dashboard" title="Dashboard">Dashboard</button>
@@ -2156,6 +2163,77 @@
             </thead>
             <tbody id="rankingBody"></tbody>
           </table>
+        </div>
+      </section>
+
+      <section class="view" id="eventView">
+        <div class="topbar">
+          <div>
+            <h2>Informações do torneio</h2>
+            <p class="muted">Edite os dados principais do evento.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="primary" type="button" id="saveEventInfo">Salvar informações</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="event-form-grid">
+            <div>
+              <label class="field">Nome do torneio
+                <input id="editTournamentName" type="text">
+              </label>
+              <div class="field-row">
+                <label class="field">Data
+                  <input id="editTournamentDate" type="date">
+                </label>
+                <label class="field">Local
+                  <input id="editTournamentLocation" type="text" placeholder="Local do evento">
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field">Categoria
+                  <select id="editCategory">
+                    <option>Iniciante</option>
+                    <option>Intermediario</option>
+                    <option>Avancado</option>
+                    <option>Misto</option>
+                    <option>Open</option>
+                  </select>
+                </label>
+                <label class="field">Jogo ate
+                  <select id="editPointsToWin">
+                    <option value="11">11 pontos</option>
+                    <option value="15">15 pontos</option>
+                    <option value="18">18 pontos</option>
+                    <option value="21">21 pontos</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div>
+              <div class="field-row">
+                <label class="field">Quadras
+                  <select id="editCourts">
+                    <option value="1">1 quadra</option>
+                    <option value="2">2 quadras</option>
+                    <option value="3">3 quadras</option>
+                    <option value="4">4 quadras</option>
+                  </select>
+                </label>
+                <label class="field">Tempo estimado
+                  <select id="editMatchMinutes">
+                    <option value="12">12 min</option>
+                    <option value="15">15 min</option>
+                    <option value="18">18 min</option>
+                    <option value="20">20 min</option>
+                  </select>
+                </label>
+              </div>
+              <label class="field">Observação
+                <textarea id="editNotes" placeholder="Ex: final melhor de 3, aquecimento de 3 minutos..."></textarea>
+              </label>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -2386,6 +2464,46 @@
       document.getElementById("pointsToWin").value = s.points;
       document.getElementById("matchMinutes").value = s.matchMinutes;
       document.getElementById("notes").value = s.notes;
+    }
+
+    function setEventEditor(settings) {
+      const s = { ...defaultSettings(), ...settings };
+      const fields = {
+        editTournamentName: s.name,
+        editTournamentDate: s.date || "",
+        editTournamentLocation: s.location || "",
+        editCategory: s.category,
+        editCourts: s.courts,
+        editPointsToWin: s.points,
+        editMatchMinutes: s.matchMinutes,
+        editNotes: s.notes
+      };
+      Object.entries(fields).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+        if (field) field.value = value;
+      });
+    }
+
+    function getEventEditorSettings() {
+      return {
+        name: document.getElementById("editTournamentName")?.value.trim() || "Torneio de Futevolei",
+        date: document.getElementById("editTournamentDate")?.value || "",
+        location: document.getElementById("editTournamentLocation")?.value.trim() || "",
+        category: document.getElementById("editCategory")?.value || "Intermediario",
+        courts: Number(document.getElementById("editCourts")?.value || 1),
+        points: Number(document.getElementById("editPointsToWin")?.value || 18),
+        matchMinutes: Number(document.getElementById("editMatchMinutes")?.value || 15),
+        model: "random",
+        notes: document.getElementById("editNotes")?.value.trim() || ""
+      };
+    }
+
+    function saveEventInfo() {
+      const settings = getEventEditorSettings();
+      setSettings(settings);
+      if (tournament) Object.assign(tournament, settings, { updatedAt: new Date().toISOString() });
+      persist();
+      renderAll();
     }
 
     function teamName(team) {
@@ -3834,6 +3952,7 @@
       renderSummary();
       renderFinance();
       renderUniforms();
+      setEventEditor(tournament || getSettings());
       renderClock();
       renderModeHelp();
       requestAnimationFrame(fitPublicBracket);
@@ -3871,6 +3990,7 @@
 
       document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
       document.getElementById("exitTournamentButton").addEventListener("click", openNewTournamentScreen);
+      document.getElementById("saveEventInfo").addEventListener("click", saveEventInfo);
 
       document.getElementById("addTeam").addEventListener("click", () => {
         const options = [4, 8, 12, 16, 20, 24];
@@ -3960,6 +4080,17 @@
       ["tournamentName", "tournamentDate", "tournamentLocation", "category", "courts", "pointsToWin", "matchMinutes", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
           if (tournament) Object.assign(tournament, getSettings(), { updatedAt: new Date().toISOString() });
+          persist();
+          setEventEditor(tournament || getSettings());
+          renderSummary();
+        });
+      });
+
+      ["editTournamentName", "editTournamentDate", "editTournamentLocation", "editCategory", "editCourts", "editPointsToWin", "editMatchMinutes", "editNotes"].forEach(id => {
+        document.getElementById(id).addEventListener("input", () => {
+          const settings = getEventEditorSettings();
+          setSettings(settings);
+          if (tournament) Object.assign(tournament, settings, { updatedAt: new Date().toISOString() });
           persist();
           renderSummary();
         });
