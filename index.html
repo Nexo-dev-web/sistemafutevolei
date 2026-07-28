@@ -1200,6 +1200,22 @@
     .public-mode.double-public main::after {
       display: none;
     }
+
+    .public-mode.double-public .double-diagram .slot-text {
+      font-size: 15px;
+    }
+
+    .public-mode.double-public .double-diagram .score-text {
+      font-size: 13px;
+    }
+
+    .public-mode.double-public .double-diagram .small-text {
+      font-size: 11px;
+    }
+
+    .public-mode.double-public .double-diagram .legend-text {
+      font-size: 13px;
+    }
     .double-admin {
       display: grid;
       grid-template-columns: 1fr;
@@ -3987,21 +4003,21 @@
         if (match.code) matchByCode.set(match.code, match);
       });
 
-      const boxW = 210;
+      const boxW = 205;
       const boxH = 58;
       const rowH = 25;
       const scoreW = 28;
-      const leftX = [55, 325, 595, 820];
-      const rightX = [1535, 1265, 1010, 860];
+      const leftX = [55, 325, 595, 790];
+      const rightX = [1740, 1480, 1220, 950];
       const leftY = [112, 190, 268, 346, 454, 532, 610, 688];
       const leftRound2Y = [151, 307, 493, 649];
       const leftRound3Y = [229, 571];
-      const leftFinalY = 400;
+      const leftFinalY = 392;
       const rightY = [112, 268, 454, 610];
       const rightRound2Y = [151, 307, 493, 649];
       const rightRound3Y = [229, 571];
-      const repFinalY = 235;
-      const grandFinalY = 600;
+      const repFinalY = 205;
+      const grandFinalY = 604;
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4062,24 +4078,24 @@
       ].join("");
 
       return `
-        <svg class="double-diagram" viewBox="0 0 1800 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="1800" height="780" fill="#06100c" />
-          <text class="title-text" x="900" y="30">TABELA DE JOGOS</text>
-          <text class="subtitle-text" x="900" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
-          <text class="label-text" x="465" y="88">Classificatoria</text>
-          <text class="legend-text" x="160" y="102">Primeira rodada</text>
-          <text class="legend-text" x="430" y="102">Oitavas</text>
-          <text class="legend-text" x="700" y="102">Quartas</text>
-          <text class="label-text" x="1380" y="88">Repescagem</text>
-          <text class="legend-text" x="1640" y="102">Primeira rodada</text>
-          <text class="legend-text" x="1370" y="102">Quartas dos perdedores</text>
-          <text class="legend-text" x="1115" y="102">Semi</text>
-          <text class="label-text" x="925" y="575">Grande Final</text>
+        <svg class="double-diagram" viewBox="0 0 2000 780" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
+          <rect x="0" y="0" width="2000" height="780" fill="#06100c" />
+          <text class="title-text" x="1000" y="30">TABELA DE JOGOS</text>
+          <text class="subtitle-text" x="1000" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
+          <text class="label-text" x="500" y="82">Classificatoria</text>
+          <text class="legend-text" x="158" y="102">Primeira rodada</text>
+          <text class="legend-text" x="428" y="102">Oitavas</text>
+          <text class="legend-text" x="698" y="102">Quartas</text>
+          <text class="label-text" x="1490" y="82">Repescagem</text>
+          <text class="legend-text" x="1840" y="102">Primeira rodada</text>
+          <text class="legend-text" x="1582" y="102">Quartas dos perdedores</text>
+          <text class="legend-text" x="1322" y="102">Semi</text>
+          <text class="label-text" x="895" y="578">Grande Final</text>
           ${leftR1}${leftR2}${leftR3}${leftFinal}${leftConnectors}
           ${rightR1}${rightR2}${rightR3}${rightFinal}${rightConnectors}
           ${grandFinal}
           <line class="line champion-line" x1="${leftX[3] + boxW}" y1="${grandFinalY + boxH / 2}" x2="${leftX[3] + boxW + 75}" y2="${grandFinalY + boxH / 2}" />
-          <text class="label-text" x="1130" y="608">Campeao</text>
+          <text class="label-text" x="1088" y="633">Campeao</text>
           <text class="small-text" x="${leftX[3]}" y="${leftFinalY - 14}">Final principal</text>
           <text class="small-text" x="${rightX[3]}" y="${repFinalY - 14}">Final da repescagem</text>
         </svg>
