@@ -995,6 +995,19 @@
       font-size: 0.86rem;
     }
 
+    .uniform-missing,
+    .uniform-pending {
+      border-color: rgba(255, 113, 113, 0.72) !important;
+      background: rgba(122, 31, 31, 0.42) !important;
+      color: #ffb3b3 !important;
+      box-shadow: inset 0 0 0 1px rgba(255, 113, 113, 0.12);
+    }
+
+    .uniform-missing option,
+    .uniform-pending option {
+      color: #06100c;
+    }
+
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(180px, 1fr));
@@ -5714,23 +5727,26 @@
       });
 
       body.innerHTML = visibleRows.length ? visibleRows.map(({ team, index, record, athlete }, rowIndex) => {
+        const shirtClass = record.shirt ? "" : " uniform-missing";
+        const shortsClass = record.shorts ? "" : " uniform-missing";
+        const statusClass = record.status === "Pendente" ? " uniform-pending" : "";
         return `
           <tr style="--stagger:${rowIndex}">
             <th>${teamNameHtml(team)}</th>
             <td>${escapeAttr(athlete) || `Atleta ${index + 1}`}</td>
             <td>
-              <select aria-label="Camisa de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shirt">
+              <select class="${shirtClass}" aria-label="Camisa de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shirt">
                 ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shirt === size ? "selected" : ""}>${size || "Camisa"}</option>`).join("")}
               </select>
             </td>
             <td>
-              <select aria-label="Short de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shorts">
+              <select class="${shortsClass}" aria-label="Short de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shorts">
                 ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shorts === size ? "selected" : ""}>${size || "Short"}</option>`).join("")}
               </select>
             </td>
             <td><input value="${escapeAttr(record.number)}" placeholder="Opcional" aria-label="Numero de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="number"></td>
             <td>
-              <select aria-label="Status do uniforme de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="status">
+              <select class="${statusClass}" aria-label="Status do uniforme de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="status">
                 ${["Pendente", "Separado", "Entregue", "Trocar"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
               </select>
             </td>
