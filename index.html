@@ -671,6 +671,34 @@
         linear-gradient(135deg, rgba(158, 42, 42, 0.22), rgba(230, 199, 109, 0.08)),
         rgba(8, 17, 14, 0.97);
     }
+    .developer-credit {
+      position: fixed;
+      right: 14px;
+      bottom: 8px;
+      z-index: 70;
+      color: rgba(247, 255, 249, 0.42);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 160ms ease, opacity 160ms ease, transform 160ms ease;
+    }
+
+    .developer-credit:hover,
+    .developer-credit:focus-visible {
+      color: var(--sand);
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .public-mode .developer-credit {
+      z-index: 220;
+      right: 18px;
+      bottom: 10px;
+      color: rgba(247, 255, 249, 0.34);
+      font-size: 0.62rem;
+    }
 
     .secondary {
       color: var(--text);
@@ -2892,6 +2920,11 @@
         bottom: 12px;
         max-width: none;
       }
+      .developer-credit {
+        right: 10px;
+        bottom: 6px;
+        font-size: 0.58rem;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -3354,6 +3387,7 @@
       </section>
     </main>
   </div>
+  <a class="developer-credit" href="https://portfolio-nexo.netlify.app/" target="_blank" rel="noopener noreferrer">Desenvolvido por Nexo Developer</a>
   <div class="toast" id="appToast" role="status" aria-live="polite"></div>
 
   <script>
