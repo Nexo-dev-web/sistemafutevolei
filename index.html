@@ -1756,6 +1756,7 @@
       padding: 0 5px;
       text-align: center;
       font-weight: 900;
+      line-height: 1;
       background: rgba(255, 255, 255, 0.07);
     }
 
@@ -2171,12 +2172,17 @@
     }
 
     .public-mode.score-focus .match.score-live .score-input {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       min-width: 0;
-      min-height: clamp(72px, 11vh, 128px);
+      height: clamp(90px, 14vh, 150px);
+      padding: 0 5px;
       border-radius: 8px;
       color: var(--sand);
-      font-size: clamp(2.4rem, 6vw, 6.5rem);
+      font-size: clamp(2.2rem, 5.2vw, 5.6rem);
+      line-height: 1;
       background: rgba(255, 255, 255, 0.1);
     }
 
@@ -3999,8 +4005,10 @@
       const rule = scoreRule(targetPoints);
       let a = Math.max(0, Number(scoreA) || 0);
       let b = Math.max(0, Number(scoreB) || 0);
-      a = Math.min(a, rule.target);
-      b = Math.min(b, rule.target);
+      // Em vantagem (ambos >= deuceAt, ex: 17-17) o placar pode passar do alvo (18).
+      const cap = Math.min(a, b) >= rule.deuceAt ? 99 : rule.target;
+      a = Math.min(a, cap);
+      b = Math.min(b, cap);
       return [a, b];
     }
 
@@ -4010,7 +4018,8 @@
       const high = Math.max(scoreA, scoreB);
       const low = Math.min(scoreA, scoreB);
       if (high < rule.target) return false;
-      return high === rule.target && high - low >= 1;
+      if (low >= rule.deuceAt) return high - low >= rule.advantage;
+      return true;
     }
 
     function syncWinners() {
@@ -4857,7 +4866,10 @@
         input.addEventListener("input", () => {
           playOnce(input, "score-bump");
           const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
-          if (input.value !== "") input.value = String(Math.min(18, Math.max(0, Number(input.value) || 0)));
+          const otherField = input.dataset.field === "scoreA" ? "scoreB" : "scoreA";
+          const rule = scoreRule(18);
+          const cap = (Number(match[otherField]) || 0) >= rule.deuceAt ? 99 : rule.target;
+          if (input.value !== "") input.value = String(Math.min(cap, Math.max(0, Number(input.value) || 0)));
           match[input.dataset.field] = input.value;
           if (match.scoreA !== "" && match.scoreB !== "") {
             const [scoreA, scoreB] = cleanScorePair(match.scoreA, match.scoreB, 18);
@@ -5234,11 +5246,11 @@
           </div>
           <div class="team${aWinner}" data-slot="A">
             <span class="team-name ${match.teamA ? "" : "bye"}">${teamNameHtml(match.teamA)}</span>
-            <input class="score-input" type="number" min="0" max="18" value="${escapeAttr(match.scoreA)}" aria-label="Pontos de ${teamNameHtml(match.teamA)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="99" value="${escapeAttr(match.scoreA)}" aria-label="Pontos de ${teamNameHtml(match.teamA)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
           </div>
           <div class="team${bWinner}" data-slot="B">
             <span class="team-name ${match.teamB ? "" : "bye"}">${teamNameHtml(match.teamB)}</span>
-            <input class="score-input" type="number" min="0" max="18" value="${escapeAttr(match.scoreB)}" aria-label="Pontos de ${teamNameHtml(match.teamB)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
+            <input class="score-input" type="number" min="0" max="99" value="${escapeAttr(match.scoreB)}" aria-label="Pontos de ${teamNameHtml(match.teamB)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
         </article>
       `;
