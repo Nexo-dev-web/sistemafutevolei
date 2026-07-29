@@ -2730,6 +2730,9 @@
               <input id="newTournamentLocation" type="text" placeholder="Ex: Arena Noite Vegas">
             </label>
           </div>
+          <label class="field">Valor da inscricao por dupla (R$)
+            <input id="newTournamentEntryFee" type="number" min="0" step="0.01" placeholder="Ex: 50,00">
+          </label>
           <button class="primary" type="button" id="createNewTournament">Criar torneio</button>
         </div>
       </div>
@@ -4795,6 +4798,8 @@
       if (date && !date.value) date.value = new Date().toISOString().slice(0, 10);
       document.getElementById("newTournamentName").value = "";
       document.getElementById("newTournamentLocation").value = "";
+      const entryFee = document.getElementById("newTournamentEntryFee");
+      if (entryFee) entryFee.value = "";
       renderAll();
     }
 
@@ -5802,11 +5807,12 @@
         const name = document.getElementById("newTournamentName").value.trim();
         const date = document.getElementById("newTournamentDate").value;
         const location = document.getElementById("newTournamentLocation").value.trim();
+        const entryFee = document.getElementById("newTournamentEntryFee")?.value || "";
         if (!name || !date || !location) {
           alert("Preencha nome, data e local para criar o torneio.");
           return;
         }
-        createTournamentShell({ name, date, location });
+        createTournamentShell({ name, date, location, entryFee });
         showToast("Torneio criado.");
       });
 
