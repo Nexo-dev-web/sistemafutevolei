@@ -3015,7 +3015,7 @@
         <div class="topbar">
           <div>
             <h2>Controle financeiro</h2>
-            <p class="muted">Planilha manual: digite as duplas, preencha pagamento e adicione novas linhas quando precisar.</p>
+            <p class="muted">As duplas vem automaticamente da chave. Aqui voce so controla pagamento, valor, forma, data e observacoes.</p>
           </div>
           <div class="topbar-actions">
             <button class="secondary" type="button" id="addFinanceRow">Adicionar linha</button>
@@ -3029,7 +3029,7 @@
           <div class="control-card"><span>Duplas pagas</span><strong id="financePaidCount">0/0</strong></div>
         </div>
         <div class="filter-bar">
-          <input id="financeSearch" type="search" aria-label="Buscar no financeiro" placeholder="Filtrar por dupla, forma, data ou observacao">
+          <input id="financeSearch" type="search" aria-label="Buscar no financeiro" placeholder="Filtrar pagamento por dupla, status, forma, data ou observacao">
           <select id="financeStatusFilter" aria-label="Filtrar financeiro por status">
             <option value="">Todos os status</option>
             <option>Aberto</option>
@@ -3054,7 +3054,7 @@
         <div class="topbar">
           <div>
             <h2>Controle de uniformes</h2>
-            <p class="muted">Preenchimento manual: escolha tamanho, numero e entrega atleta por atleta.</p>
+            <p class="muted">Os atletas vem das duplas inscritas na chave. Aqui voce so preenche camisa, short, numero, status de entrega e observacoes.</p>
           </div>
           <div class="topbar-actions">
             <button class="primary" type="button" id="saveUniforms">Salvar uniformes</button>
@@ -3077,7 +3077,7 @@
           </div>
         </div>
         <div class="filter-bar">
-          <input id="uniformSearch" type="search" aria-label="Buscar em uniformes" placeholder="Filtrar por dupla, atleta, numero ou observacao">
+          <input id="uniformSearch" type="search" aria-label="Buscar em uniformes" placeholder="Filtrar uniforme por dupla, atleta, tamanho, numero ou observacao">
           <select id="uniformStatusFilter" aria-label="Filtrar uniformes por status">
             <option value="">Todos os status</option>
             <option>Pendente</option>
@@ -5563,7 +5563,7 @@
       body.innerHTML = visibleRows.length ? visibleRows.map((record, index) => {
         return `
           <tr style="--stagger:${index}">
-            <td><input value="${escapeAttr(record.team)}" placeholder="Nome da dupla" aria-label="Nome da dupla" data-finance="${escapeAttr(record.id)}" data-field="team"></td>
+            <td><input value="${escapeAttr(record.team)}" placeholder="Dupla da chave" aria-label="Dupla da chave" data-finance="${escapeAttr(record.id)}" data-field="team"></td>
             <td>
               <select class="finance-status finance-status-${record.status.toLowerCase()}" aria-label="Status do pagamento de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="status">
                 ${["Aberto", "Pago", "Parcial", "Cortesia"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
