@@ -669,6 +669,93 @@
       border: 1px dashed var(--line);
     }
 
+    /* ---- Modal do QR publico ---- */
+    .qr-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3, 8, 6, 0.82);
+      backdrop-filter: blur(4px);
+      animation: viewEnter 200ms ease both;
+    }
+
+    .qr-overlay[hidden] { display: none; }
+
+    .qr-card {
+      position: relative;
+      display: grid;
+      gap: 12px;
+      width: min(430px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      padding: 22px;
+      border: 1px solid rgba(230, 199, 109, 0.34);
+      border-radius: 14px;
+      background: linear-gradient(150deg, rgba(19, 38, 29, 0.98), rgba(8, 17, 14, 0.99));
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6);
+      animation: qrPop 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes qrPop {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .qr-card h2 { margin: 0; font-size: 1.15rem; }
+    .qr-card .muted { margin: 0; font-size: 0.84rem; }
+
+    .qr-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      padding: 2px 9px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .qr-close:hover { color: var(--text); }
+
+    .qr-holder {
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .qr-holder .qr-svg {
+      width: min(250px, 60vw);
+      height: auto;
+      display: block;
+    }
+
+    .qr-link {
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--muted);
+      font-size: 0.76rem;
+      word-break: break-all;
+    }
+
+    .qr-hint {
+      margin: 0;
+      color: var(--sand);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .qr-hint:empty { display: none; }
+
     .view { display: none; }
     .view.active { display: block; }
 
@@ -794,6 +881,16 @@
     .money-cell {
       min-width: 112px;
     }
+
+    .finance-status {
+      font-weight: 700;
+      border-color: transparent;
+    }
+
+    .finance-status-aberto { background: rgba(255, 71, 71, 0.22); color: #ff8a8a; }
+    .finance-status-pago { background: rgba(111, 191, 154, 0.25); color: var(--green); }
+    .finance-status-parcial { background: rgba(230, 199, 109, 0.25); color: var(--sand); }
+    .finance-status-cortesia { background: rgba(75, 181, 255, 0.22); color: var(--blue); }
 
     .uniform-size {
       min-width: 92px;
@@ -1096,31 +1193,38 @@
       height: 100%;
       min-height: 0;
       border: 1px solid rgba(230, 199, 109, 0.18);
-      background:
-        radial-gradient(circle at 50% 50%, rgba(53, 228, 138, 0.055), transparent 42%),
-        #06100c;
+      background: #101012;
     }
 
     .double-diagram .line {
       fill: none;
-      stroke: rgba(117, 121, 117, 0.92);
-      stroke-width: 3;
-      stroke-linecap: square;
+      stroke: rgba(150, 152, 156, 0.75);
+      stroke-width: 2.2;
+      stroke-linecap: butt;
       stroke-linejoin: miter;
-      stroke-dasharray: 900;
-      stroke-dashoffset: 900;
+      stroke-dasharray: 1400;
+      stroke-dashoffset: 1400;
       animation: drawLine 1.8s ease forwards;
+    }
+
+    /* Caminho do campeao: dourado, mais grosso que as demais ligacoes. */
+    .double-diagram .line-gold {
+      fill: none;
+      stroke: rgba(214, 172, 78, 0.95);
+      stroke-width: 3.2;
+      stroke-linecap: butt;
+      filter: drop-shadow(0 0 6px rgba(230, 199, 109, 0.45));
     }
 
     .double-diagram .line-soft {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.2);
+      stroke: rgba(255, 255, 255, 0.18);
       stroke-width: 1.4;
     }
 
     .double-diagram .line-feed {
       fill: none;
-      stroke: rgba(230, 199, 109, 0.6);
+      stroke: rgba(230, 199, 109, 0.55);
       stroke-width: 2;
       stroke-dasharray: 6 5;
       stroke-linecap: round;
@@ -1128,79 +1232,161 @@
     }
 
     .double-diagram .team-node {
-      fill: rgba(60, 64, 63, 0.96);
-      stroke: rgba(255, 255, 255, 0.16);
-      stroke-width: 1.2;
-      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+      fill: #2c2d31;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 1;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
     }
 
     .double-diagram .team-node.winner-node {
-      fill: rgba(29, 92, 65, 0.98);
-      stroke: rgba(53, 228, 138, 0.95);
-      filter: drop-shadow(0 0 13px rgba(53, 228, 138, 0.32));
+      fill: #3c3a2a;
+      stroke: rgba(230, 199, 109, 0.9);
+      filter: drop-shadow(0 0 12px rgba(230, 199, 109, 0.35));
     }
 
     .double-diagram .score-node {
-      fill: rgba(12, 16, 15, 0.52);
+      fill: rgba(0, 0, 0, 0.42);
     }
 
     .double-diagram .slot-text {
-      fill: #f7fff9;
-      font-size: 17px;
-      font-weight: 900;
+      fill: #eef0f2;
+      font-size: 14px;
+      font-weight: 800;
     }
 
     .double-diagram .score-text {
-      fill: #f7fff9;
-      font-size: 16px;
+      fill: #f6e6b4;
+      font-size: 14px;
       font-weight: 1000;
       text-anchor: middle;
     }
 
+    /* ---- Centro: campeao, podios e ornamentos ---- */
+    .double-diagram .champion-glow { fill: url(#championGlow); }
+    .double-diagram .champion-beam { fill: url(#championBeam); }
+
+    .double-diagram .podium-face {
+      fill: url(#podiumGoldTop);
+      stroke: rgba(255, 240, 195, 0.7);
+      stroke-width: 1.2;
+    }
+
+    .double-diagram .podium-side {
+      fill: url(#podiumGold);
+      stroke: rgba(120, 88, 24, 0.8);
+      stroke-width: 1;
+    }
+
+    .double-diagram .silver-face {
+      fill: url(#podiumSilverTop);
+      stroke: rgba(240, 245, 250, 0.55);
+      stroke-width: 1;
+    }
+
+    .double-diagram .silver-side {
+      fill: url(#podiumSilver);
+      stroke: rgba(70, 76, 82, 0.8);
+      stroke-width: 1;
+    }
+
+    .double-diagram .laurel-leaf {
+      fill: rgba(228, 196, 112, 0.85);
+    }
+
+    .double-diagram .champion-title {
+      fill: #f3dda2;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 44px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-anchor: middle;
+      filter: drop-shadow(0 0 18px rgba(230, 199, 109, 0.5));
+    }
+
+    .double-diagram .final-label,
+    .double-diagram .third-label {
+      fill: #d8dce0;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-anchor: middle;
+    }
+
+    .double-diagram .semi-label {
+      fill: #cfd4d9;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-anchor: middle;
+    }
+
+    .double-diagram .title-badge rect {
+      fill: rgba(255, 255, 255, 0.05);
+      stroke: rgba(255, 255, 255, 0.16);
+      stroke-width: 1;
+    }
+
+    .double-diagram .title-badge text {
+      fill: #e7eaed;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-anchor: middle;
+    }
+
+    /* Grande Final: caixa e tipografia ampliadas para ser o foco do telao. */
+    .double-diagram .team-node.big-slot {
+      fill: #35322a;
+      stroke: rgba(230, 199, 109, 0.6);
+      stroke-width: 1.6;
+      filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.6));
+    }
+
+    .double-diagram .team-node.big-slot.winner-node {
+      fill: #4a4227;
+      stroke: rgba(246, 222, 150, 0.95);
+    }
+
+    .double-diagram .slot-text.big-slot {
+      font-size: 22px;
+    }
+
+    .double-diagram .score-text.big-slot {
+      font-size: 21px;
+    }
+
     .double-diagram .small-text {
-      fill: #adc0b4;
+      fill: #8d949b;
       font-size: 13px;
       font-weight: 700;
     }
 
+    /* Titulo de cada chave (Classificatoria / Repescagem). */
     .double-diagram .label-text {
-      fill: #35e48a;
-      font-size: 16px;
+      fill: #e2c887;
+      font-size: 17px;
       font-weight: 800;
-      text-anchor: middle;
-    }
-
-    .double-diagram .title-text {
-      fill: #f7fff9;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 0.3px;
-      text-anchor: middle;
-    }
-
-    .double-diagram .subtitle-text {
-      fill: #e6c76d;
-      font-size: 18px;
-      font-weight: 800;
+      letter-spacing: 0.08em;
       text-anchor: middle;
     }
 
     .double-diagram .legend-text {
-      fill: #adc0b4;
-      font-size: 14px;
+      fill: #9aa1a8;
+      font-size: 13px;
       font-weight: 800;
+      letter-spacing: 0.04em;
       text-anchor: middle;
     }
 
     .double-diagram .legend-note-title {
-      fill: #e6c76d;
+      fill: #e2c887;
       font-size: 15px;
       font-weight: 800;
       text-anchor: middle;
     }
 
     .double-diagram .legend-note {
-      fill: #adc0b4;
+      fill: #939aa1;
       font-size: 12px;
       font-weight: 600;
       text-anchor: middle;
@@ -1208,12 +1394,6 @@
 
     .public-mode.double-public .double-diagram .legend-note {
       font-size: 11px;
-    }
-
-    .double-diagram .champion-line {
-      stroke: #35e48a;
-      stroke-width: 2.4;
-      filter: drop-shadow(0 0 7px rgba(53, 228, 138, 0.55));
     }
 
     .public-mode.double-public .double-diagram .line {
@@ -1232,6 +1412,14 @@
 
     .public-mode.double-public .double-diagram .score-text {
       font-size: 13px;
+    }
+
+    .public-mode.double-public .double-diagram .slot-text.big-slot {
+      font-size: 20px;
+    }
+
+    .public-mode.double-public .double-diagram .score-text.big-slot {
+      font-size: 19px;
     }
 
     .public-mode.double-public .double-diagram .small-text {
@@ -2160,6 +2348,187 @@
       to { stroke-dashoffset: 0; }
     }
 
+    /* ------------------------------------------------------------------ */
+    /* Movimento com proposito                                             */
+    /* Cada animacao daqui pra baixo comunica um evento (placar mudou,     */
+    /* vaga preenchida, aba trocada). Nada e puramente decorativo, para    */
+    /* que o telao continue legivel de longe durante o jogo.               */
+    /* ------------------------------------------------------------------ */
+
+    /* Troca de aba: entrada curta, sem empurrar o layout. */
+    .view.active {
+      animation: viewEnter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes viewEnter {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cascata das listas. O --stagger vem do JS (indice da linha). */
+    .queue-card,
+    #rankingBody tr,
+    #financeBody tr,
+    #uniformBody tr {
+      animation: rowEnter 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--stagger, 0) * 26ms);
+    }
+
+    @keyframes rowEnter {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Placar alterado: pulso curto para o mesario confirmar o registro. */
+    .score-input.score-bump {
+      animation: scoreBump 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes scoreBump {
+      0% { transform: scale(1); }
+      38% { transform: scale(1.28); background: rgba(230, 199, 109, 0.34); color: #fff; }
+      100% { transform: scale(1); }
+    }
+
+    /* Confronto decidido: varredura verde que corre uma vez pelo vencedor. */
+    .team.winner-reveal {
+      animation: winnerSweep 900ms ease both;
+    }
+
+    @keyframes winnerSweep {
+      0% { background: rgba(53, 228, 138, 0.05); box-shadow: 0 0 0 rgba(53, 228, 138, 0); }
+      35% { background: rgba(53, 228, 138, 0.42); box-shadow: 0 0 34px rgba(53, 228, 138, 0.5); }
+      100% { background: rgba(53, 228, 138, 0.12); box-shadow: 0 0 12px rgba(53, 228, 138, 0.18); }
+    }
+
+    /* Nova dupla ocupa uma vaga que estava "A definir". */
+    .team.slot-filled {
+      animation: slotFill 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes slotFill {
+      0% { opacity: 0.25; transform: translateX(-10px); filter: blur(2px); }
+      100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+    }
+
+    /* Toast com leve overshoot em vez de deslize linear. */
+    .toast {
+      transition:
+        transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 200ms ease;
+    }
+
+    /* Botoes: resposta tatil ao clique. */
+    button {
+      transition: transform 130ms cubic-bezier(0.34, 1.56, 0.64, 1), filter 130ms ease, background 160ms ease;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
+
+    /* Foco visivel e consistente para navegacao por teclado. */
+    :is(button, input, select, textarea, .history-item):focus-visible {
+      outline: 2px solid var(--sand);
+      outline-offset: 2px;
+    }
+
+    /* Telao: as ligacoes do chaveamento se desenham em cascata da esquerda
+       para a direita, acompanhando a ordem em que o SVG e montado. */
+    .public-mode .double-diagram .line {
+      animation: drawLine 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    }
+
+    .public-mode .double-diagram .winner-node {
+      animation: nodeWin 1.6s ease-in-out infinite;
+    }
+
+    @keyframes nodeWin {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(230, 199, 109, 0.32)); }
+      50% { filter: drop-shadow(0 0 15px rgba(230, 199, 109, 0.66)); }
+    }
+
+    /* Respiro lento no halo do podio: da vida ao telao sem distrair. */
+    .public-mode .double-diagram .champion-glow {
+      animation: championGlow 4.5s ease-in-out infinite;
+    }
+
+    @keyframes championGlow {
+      0%, 100% { opacity: 0.62; }
+      50% { opacity: 1; }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Tela publica no celular (o caso do QR).                             */
+    /* O chaveamento e largo demais para caber em 390px de forma legivel:   */
+    /* em vez de encolher tudo ate virar borrao, fixamos uma largura minima */
+    /* util e deixamos o espectador arrastar para os lados.                */
+    /* ------------------------------------------------------------------ */
+    @media (max-width: 900px) {
+      .public-mode .public-banner {
+        gap: 8px;
+        padding: 8px 12px;
+      }
+
+      .public-mode .public-banner h2 { font-size: 1.05rem; }
+      .public-mode .public-banner .muted { font-size: 0.72rem; }
+      .public-mode .refresh-clock { font-size: 0.72rem; }
+
+      .public-mode.double-public .bracket-wrap {
+        height: auto;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .public-mode.double-public .bracket {
+        width: max-content;
+        height: auto;
+      }
+
+      .public-mode.double-public .double-diagram {
+        width: 1900px;
+        min-width: 1900px;
+        height: auto;
+      }
+
+      /* Aviso de arrastar, so no telao publico em tela estreita. */
+      .public-mode.double-public .bracket-wrap::before {
+        content: "Arraste para os lados para ver a chave inteira";
+        display: block;
+        padding: 6px 10px;
+        color: var(--sand);
+        font-size: 0.74rem;
+        text-align: center;
+      }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Acessibilidade: quem pediu menos movimento recebe a interface       */
+    /* estatica, sem perder nenhuma informacao.                            */
+    /* ------------------------------------------------------------------ */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      /* Sem animacao o traco precisa nascer completo, senao some da tela. */
+      .double-diagram .line,
+      .public-mode .double-diagram .line {
+        stroke-dashoffset: 0 !important;
+      }
+
+      button:hover:not(:disabled),
+      button:active:not(:disabled) {
+        transform: none;
+      }
+    }
+
     @media (max-width: 1120px) {
       .app-shell,
       body.menu-collapsed .app-shell,
@@ -2263,6 +2632,25 @@
       </div>
     </div>
   </section>
+
+  <!-- Modal do QR: link publico do chaveamento para o publico acompanhar. -->
+  <div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-labelledby="qrTitle" hidden>
+    <div class="qr-card">
+      <button class="qr-close" type="button" id="qrClose" aria-label="Fechar">&times;</button>
+      <h2 id="qrTitle">Chaveamento para o publico</h2>
+      <p class="muted">Aponte a camera do celular. A tela abre so leitura e atualiza sozinha a cada 10 segundos.</p>
+      <div class="qr-holder" id="qrHolder"></div>
+      <div class="qr-link" id="qrLink"></div>
+      <div class="actions">
+        <button class="secondary" type="button" id="qrCopy">Copiar link</button>
+        <button class="secondary" type="button" id="qrOpen">Abrir no navegador</button>
+      </div>
+      <label class="field">Endereco publicado do sistema
+        <input id="qrBaseUrl" type="url" placeholder="https://seu-usuario.github.io/futevolei/index.html">
+      </label>
+      <p class="qr-hint" id="qrHint"></p>
+    </div>
+  </div>
 
   <div class="app-shell">
     <nav class="nav-tabs">
@@ -2392,6 +2780,7 @@
             <button class="secondary" type="button" id="newTournamentButton">Novo torneio</button>
             <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
             <button class="secondary" type="button" id="openPublic">Abrir telao</button>
+            <button class="secondary" type="button" id="openQr">QR do publico</button>
             <button class="primary" type="button" id="saveScores">Salvar placares</button>
           </div>
         </div>
@@ -2533,8 +2922,8 @@
           <div class="control-card"><span>Duplas pagas</span><strong id="financePaidCount">0/0</strong></div>
         </div>
         <div class="filter-bar">
-          <input id="financeSearch" type="search" placeholder="Filtrar por dupla, forma, data ou observacao">
-          <select id="financeStatusFilter">
+          <input id="financeSearch" type="search" aria-label="Buscar no financeiro" placeholder="Filtrar por dupla, forma, data ou observacao">
+          <select id="financeStatusFilter" aria-label="Filtrar financeiro por status">
             <option value="">Todos os status</option>
             <option>Aberto</option>
             <option>Pago</option>
@@ -2566,13 +2955,13 @@
         </div>
         <div class="control-summary">
           <div class="control-card"><span>Atletas</span><strong id="uniformAthletes">0</strong></div>
-          <div class="control-card"><span>Camisas P/M/G/GG</span><strong id="uniformShirts">0/0/0/0</strong></div>
-          <div class="control-card"><span>Shorts P/M/G/GG</span><strong id="uniformShorts">0/0/0/0</strong></div>
+          <div class="control-card"><span>Camisas PP/P/M/G/GG/XG/XGG</span><strong id="uniformShirts">0/0/0/0/0/0/0</strong></div>
+          <div class="control-card"><span>Shorts PP/P/M/G/GG/XG/XGG</span><strong id="uniformShorts">0/0/0/0/0/0/0</strong></div>
           <div class="control-card"><span>Entregues</span><strong id="uniformDelivered">0/0</strong></div>
         </div>
         <div class="filter-bar">
-          <input id="uniformSearch" type="search" placeholder="Filtrar por dupla, atleta, numero ou observacao">
-          <select id="uniformStatusFilter">
+          <input id="uniformSearch" type="search" aria-label="Buscar em uniformes" placeholder="Filtrar por dupla, atleta, numero ou observacao">
+          <select id="uniformStatusFilter" aria-label="Filtrar uniformes por status">
             <option value="">Todos os status</option>
             <option>Pendente</option>
             <option>Separado</option>
@@ -2661,14 +3050,41 @@
   <div class="toast" id="appToast" role="status" aria-live="polite"></div>
 
   <script>
+    /* ====================================================================
+     * Gestor de Torneio de Futevolei - aplicacao de arquivo unico.
+     * Visao geral, modelo de dados e limitacoes conhecidas: README.md
+     *
+     * Fluxo central: toda mudanca de estado chama persist() e renderAll().
+     * Nao ha framework nem atualizacao granular - as telas sao redesenhadas
+     * a partir de templates de string (~8ms com 16 duplas).
+     *
+     * Roteiro do arquivo:
+     *   1. Configuracao e estado
+     *   2. Utilitarios (escape, formatacao, dinheiro)
+     *   3. Montagem dos chaveamentos
+     *   4. Regras de placar e avanco
+     *   5. Persistencia (localStorage + Supabase)
+     *   6. Renderizacao
+     *   7. Eventos e inicializacao
+     * ==================================================================== */
+
+    /* ---------- 1. Configuracao e estado ---------- */
+
     const STORAGE_KEY = "nexo_futevolei_tournament_v2";
+    const STORAGE_VERSION = 3;
     const SUPABASE_URL = "https://bucyqoczsximiythoztw.supabase.co";
     const SUPABASE_KEY = "sb_publishable_3JjJZUCsQXk6vK1Ka0VEqg_Kr4zinnb";
     const SUPABASE_TABLE = "futevolei_tournaments";
     const REFRESH_MS = 10000;
     const SCORE_ADVANTAGE = 2;
+    // Agrupa rajadas de digitacao num unico POST ao Supabase.
+    const REMOTE_SAVE_DEBOUNCE_MS = 1200;
     const params = new URLSearchParams(window.location.search);
     const isPublic = params.get("view") === "chaveamento";
+    // Presente no link do QR: faz o telao ler do Supabase em vez do localStorage.
+    const publicTournamentId = params.get("t") || "";
+    // Base usada para montar o link do QR quando a pagina esta publicada.
+    const PUBLIC_URL_KEY = "nexo_futevolei_public_url";
 
     let activeView = "bracketView";
     let mode = "single";
@@ -2684,8 +3100,12 @@
     let teamTargetCount = 16;
     let nextRefreshAt = Date.now() + REFRESH_MS;
     let scoreSaveTimer = null;
+    let remoteSaveTimer = null;
     let publicScoreSnapshot = "";
     let publicLiveMatchId = "";
+    // Hash do ultimo estado desenhado no telao: evita repintar (e reiniciar as
+    // animacoes CSS) a cada ciclo de 10s quando nada mudou.
+    let publicRenderSignature = "";
     const filters = {
       financeSearch: "",
       financeStatus: "",
@@ -2726,6 +3146,342 @@
         text: "A dupla so e eliminada depois da segunda derrota. Quem perde na chave principal cai para a repescagem e ainda pode voltar para disputar a grande final."
       }
     };
+
+    /* ---------- 2. Utilitarios ---------- */
+
+    /* =====================================================================
+     * Gerador de QR Code (modo byte, correcao de erro nivel M, versoes 1-10)
+     *
+     * Escrito aqui em vez de usar uma biblioteca porque o projeto e um arquivo
+     * unico sem build e precisa funcionar offline - uma API externa de QR
+     * quebraria o telão justamente quando a rede do evento cair.
+     *
+     * Versoes 1-10 cobrem ate 213 bytes, folga suficiente para uma URL.
+     * ===================================================================== */
+
+    // Campo de Galois GF(256) com polinomio 0x11d, usado pelo Reed-Solomon.
+    const QR_EXP = new Uint8Array(256);
+    const QR_LOG = new Uint8Array(256);
+    (() => {
+      let x = 1;
+      for (let i = 0; i < 255; i += 1) {
+        QR_EXP[i] = x;
+        QR_LOG[x] = i;
+        x <<= 1;
+        if (x & 0x100) x ^= 0x11d;
+      }
+      QR_EXP[255] = QR_EXP[0];
+    })();
+
+    const qrMul = (a, b) => (a === 0 || b === 0 ? 0 : QR_EXP[(QR_LOG[a] + QR_LOG[b]) % 255]);
+
+    // Por versao: [codewords de correcao por bloco, blocos grupo 1, dados por
+    // bloco do grupo 1, blocos grupo 2, dados por bloco do grupo 2] - nivel M.
+    const QR_BLOCKS_M = {
+      1: [10, 1, 16, 0, 0],
+      2: [16, 1, 28, 0, 0],
+      3: [26, 1, 44, 0, 0],
+      4: [18, 2, 32, 0, 0],
+      5: [24, 2, 43, 0, 0],
+      6: [16, 4, 27, 0, 0],
+      7: [18, 4, 31, 0, 0],
+      8: [22, 2, 38, 2, 39],
+      9: [22, 3, 36, 2, 37],
+      10: [26, 4, 43, 1, 44]
+    };
+
+    // Centros dos padroes de alinhamento por versao (a v1 nao tem nenhum).
+    const QR_ALIGN = {
+      1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30],
+      6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50]
+    };
+
+    function qrGenerator(degree) {
+      let poly = [1];
+      for (let i = 0; i < degree; i += 1) {
+        const next = new Array(poly.length + 1).fill(0);
+        for (let j = 0; j < poly.length; j += 1) {
+          next[j] ^= poly[j];
+          next[j + 1] ^= qrMul(poly[j], QR_EXP[i]);
+        }
+        poly = next;
+      }
+      return poly;
+    }
+
+    function qrRemainder(data, ecLength) {
+      const gen = qrGenerator(ecLength);
+      const buffer = [...data, ...new Array(ecLength).fill(0)];
+      for (let i = 0; i < data.length; i += 1) {
+        const coef = buffer[i];
+        if (!coef) continue;
+        for (let j = 0; j < gen.length; j += 1) buffer[i + j] ^= qrMul(gen[j], coef);
+      }
+      return buffer.slice(data.length);
+    }
+
+    // Monta a sequencia final de codewords: cabecalho, dados, preenchimento,
+    // divisao em blocos e intercalacao com os codewords de correcao.
+    function qrCodewords(bytes, version) {
+      const [ecPerBlock, g1Blocks, g1Size, g2Blocks, g2Size] = QR_BLOCKS_M[version];
+      const totalData = g1Blocks * g1Size + g2Blocks * g2Size;
+      const countBits = version >= 10 ? 16 : 8;
+
+      const bits = [];
+      const push = (value, length) => {
+        for (let i = length - 1; i >= 0; i -= 1) bits.push((value >> i) & 1);
+      };
+      push(4, 4);                    // indicador de modo byte
+      push(bytes.length, countBits);
+      bytes.forEach(byte => push(byte, 8));
+
+      const capacity = totalData * 8;
+      for (let i = 0; i < 4 && bits.length < capacity; i += 1) bits.push(0); // terminador
+      while (bits.length % 8) bits.push(0);
+
+      const data = [];
+      for (let i = 0; i < bits.length; i += 8) {
+        data.push(bits.slice(i, i + 8).reduce((acc, bit) => (acc << 1) | bit, 0));
+      }
+      const padBytes = [0xec, 0x11];
+      while (data.length < totalData) data.push(padBytes[(data.length - bits.length / 8) % 2]);
+
+      const blocks = [];
+      let offset = 0;
+      for (let i = 0; i < g1Blocks; i += 1) { blocks.push(data.slice(offset, offset + g1Size)); offset += g1Size; }
+      for (let i = 0; i < g2Blocks; i += 1) { blocks.push(data.slice(offset, offset + g2Size)); offset += g2Size; }
+      const ecBlocks = blocks.map(block => qrRemainder(block, ecPerBlock));
+
+      const result = [];
+      const maxData = Math.max(...blocks.map(block => block.length));
+      for (let i = 0; i < maxData; i += 1) {
+        blocks.forEach(block => { if (i < block.length) result.push(block[i]); });
+      }
+      for (let i = 0; i < ecPerBlock; i += 1) {
+        ecBlocks.forEach(block => result.push(block[i]));
+      }
+      return result;
+    }
+
+    const QR_MASKS = [
+      (r, c) => (r + c) % 2 === 0,
+      r => r % 2 === 0,
+      (r, c) => c % 3 === 0,
+      (r, c) => (r + c) % 3 === 0,
+      (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
+      (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0,
+      (r, c) => (((r * c) % 2) + ((r * c) % 3)) % 2 === 0,
+      (r, c) => (((r + c) % 2) + ((r * c) % 3)) % 2 === 0
+    ];
+
+    // Penalidades da norma: quanto menor, mais legivel para o leitor.
+    function qrPenalty(grid) {
+      const size = grid.length;
+      let score = 0;
+
+      const runScore = line => {
+        let total = 0;
+        let run = 1;
+        for (let i = 1; i < line.length; i += 1) {
+          if (line[i] === line[i - 1]) {
+            run += 1;
+          } else {
+            if (run >= 5) total += run - 2;
+            run = 1;
+          }
+        }
+        if (run >= 5) total += run - 2;
+        return total;
+      };
+
+      for (let i = 0; i < size; i += 1) {
+        score += runScore(grid[i]);
+        score += runScore(grid.map(row => row[i]));
+      }
+
+      for (let r = 0; r < size - 1; r += 1) {
+        for (let c = 0; c < size - 1; c += 1) {
+          const v = grid[r][c];
+          if (v === grid[r][c + 1] && v === grid[r + 1][c] && v === grid[r + 1][c + 1]) score += 3;
+        }
+      }
+
+      const pattern = [true, false, true, true, true, false, true, false, false, false, false];
+      const hasPattern = (line, start) => pattern.every((bit, i) => line[start + i] === bit);
+      for (let i = 0; i < size; i += 1) {
+        const row = grid[i];
+        const col = grid.map(r => r[i]);
+        for (let j = 0; j + pattern.length <= size; j += 1) {
+          if (hasPattern(row, j)) score += 40;
+          if (hasPattern(col, j)) score += 40;
+        }
+      }
+
+      let dark = 0;
+      grid.forEach(row => row.forEach(cell => { if (cell) dark += 1; }));
+      const percent = (dark * 100) / (size * size);
+      score += Math.floor(Math.abs(percent - 50) / 5) * 10;
+      return score;
+    }
+
+    function qrFormatBits(mask) {
+      // Nivel M = 00, seguido dos 3 bits da mascara, com BCH(15,5) e XOR final.
+      let value = (0b00 << 3) | mask;
+      let bch = value << 10;
+      for (let i = 4; i >= 0; i -= 1) {
+        if (bch & (1 << (i + 10))) bch ^= 0b10100110111 << i;
+      }
+      return ((value << 10) | bch) ^ 0b101010000010010;
+    }
+
+    function qrVersionBits(version) {
+      let bch = version << 12;
+      for (let i = 5; i >= 0; i -= 1) {
+        if (bch & (1 << (i + 12))) bch ^= 0b1111100100101 << i;
+      }
+      return (version << 12) | bch;
+    }
+
+    // Devolve uma matriz booleana (true = modulo escuro) para o texto dado.
+    function qrMatrix(text) {
+      const bytes = [...new TextEncoder().encode(text)];
+      const capacity = { 1: 14, 2: 26, 3: 42, 4: 62, 5: 84, 6: 106, 7: 122, 8: 152, 9: 180, 10: 213 };
+      const version = Number(Object.keys(capacity).find(v => bytes.length <= capacity[v]));
+      if (!version) throw new Error("Texto longo demais para o QR (limite de 213 bytes).");
+
+      const size = version * 4 + 17;
+      const grid = Array.from({ length: size }, () => new Array(size).fill(false));
+      const fixed = Array.from({ length: size }, () => new Array(size).fill(false));
+      const set = (r, c, value) => { grid[r][c] = value; fixed[r][c] = true; };
+
+      const finder = (row, col) => {
+        for (let r = -1; r <= 7; r += 1) {
+          for (let c = -1; c <= 7; c += 1) {
+            const rr = row + r;
+            const cc = col + c;
+            if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+            const edge = r === 0 || r === 6 || c === 0 || c === 6;
+            const core = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+            set(rr, cc, (r >= 0 && r <= 6 && c >= 0 && c <= 6) && (edge || core));
+          }
+        }
+      };
+      finder(0, 0);
+      finder(0, size - 7);
+      finder(size - 7, 0);
+
+      // Alinhamento antes da temporizacao: a partir da versao 7 existem padroes
+      // centrados sobre a linha de temporizacao, e eles tem prioridade. Na ordem
+      // inversa esses padroes somem e o codigo deixa de ser lido.
+      QR_ALIGN[version].forEach(row => {
+        QR_ALIGN[version].forEach(col => {
+          if (fixed[row][col]) return; // centro dentro de um localizador
+          for (let r = -2; r <= 2; r += 1) {
+            for (let c = -2; c <= 2; c += 1) {
+              set(row + r, col + c, Math.max(Math.abs(r), Math.abs(c)) !== 1);
+            }
+          }
+        });
+      });
+
+      for (let i = 8; i < size - 8; i += 1) {
+        if (!fixed[6][i]) set(6, i, i % 2 === 0);
+        if (!fixed[i][6]) set(i, 6, i % 2 === 0);
+      }
+
+      set(size - 8, 8, true); // modulo escuro obrigatorio
+
+      // Reserva as areas de formato e versao antes de distribuir os dados.
+      for (let i = 0; i < 9; i += 1) {
+        if (!fixed[8][i]) set(8, i, false);
+        if (!fixed[i][8]) set(i, 8, false);
+      }
+      for (let i = 0; i < 8; i += 1) {
+        if (!fixed[8][size - 1 - i]) set(8, size - 1 - i, false);
+        if (!fixed[size - 1 - i][8]) set(size - 1 - i, 8, false);
+      }
+      if (version >= 7) {
+        for (let i = 0; i < 6; i += 1) {
+          for (let j = 0; j < 3; j += 1) {
+            set(size - 11 + j, i, false);
+            set(i, size - 11 + j, false);
+          }
+        }
+      }
+
+      const codewords = qrCodewords(bytes, version);
+      const dataBits = [];
+      codewords.forEach(byte => {
+        for (let i = 7; i >= 0; i -= 1) dataBits.push((byte >> i) & 1);
+      });
+
+      // Zigue-zague de baixo para cima, duas colunas por vez, pulando a coluna 6.
+      let bitIndex = 0;
+      let upward = true;
+      for (let right = size - 1; right > 0; right -= 2) {
+        if (right === 6) right -= 1;
+        for (let step = 0; step < size; step += 1) {
+          const row = upward ? size - 1 - step : step;
+          for (let c = 0; c < 2; c += 1) {
+            const col = right - c;
+            if (fixed[row][col]) continue;
+            grid[row][col] = bitIndex < dataBits.length ? dataBits[bitIndex] === 1 : false;
+            bitIndex += 1;
+          }
+        }
+        upward = !upward;
+      }
+
+      // Testa as 8 mascaras e fica com a de menor penalidade.
+      let best = null;
+      QR_MASKS.forEach((maskFn, mask) => {
+        const candidate = grid.map((row, r) => row.map((cell, c) => (fixed[r][c] ? cell : cell !== maskFn(r, c))));
+
+        const format = qrFormatBits(mask);
+        for (let i = 0; i < 15; i += 1) {
+          const bit = ((format >> i) & 1) === 1;
+          if (i < 6) candidate[i][8] = bit;
+          else if (i < 8) candidate[i + 1][8] = bit;
+          else candidate[size - 15 + i][8] = bit;
+
+          if (i < 8) candidate[8][size - 1 - i] = bit;
+          else if (i < 9) candidate[8][15 - i - 1 + 1] = bit;
+          else candidate[8][15 - i - 1] = bit;
+        }
+        if (version >= 7) {
+          const vBits = qrVersionBits(version);
+          for (let i = 0; i < 18; i += 1) {
+            const bit = ((vBits >> i) & 1) === 1;
+            candidate[Math.floor(i / 3)][size - 11 + (i % 3)] = bit;
+            candidate[size - 11 + (i % 3)][Math.floor(i / 3)] = bit;
+          }
+        }
+
+        const score = qrPenalty(candidate);
+        if (!best || score < best.score) best = { score, grid: candidate };
+      });
+
+      return best.grid;
+    }
+
+    // Renderiza a matriz como SVG (um unico <path>, sem imagem externa).
+    function qrSvg(text, options = {}) {
+      const quiet = options.quiet ?? 4;
+      const grid = qrMatrix(text);
+      const size = grid.length + quiet * 2;
+      let path = "";
+      grid.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          if (cell) path += `M${c + quiet} ${r + quiet}h1v1h-1z`;
+        });
+      });
+      return `
+        <svg class="qr-svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code do telao publico">
+          <rect width="${size}" height="${size}" fill="#ffffff" />
+          <path d="${path}" fill="#06100c" />
+        </svg>
+      `;
+    }
 
     function uid() {
       return Math.random().toString(36).slice(2, 10);
@@ -2854,15 +3610,22 @@
       renderAll();
     }
 
+    // Valor cru, para logica/comparacao/busca. Nunca injete direto em innerHTML.
     function teamName(team) {
       if (!team) return "A definir";
       return `${team.a || "Atleta"} / ${team.b || "Atleta"}`;
+    }
+
+    // Use esta versao em qualquer template que vire innerHTML.
+    function teamNameHtml(team) {
+      return escapeAttr(teamName(team));
     }
 
     function teamKey(team) {
       return team ? team.id : "";
     }
 
+    // Cobre contexto de texto e de atributo entre aspas duplas.
     function escapeAttr(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -2906,6 +3669,8 @@
       const copy = [...list];
       return copy.sort(() => Math.random() - 0.5);
     }
+
+    /* ---------- 3. Montagem dos chaveamentos ---------- */
 
     function createTournament() {
       const settings = getSettings();
@@ -3223,6 +3988,8 @@
       clearFutureSlots(roundIndex + 1, Math.floor(matchIndex / 2));
     }
 
+    /* ---------- 4. Regras de placar e avanco ---------- */
+
     function scoreRule(targetPoints = 18) {
       const target = Number(targetPoints) || 18;
       return { target, deuceAt: Math.max(target - 1, 0), advantage: SCORE_ADVANTAGE };
@@ -3248,6 +4015,10 @@
 
     function syncWinners() {
       if (!tournament) return;
+      // Fotografa vencedores e ocupacao das vagas para animar apenas o que mudar.
+      const decidedBefore = new Map(allMatches().map(match => [match.id, match.winner || ""]));
+      const slotsBefore = new Map(allMatches().map(match => [match.id, `${teamKey(match.teamA)}>${teamKey(match.teamB)}`]));
+
       tournament.rounds.forEach((round, roundIndex) => {
         round.matches.forEach((match, matchIndex) => {
           const targetPoints = 18;
@@ -3283,8 +4054,32 @@
       });
       tournament.updatedAt = new Date().toISOString();
       if (tournament.mode === "double") syncDoubleEliminationSlots();
+
+      const changes = [];
+      allMatches().forEach(match => {
+        if (match.winner && decidedBefore.get(match.id) !== match.winner) {
+          changes.push({ id: match.id, slot: match.winner, effect: "winner-reveal" });
+        }
+        // Vaga que estava vazia e acabou de receber uma dupla que avancou.
+        const [beforeA, beforeB] = (slotsBefore.get(match.id) || ">").split(">");
+        if (match.teamA && !beforeA) changes.push({ id: match.id, slot: "A", effect: "slot-filled" });
+        if (match.teamB && !beforeB) changes.push({ id: match.id, slot: "B", effect: "slot-filled" });
+      });
+
       persist();
       renderAll();
+      highlightMatchChanges(changes);
+    }
+
+    // Roda depois do renderAll: os nos foram recriados, entao a busca e por id.
+    function highlightMatchChanges(changes) {
+      if (!changes.length) return;
+      requestAnimationFrame(() => {
+        changes.forEach(({ id, slot, effect }) => {
+          const card = document.querySelector(`.match[data-match-id="${CSS.escape(id)}"]`);
+          playOnce(card?.querySelector(`.team[data-slot="${slot}"]`), effect);
+        });
+      });
     }
 
     function matchWinnerTeam(match) {
@@ -3334,6 +4129,11 @@
           match.status = "Aguardando";
         });
       };
+      // Mapa completo de avanco da dupla eliminatoria (J1..J30).
+      // V = destino do vencedor, P = destino do perdedor, no formato [jogo, vaga].
+      // Jogos sem P sao da repescagem, onde perder ja elimina.
+      // Este objeto e a unica fonte da progressao: para mudar o chaveamento,
+      // edite aqui - nao ha logica de avanco espalhada pelo resto do codigo.
       const flow = {
         J1: { V: ["J13", "d1"], P: ["J9", "d1"] },
         J2: { V: ["J13", "d2"], P: ["J9", "d2"] },
@@ -3387,6 +4187,16 @@
 
     function scoreSnapshot() {
       return allMatches().map(match => `${match.id}:${match.scoreA || ""}-${match.scoreB || ""}`).join("|");
+    }
+
+    // Tudo que o telao desenha. Se nao mudou, nao vale repintar: o innerHTML novo
+    // reinicia as animacoes de entrada e faz a tela "piscar" a cada refresh.
+    function publicBracketSignature() {
+      if (!tournament) return "vazio";
+      const slots = allMatches()
+        .map(match => `${match.id}:${teamKey(match.teamA)}>${teamKey(match.teamB)}:${match.scoreA || ""}-${match.scoreB || ""}:${match.winner || ""}:${match.status}`)
+        .join("|");
+      return `${tournament.mode}#${publicLiveMatchId}#${slots}`;
     }
 
     function detectPublicScoreMovement() {
@@ -3491,6 +4301,8 @@
       return finances;
     }
 
+    // Valor por dupla nesta tabela = quanto a dupla ja pagou (recebido), nao o previsto.
+    // O previsto e calculado a parte como entryFee x numero de duplas (ver financeTotals()).
     function syncFinanceWithTeams() {
       if (!Array.isArray(finances)) finances = [];
       const existing = new Map(finances.map(row => [row.id, row]));
@@ -3499,18 +4311,32 @@
         finances = [];
         return;
       }
-      const feeSetting = tournament?.entryFee ?? getSettings().entryFee ?? "";
-      const defaultValue = feeSetting === "" ? "" : String(feeSetting);
       const synced = validTeams.map(team => {
         const current = existing.get(team.id);
-        if (current) {
-          const value = current.value === "" ? defaultValue : current.value;
-          return { ...current, id: team.id, team: teamName(team), value };
-        }
-        return { id: team.id, team: teamName(team), status: "Aberto", value: defaultValue, method: "", date: "", note: "" };
+        if (current) return { ...current, id: team.id, team: teamName(team) };
+        return { id: team.id, team: teamName(team), status: "Aberto", value: "", method: "", date: "", note: "" };
       });
       const manualRows = finances.filter(row => !teams.some(team => team.id === row.id) && row.team);
       finances = [...synced, ...manualRows];
+    }
+
+    function financeTotals(rows) {
+      const feeSetting = tournament?.entryFee ?? getSettings().entryFee ?? "";
+      const fee = moneyValue(feeSetting);
+      const total = fee * rows.length;
+      let paid = 0;
+      let paidCount = 0;
+      rows.forEach(record => {
+        const value = moneyValue(record.value);
+        if (record.status === "Pago") {
+          paid += value;
+          paidCount += 1;
+        } else if (record.status === "Parcial") {
+          paid += value;
+        }
+      });
+      const open = Math.max(total - paid, 0);
+      return { total, paid, paidCount, open };
     }
 
     function uniformRecord(team, athleteIndex) {
@@ -3522,6 +4348,8 @@
       }
       return uniforms[key];
     }
+
+    /* ---------- 5. Persistencia (localStorage + Supabase) ---------- */
 
     function currentStateSnapshot() {
       syncFinanceWithTeams();
@@ -3568,6 +4396,23 @@
       else tournaments.unshift(snapshot);
     }
 
+    // Unico ponto de escrita no localStorage: o shape do estado fica definido aqui.
+    // `extra` carrega o rascunho da aba admin; o telao grava so a lista de torneios.
+    function writeLocalState(extra = {}) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          version: STORAGE_VERSION,
+          activeTournamentId,
+          hasActiveTournament,
+          tournaments,
+          ...extra
+        }));
+      } catch (error) {
+        // Cota estourada nao pode derrubar a interface durante o evento.
+        console.warn("Nao foi possivel gravar no localStorage:", error.message);
+      }
+    }
+
     async function supabaseRequest(path, options = {}) {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         ...options,
@@ -3596,11 +4441,19 @@
           if (!current || String(item.savedAt || "") > String(current.savedAt || "")) merged.set(item.id, item);
         });
         tournaments = [...merged.values()];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId, hasActiveTournament, tournaments }));
+        writeLocalState();
         renderAll();
       } catch (error) {
         console.warn("Supabase historico indisponivel:", error.message);
       }
+    }
+
+    // Busca um torneio especifico no Supabase. E o que permite o telao rodar
+    // em outro aparelho (celular via QR), onde nao existe o localStorage do gestor.
+    async function fetchRemoteTournament(id) {
+      if (!id) return null;
+      const rows = await supabaseRequest(`${SUPABASE_TABLE}?id=eq.${encodeURIComponent(id)}&select=payload`);
+      return Array.isArray(rows) && rows[0]?.payload ? rows[0].payload : null;
     }
 
     async function saveRemoteTournament(snapshot) {
@@ -3628,14 +4481,20 @@
       }
     }
 
+    // O localStorage e a fonte de verdade imediata; o Supabase e replica.
+    // Sem debounce, digitar um placar de 2 digitos dispara 2 POSTs.
+    function queueRemoteSave() {
+      clearTimeout(remoteSaveTimer);
+      remoteSaveTimer = setTimeout(() => {
+        const snapshot = tournaments.find(item => item.id === activeTournamentId);
+        if (snapshot) saveRemoteTournament(snapshot);
+      }, REMOTE_SAVE_DEBOUNCE_MS);
+    }
+
     function persist() {
       upsertActiveTournament();
       const snapshot = tournaments.find(item => item.id === activeTournamentId);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        version: 3,
-        activeTournamentId,
-        hasActiveTournament,
-        tournaments,
+      writeLocalState({
         teams,
         finances,
         uniforms,
@@ -3645,58 +4504,40 @@
         menuCollapsed,
         adminPanelHidden,
         teamTargetCount
-      }));
-      if (snapshot) saveRemoteTournament(snapshot);
+      });
+      if (snapshot) queueRemoteSave();
     }
 
+    // Le a lista de torneios. O telao (isPublic) carrega direto o torneio ativo;
+    // a aba admin para na tela de selecao e so hidrata quando o usuario escolhe um.
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
+      hasActiveTournament = false;
+
       if (!raw) {
         tournaments = [demoTournamentSnapshot()];
-        hasActiveTournament = false;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
+        activeTournamentId = "";
+        writeLocalState();
         return;
       }
+
       try {
         const state = JSON.parse(raw);
         tournaments = Array.isArray(state.tournaments) ? state.tournaments : [];
+        activeTournamentId = state.activeTournamentId || "";
+
         if (!tournaments.length) {
           tournaments = [demoTournamentSnapshot()];
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
-        }
-        activeTournamentId = state.activeTournamentId || "";
-        hasActiveTournament = false;
-        const activeState = tournaments.find(item => item.id === activeTournamentId);
-        if (isPublic && activeState) {
-          applyTournamentState(activeState);
-          return;
-        }
-        if (tournaments.length) {
-          return;
+          activeTournamentId = "";
+          writeLocalState();
         }
 
-        teams = Array.isArray(state.teams) ? state.teams : [];
-        finances = Array.isArray(state.finances) ? state.finances : [];
-        uniforms = state.uniforms && typeof state.uniforms === "object" ? state.uniforms : {};
-        tournament = state.tournament || null;
-        mode = state.mode || "single";
-        activeView = state.activeView || "bracketView";
-        menuCollapsed = Boolean(state.menuCollapsed);
-        adminPanelHidden = Boolean(state.adminPanelHidden);
-        teamTargetCount = Number(state.teamTargetCount) || Math.max(16, teams.length || 16);
-        if (mode === "double") teamTargetCount = 16;
-        if (teams.length || tournament) {
-          activeTournamentId = uid();
-          setSettings(tournament || defaultSettings());
-          syncTeamRowsWithTarget();
-          syncFinanceWithTeams();
-          const snapshot = currentStateSnapshot();
-          tournaments = [snapshot];
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, activeTournamentId: "", hasActiveTournament: false, tournaments }));
-        }
-      } catch {
+        const activeState = tournaments.find(item => item.id === activeTournamentId);
+        if (isPublic && activeState) applyTournamentState(activeState);
+      } catch (error) {
+        console.warn("Estado salvo invalido, recriando:", error.message);
         tournaments = [demoTournamentSnapshot()];
-        hasActiveTournament = false;
+        activeTournamentId = "";
       }
     }
 
@@ -3780,6 +4621,9 @@
 
       await deleteRemoteTournament(removedId);
       await sleep(500);
+      setButtonLoading(button, false);
+      button.textContent = "Apagar torneio";
+      delete button.dataset.confirmed;
       showToast(`Torneio "${name}" apagado.`, "danger");
       renderAll();
     }
@@ -3831,6 +4675,8 @@
       renderAll();
     }
 
+    /* ---------- 6. Renderizacao ---------- */
+
     function renderTournamentHistory() {
       const list = document.getElementById("tournamentHistory");
       if (!list) return;
@@ -3873,9 +4719,9 @@
       syncTeamRowsWithTarget();
       list.innerHTML = teams.map((team, index) => `
         <div class="team-row">
-          <input value="${team.a || ""}" placeholder="Atleta ${index + 1}A" data-team="${team.id}" data-field="a">
-          <input value="${team.b || ""}" placeholder="Atleta ${index + 1}B" data-team="${team.id}" data-field="b">
-          <button class="danger-btn" type="button" title="Remover dupla" data-remove="${team.id}">x</button>
+          <input value="${escapeAttr(team.a)}" placeholder="Atleta ${index + 1}A" aria-label="Atleta ${index + 1}A" data-team="${escapeAttr(team.id)}" data-field="a">
+          <input value="${escapeAttr(team.b)}" placeholder="Atleta ${index + 1}B" aria-label="Atleta ${index + 1}B" data-team="${escapeAttr(team.id)}" data-field="b">
+          <button class="danger-btn" type="button" title="Remover dupla" aria-label="Remover dupla ${index + 1}" data-remove="${escapeAttr(team.id)}">x</button>
         </div>
       `).join("");
 
@@ -3918,6 +4764,14 @@
       document.body.classList.toggle("double-public", Boolean(isPublic && tournament.mode === "double"));
       document.body.classList.toggle("single-public", Boolean(isPublic && tournament.mode === "single"));
       document.body.classList.toggle("groups-public", Boolean(isPublic && tournament.mode === "groups"));
+
+      // O telao repinta a cada 10s; sem esta guarda as animacoes nunca terminam.
+      if (isPublic) {
+        const signature = publicBracketSignature();
+        if (signature === publicRenderSignature && bracket.childElementCount) return;
+        publicRenderSignature = signature;
+      }
+
       if (isPublic && tournament.mode === "double") {
         bracket.innerHTML = `${liveMatchOverlayHtml()}${doubleEliminationSvg(tournament.teams || normalizeTeams())}`;
         return;
@@ -3990,9 +4844,18 @@
       `;
     }
 
+    // Reinicia a animacao mesmo se a classe ja estiver aplicada.
+    function playOnce(element, className) {
+      if (!element) return;
+      element.classList.remove(className);
+      void element.offsetWidth;
+      element.classList.add(className);
+    }
+
     function wireScoreInputs(scope) {
       scope.querySelectorAll(".score-input").forEach(input => {
         input.addEventListener("input", () => {
+          playOnce(input, "score-bump");
           const match = tournament.rounds[Number(input.dataset.round)].matches[Number(input.dataset.match)];
           if (input.value !== "") input.value = String(Math.min(18, Math.max(0, Number(input.value) || 0)));
           match[input.dataset.field] = input.value;
@@ -4045,33 +4908,84 @@
         if (match.code) matchByCode.set(match.code, match);
       });
 
-      const boxW = 205;
-      const rowH = 24;
+      /* ---- Geometria do diagrama (unidades do viewBox, nao pixels de tela) ----
+       *
+       * Leitura da tela, de cima para baixo no centro:
+       *   CAMPEAO -> Grande Final sobre o podio dourado
+       *   Semifinal 1 (esquerda) e Semifinal 2 (direita), ladeando o centro
+       *   3o lugar sobre o podio prateado
+       *
+       * Classificatoria cresce da esquerda para o centro; Repescagem, da
+       * direita para o centro. As duas alimentam as semifinais.
+       */
+      const boxW = 180;
+      const rowH = 26;
       const boxH = rowH * 2 + 5;
-      const scoreW = 32;
-      const colGap = 40;
-      const semiGap = 120;
-      const leftX = [55, 300, 545];
-      const semi1X = 790;
-      const semi2X = semi1X + boxW + semiGap;
-      const semisRowY = 382;
-      const finalX = (semi1X + semi2X + boxW) / 2 - boxW / 2;
-      const grandFinalY = semisRowY + boxH + 85;
-      const thirdPlaceY = grandFinalY + boxH + 90;
-      const accessX = semi2X + boxW + colGap;
+      const scoreW = 30;
+      const colGap = 26;
+      const sideGap = 38;
+
+      const leftX = [40, 246, 452];
+      const leftEdge = leftX[2] + boxW;              // 632
+      const semi1X = leftEdge + sideGap;             // 670
+      const centerX = 1000;
+      const semi2X = centerX + (centerX - (semi1X + boxW)); // espelha a Semi 1
+      const semiRowY = 412;
+      const semiCenterY = semiRowY + boxH / 2;
+
+      const accessX = semi2X + boxW + sideGap;
       const rightX2 = accessX + boxW + colGap;
       const rightX1 = rightX2 + boxW + colGap;
       const rightX0 = rightX1 + boxW + colGap;
       const rightX = [rightX0, rightX1, rightX2];
-      const canvasW = rightX0 + boxW + 55;
-      const canvasH = 900;
-      const leftY = [106, 178, 250, 322, 428, 500, 572, 644];
-      const leftRound2Y = [142, 286, 464, 608];
-      const leftRound3Y = [214, 536];
-      const rightY = [106, 250, 428, 572];
-      const rightRound2Y = [142, 286, 464, 608];
-      const rightRound3Y = [214, 536];
-      const accessY = [258, 506];
+      const canvasW = rightX0 + boxW + 40;
+      const canvasH = 860;
+
+      // Faixas do topo: selo do torneio a direita, depois titulos das chaves.
+      const badgeY = 18;
+      const sectionLabelY = 84;
+      const columnLabelY = 106;
+
+      // Grande Final: caixa maior, apoiada no podio.
+      const finalW = 262;
+      const finalRowH = 34;
+      const finalGap = 8;
+      const finalBoxH = finalRowH * 2 + finalGap;
+      const finalX = centerX - finalW / 2;
+      const finalY = 162;
+      const finalBottomY = finalY + finalBoxH;
+
+      // Podio dourado do campeao.
+      const podiumRx = 158;
+      const podiumRy = 23;
+      const podiumTopY = finalBottomY + 4;
+      const podiumH = 30;
+      const podiumBaseY = podiumTopY + podiumH;
+
+      // Corredor onde as duas semifinais se encontram antes de subir ao podio.
+      const mergeY = 320;
+
+      // 3o lugar, sobre o podio prateado.
+      const thirdW = 196;
+      const thirdX = centerX - thirdW / 2;
+      const thirdY = 600;
+      const thirdFeedY = 550;
+      const silverRx = 122;
+      const silverRy = 19;
+      const silverTopY = thirdY + boxH + 4;
+      const silverH = 24;
+
+      // Corredores das duas ligacoes que atravessam o centro (ver README).
+      const crossUpperY = 360;   // J25 (repescagem) -> Semifinal 1
+      const crossLowerY = 520;   // J22 (classificatoria) -> Semifinal 2
+
+      const leftY = [122, 200, 278, 356, 488, 566, 644, 722];
+      const round2Y = [161, 317, 527, 683];
+      const round3Y = [239, 605];
+      const rightY = round2Y;      // J12..J9 alinhados 1 a 1 com J17..J20
+      const rightRound2Y = round2Y;
+      const rightRound3Y = round3Y;
+      const accessY = round3Y;     // J23->J25 e J24->J26 em linha reta
 
       const slotName = (team, fallback) => team ? `${team.a || ""} / ${team.b || ""}`.trim() || fallback : fallback;
       const matchSlot = (code, slot, fallback) => {
@@ -4082,132 +4996,249 @@
         return { name: slotName(team, fallback), score: score ?? "", winner };
       };
 
-      const matchBox = (x, y, w, h, a, b, id) => {
-        const scoreX = x + w - scoreW - 6;
-        const nameMax = 17;
+      // `options` permite ampliar um confronto (usado so na Grande Final) sem
+      // duplicar o template: rh = altura da linha, sw = largura do placar.
+      const matchBox = (x, y, w, h, a, b, id, options = {}) => {
+        const rh = options.rowH || rowH;
+        const gap = options.gap ?? 5;
+        const sw = options.scoreW || scoreW;
+        const nameMax = options.nameMax || 17;
+        const big = options.big ? " big-slot" : "";
+        const scoreX = x + w - sw - 6;
+        const row2Y = y + rh + gap;
+        const baseline = rh / 2 + 6;
         return `
           <text class="small-text" x="${x}" y="${y - 6}">${id}</text>
-          <rect class="team-node${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${rowH}" rx="7" />
-          <rect class="team-node${b.winner ? " winner-node" : ""}" x="${x}" y="${y + rowH + 5}" width="${w}" height="${rowH}" rx="7" />
-          <rect class="score-node" x="${scoreX}" y="${y + 3}" width="${scoreW}" height="${rowH - 6}" rx="6" />
-          <rect class="score-node" x="${scoreX}" y="${y + rowH + 8}" width="${scoreW}" height="${rowH - 6}" rx="6" />
-          <text class="slot-text" x="${x + 10}" y="${y + 18}">${trimSvgText(a.name, nameMax)}</text>
-          <text class="slot-text" x="${x + 10}" y="${y + rowH + 23}">${trimSvgText(b.name, nameMax)}</text>
-          <text class="score-text" x="${scoreX + scoreW / 2}" y="${y + 18}">${svgEscape(a.score)}</text>
-          <text class="score-text" x="${scoreX + scoreW / 2}" y="${y + rowH + 23}">${svgEscape(b.score)}</text>
+          <rect class="team-node${big}${a.winner ? " winner-node" : ""}" x="${x}" y="${y}" width="${w}" height="${rh}" rx="7" />
+          <rect class="team-node${big}${b.winner ? " winner-node" : ""}" x="${x}" y="${row2Y}" width="${w}" height="${rh}" rx="7" />
+          <rect class="score-node" x="${scoreX}" y="${y + 3}" width="${sw}" height="${rh - 6}" rx="6" />
+          <rect class="score-node" x="${scoreX}" y="${row2Y + 3}" width="${sw}" height="${rh - 6}" rx="6" />
+          <text class="slot-text${big}" x="${x + 8}" y="${y + baseline}">${trimSvgText(a.name, nameMax)}</text>
+          <text class="slot-text${big}" x="${x + 8}" y="${row2Y + baseline}">${trimSvgText(b.name, nameMax)}</text>
+          <text class="score-text${big}" x="${scoreX + sw / 2}" y="${y + baseline}">${svgEscape(a.score)}</text>
+          <text class="score-text${big}" x="${scoreX + sw / 2}" y="${row2Y + baseline}">${svgEscape(b.score)}</text>
         `;
       };
 
       const connector = (x1, y1, x2, y2, cls = "line") => `
         <path class="${cls}" d="M${x1} ${y1} H${(x1 + x2) / 2} V${y2} H${x2}" />
       `;
-      const straight = (x1, y1, x2, y2, cls = "line") => `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
       const cornerConnector = (x1, y1, x2, y2, cls = "line") => `<path class="${cls}" d="M${x1} ${y1} H${x2} V${y2}" />`;
       const connectorV = (x1, y1, x2, y2, cls = "line") => `<path class="${cls}" d="M${x1} ${y1} V${(y1 + y2) / 2} H${x2} V${y2}" />`;
+      // Como `connector`, mas com a dobra num X escolhido em vez do ponto medio:
+      // usado para desviar de caixas que ficam no caminho reto.
+      const connectorAt = (x1, y1, bendX, y2, x2, cls = "line") => `<path class="${cls}" d="M${x1} ${y1} H${bendX} V${y2} H${x2}" />`;
+      // Caminho ortogonal livre: recebe os vertices ja calculados. Usado quando
+      // a ligacao precisa contornar caixas e nenhum helper fixo resolve.
+      const polyline = (points, cls = "line") =>
+        `<path class="${cls}" d="M${points.map(([px, py]) => `${px} ${py}`).join(" L")}" />`;
 
       const leftR1 = leftY.map((y, index) => {
         const code = `J${index + 1}`;
         return matchBox(leftX[0], y, boxW, boxH, matchSlot(code, "A", shortTeamName(teamsForSvg[index * 2], "A definir")), matchSlot(code, "B", shortTeamName(teamsForSvg[index * 2 + 1], "A definir")), code);
       }).join("");
-      const leftR2 = leftRound2Y.map((y, index) => {
+      const leftR2 = round2Y.map((y, index) => {
         const code = `J${index + 13}`;
         return matchBox(leftX[1], y, boxW, boxH, matchSlot(code, "A", "A definir"), matchSlot(code, "B", "A definir"), code);
       }).join("");
-      const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], leftRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const leftR3 = [21, 22].map((codeNumber, index) => matchBox(leftX[2], round3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const semiPositions = [semi1X, semi2X];
-      const semis = [27, 28].map((codeNumber, index) => matchBox(semiPositions[index], semisRowY, boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      const semis = [27, 28].map((codeNumber, index) => matchBox(semiPositions[index], semiRowY, boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
 
-      const rightR1 = [9, 10, 11, 12].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
+      // J12 no topo e J9 embaixo: assim cada vencedor cai na linha reta do seu
+      // destino real (J12->J17, J11->J18, J10->J19, J9->J20, conforme `flow`).
+      const rightR1 = [12, 11, 10, 9].map((codeNumber, index) => matchBox(rightX[0], rightY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR2 = [17, 18, 19, 20].map((codeNumber, index) => matchBox(rightX[1], rightRound2Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const rightR3 = [23, 24].map((codeNumber, index) => matchBox(rightX[2], rightRound3Y[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
       const accessMatches = [25, 26].map((codeNumber, index) => matchBox(accessX, accessY[index], boxW, boxH, matchSlot(`J${codeNumber}`, "A", "A definir"), matchSlot(`J${codeNumber}`, "B", "A definir"), `J${codeNumber}`)).join("");
-      const grandFinal = matchBox(finalX, grandFinalY, boxW, boxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30");
-      const thirdPlace = matchBox(finalX, thirdPlaceY, boxW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
+      const grandFinal = matchBox(finalX, finalY, finalW, finalBoxH, matchSlot("J30", "A", "A definir"), matchSlot("J30", "B", "A definir"), "J30", {
+        rowH: finalRowH,
+        gap: finalGap,
+        scoreW: 46,
+        nameMax: 20,
+        big: true
+      });
+      const thirdPlace = matchBox(thirdX, thirdY, thirdW, boxH, matchSlot("J29", "A", "A definir"), matchSlot("J29", "B", "A definir"), "J29");
+
+      const leftEdgeX = leftX[2] + boxW;
+      const semi1ExitX = semi1X + boxW;
+      const semi2ExitX = semi2X + boxW;
+      const semisBottomY = semiRowY + boxH;
 
       const leftConnectors = [
-        ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], leftRound2Y[Math.floor(i / 2)] + boxH / 2)),
-        ...leftRound2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], leftRound3Y[Math.floor(i / 2)] + boxH / 2)),
-        connector(leftX[2] + boxW, leftRound3Y[0] + boxH / 2, semi1X, semisRowY + boxH / 2),
-        `<path class="line" d="M${leftX[2] + boxW} ${leftRound3Y[1] + boxH / 2} V190 H${semi2X + 30} V${semisRowY}" />`
+        ...leftY.map((y, i) => connector(leftX[0] + boxW, y + boxH / 2, leftX[1], round2Y[Math.floor(i / 2)] + boxH / 2)),
+        ...round2Y.map((y, i) => connector(leftX[1] + boxW, y + boxH / 2, leftX[2], round3Y[Math.floor(i / 2)] + boxH / 2)),
+        // J21 desce direto para a Semifinal 1.
+        connector(leftEdgeX, round3Y[0] + boxH / 2, semi1X, semiCenterY),
+        // J22 atravessa o centro por baixo das semifinais ate a Semifinal 2.
+        polyline([
+          [leftEdgeX, round3Y[1] + boxH / 2],
+          [leftEdgeX + 28, round3Y[1] + boxH / 2],
+          [leftEdgeX + 28, crossLowerY],
+          [semi2X - 20, crossLowerY],
+          [semi2X - 20, semiCenterY],
+          [semi2X, semiCenterY]
+        ])
       ].join("");
 
       const rightConnectors = [
         ...rightY.map((y, i) => connector(rightX[0], y + boxH / 2, rightX[1] + boxW, rightRound2Y[i] + boxH / 2)),
         ...rightRound2Y.map((y, i) => connector(rightX[1], y + boxH / 2, rightX[2] + boxW, rightRound3Y[Math.floor(i / 2)] + boxH / 2)),
-        connector(rightX[2], rightRound3Y[0] + boxH / 2, accessX + boxW, accessY[0] + boxH / 2),
-        connector(rightX[2], rightRound3Y[1] + boxH / 2, accessX + boxW, accessY[1] + boxH / 2)
+        connector(rightX[2], rightRound3Y[0] + boxH / 2, accessX + boxW, accessY[0] + boxH / 2, "line-feed"),
+        connector(rightX[2], rightRound3Y[1] + boxH / 2, accessX + boxW, accessY[1] + boxH / 2, "line-feed")
       ].join("");
 
-      const semiCenterY = semisRowY + boxH / 2;
-      const semi1ExitX = semi1X + boxW;
-      const semi2ExitX = semi2X + boxW;
-      const semi1BottomX = semi1X + boxW / 2;
-      const semi2BottomX = semi2X + boxW / 2;
-      const semisBottomY = semisRowY + boxH;
-      const finalCenterX = finalX + boxW / 2;
-      const finalBottomY = grandFinalY + boxH;
-      const thirdCorridorY = (finalBottomY + thirdPlaceY) / 2;
+      const semi1TopX = semi1X + boxW / 2;
+      const semi2TopX = semi2X + boxW / 2;
+
       const finalsConnectors = [
-        cornerConnector(accessX, accessY[0] + boxH / 2, semi1ExitX, semiCenterY, "line-feed"),
+        // Repescagem alimenta as semis (tracejado dourado). O J25 vem do alto a
+        // direita e precisa contornar a Semifinal 2 para chegar na Semifinal 1.
+        polyline([
+          [accessX, accessY[0] + boxH / 2],
+          [accessX - 22, accessY[0] + boxH / 2],
+          [accessX - 22, crossUpperY],
+          [semi1ExitX + 20, crossUpperY],
+          [semi1ExitX + 20, semiCenterY],
+          [semi1ExitX, semiCenterY]
+        ], "line-feed"),
         connector(semi2ExitX, semiCenterY, accessX, accessY[1] + boxH / 2, "line-feed"),
-        connectorV(semi1BottomX, semisBottomY, finalCenterX, grandFinalY),
-        connectorV(semi2BottomX, semisBottomY, finalCenterX, grandFinalY),
-        `<path class="line-soft" d="M${semi1BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`,
-        `<path class="line-soft" d="M${semi2BottomX} ${semisBottomY} V${thirdCorridorY} H${finalCenterX} V${thirdPlaceY}" />`
+
+        // Semifinais sobem e se encontram sob o podio do campeao.
+        polyline([[semi1TopX, semiRowY], [semi1TopX, mergeY], [centerX, mergeY], [centerX, podiumBaseY]], "line-gold"),
+        polyline([[semi2TopX, semiRowY], [semi2TopX, mergeY], [centerX, mergeY], [centerX, podiumBaseY]], "line-gold"),
+
+        // Perdedores das semifinais descem para a disputa de 3o lugar.
+        polyline([[semi1ExitX - 30, semisBottomY], [semi1ExitX - 30, thirdFeedY], [centerX, thirdFeedY], [centerX, thirdY]], "line-soft"),
+        polyline([[semi2X + 30, semisBottomY], [semi2X + 30, thirdFeedY], [centerX, thirdFeedY], [centerX, thirdY]], "line-soft")
       ].join("");
+
+      // ---- Ornamentos do centro: podios, brilho e ramos de louro ----
+      const laurel = (cx, cy, dir) => Array.from({ length: 6 }, (_, i) => {
+        const angle = (-52 + (i / 5) * 104) * Math.PI / 180;
+        const x = cx + dir * (30 * Math.cos(angle) - 4);
+        const y = cy + 34 * Math.sin(angle);
+        const rot = dir * (angle * 180 / Math.PI + 96) * 0.6;
+        return `<ellipse class="laurel-leaf" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="9.5" ry="3.6" transform="rotate(${rot.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})" />`;
+      }).join("");
+
+      const podium = (cx, topY, rx, ry, height, faceClass, sideClass) => `
+        <path class="${sideClass}" d="M${cx - rx} ${topY} V${topY + height} A${rx} ${ry} 0 0 0 ${cx + rx} ${topY + height} V${topY} Z" />
+        <ellipse class="${faceClass}" cx="${cx}" cy="${topY}" rx="${rx}" ry="${ry}" />
+      `;
+
+      const centerpiece = `
+        <ellipse class="champion-glow" cx="${centerX}" cy="${finalY + finalBoxH / 2}" rx="320" ry="180" />
+        <path class="champion-beam" d="M${centerX - 78} 96 L${centerX + 78} 96 L${centerX + podiumRx - 6} ${podiumTopY} L${centerX - podiumRx + 6} ${podiumTopY} Z" />
+        ${podium(centerX, podiumTopY, podiumRx, podiumRy, podiumH, "podium-face", "podium-side")}
+        <g class="laurel">${laurel(centerX - 162, 108, -1)}${laurel(centerX + 162, 108, 1)}</g>
+        <text class="champion-title" x="${centerX}" y="120">CAMPEAO</text>
+        <text class="final-label" x="${centerX}" y="${finalY - 14}">Grande Final</text>
+      `;
+
+      const thirdPiece = `
+        ${podium(centerX, silverTopY, silverRx, silverRy, silverH, "silver-face", "silver-side")}
+        <text class="third-label" x="${centerX}" y="${thirdY - 14}">3o Lugar</text>
+      `;
+
+      const badgeW = 500;
+      const badgeX = canvasW - badgeW - 40;
+      const legendTop = thirdY + boxH + silverH + 66;
 
       return `
         <svg class="double-diagram" viewBox="0 0 ${canvasW} ${canvasH}" role="img" aria-label="Tabela dupla eliminatoria com 16 duplas">
-          <rect x="0" y="0" width="${canvasW}" height="${canvasH}" fill="#06100c" />
-          <text class="title-text" x="${canvasW / 2}" y="30">TABELA DE JOGOS</text>
-          <text class="subtitle-text" x="${canvasW / 2}" y="56">16 DUPLAS - DUPLA ELIMINATORIA</text>
-          <text class="label-text" x="505" y="82">Classificatoria</text>
-          <text class="legend-text" x="158" y="102">Primeira rodada</text>
-          <text class="legend-text" x="405" y="102">Oitavas</text>
-          <text class="legend-text" x="652" y="102">Quartas</text>
-          <text class="legend-text" x="${(semi1X + semi2X + boxW) / 2}" y="102">Semifinais</text>
-          <text class="label-text" x="${(accessX + rightX[0] + boxW) / 2}" y="82">Repescagem</text>
-          <text class="legend-text" x="${rightX[0] + boxW / 2}" y="102">Primeira rodada</text>
-          <text class="legend-text" x="${rightX[1] + boxW / 2}" y="102">Oitavas</text>
-          <text class="legend-text" x="${rightX[2] + boxW / 2}" y="102">Quartas</text>
-          <text class="legend-text" x="${accessX + boxW / 2}" y="102">Quartas finais</text>
+          <defs>
+            <linearGradient id="podiumGold" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f6dd93" />
+              <stop offset="52%" stop-color="#c99b34" />
+              <stop offset="100%" stop-color="#6d4d13" />
+            </linearGradient>
+            <linearGradient id="podiumGoldTop" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffeaa8" />
+              <stop offset="60%" stop-color="#e0b855" />
+              <stop offset="100%" stop-color="#b8892a" />
+            </linearGradient>
+            <linearGradient id="podiumSilverTop" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#eef2f5" />
+              <stop offset="60%" stop-color="#aab2b9" />
+              <stop offset="100%" stop-color="#767e85" />
+            </linearGradient>
+            <linearGradient id="podiumSilver" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d7dde2" />
+              <stop offset="55%" stop-color="#8e979f" />
+              <stop offset="100%" stop-color="#4a5158" />
+            </linearGradient>
+            <radialGradient id="championGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(230, 199, 109, 0.30)" />
+              <stop offset="55%" stop-color="rgba(230, 199, 109, 0.09)" />
+              <stop offset="100%" stop-color="rgba(230, 199, 109, 0)" />
+            </radialGradient>
+            <linearGradient id="championBeam" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255, 236, 176, 0)" />
+              <stop offset="100%" stop-color="rgba(255, 226, 150, 0.16)" />
+            </linearGradient>
+            <linearGradient id="diagramBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1b1b1d" />
+              <stop offset="55%" stop-color="#121214" />
+              <stop offset="100%" stop-color="#0a0a0b" />
+            </linearGradient>
+          </defs>
+
+          <rect x="0" y="0" width="${canvasW}" height="${canvasH}" fill="url(#diagramBg)" />
+
+          <g class="title-badge">
+            <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="38" rx="8" />
+            <text x="${badgeX + badgeW / 2}" y="${badgeY + 25}">TABELA DE JOGOS - 16 DUPLAS - DUPLA ELIMINATORIA</text>
+          </g>
+
+          <text class="label-text" x="${leftX[1] + boxW / 2}" y="${sectionLabelY}">Classificatoria</text>
+          <text class="legend-text" x="${leftX[0] + boxW / 2}" y="${columnLabelY}">Primeira rodada</text>
+          <text class="legend-text" x="${leftX[1] + boxW / 2}" y="${columnLabelY}">Oitavas</text>
+          <text class="legend-text" x="${leftX[2] + boxW / 2}" y="${columnLabelY}">Quartas</text>
+
+          <text class="label-text" x="${rightX[1] + boxW / 2}" y="${sectionLabelY}">Repescagem</text>
+          <text class="legend-text" x="${accessX + boxW / 2}" y="${columnLabelY}">Acesso as semis</text>
+          <text class="legend-text" x="${rightX[2] + boxW / 2}" y="${columnLabelY}">Quartas</text>
+          <text class="legend-text" x="${rightX[1] + boxW / 2}" y="${columnLabelY}">Oitavas</text>
+          <text class="legend-text" x="${rightX[0] + boxW / 2}" y="${columnLabelY}">Primeira rodada</text>
+
+          ${centerpiece}
           ${leftConnectors}${rightConnectors}${finalsConnectors}
           ${leftR1}${leftR2}${leftR3}${semis}
           ${rightR1}${rightR2}${rightR3}${accessMatches}
+          ${thirdPiece}
           ${grandFinal}${thirdPlace}
-          <line class="line champion-line" x1="${finalX + boxW}" y1="${grandFinalY + boxH / 2}" x2="${finalX + boxW + 30}" y2="${grandFinalY + boxH / 2}" />
-          <text class="label-text" x="${finalX + boxW / 2}" y="${grandFinalY - 20}">Grande Final</text>
-          <text class="small-text" x="${finalX + boxW / 2}" y="${thirdPlaceY - 14}" text-anchor="middle">3o lugar</text>
-          <text class="label-text" x="${finalX + boxW + 85}" y="${grandFinalY + boxH / 2 + 5}">Campeao</text>
-          <text class="small-text" x="${semi1X + boxW / 2}" y="${semisRowY - 14}" text-anchor="middle">Semi 1</text>
-          <text class="small-text" x="${semi2X + boxW / 2}" y="${semisRowY - 14}" text-anchor="middle">Semi 2</text>
-          <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[0] - 14}" text-anchor="middle">Acesso semi 1</text>
-          <text class="small-text" x="${accessX + boxW / 2}" y="${accessY[1] - 14}" text-anchor="middle">Acesso semi 2</text>
+
+          <text class="semi-label" x="${semi1X + boxW / 2}" y="${semiRowY - 14}">Semifinal 1</text>
+          <text class="semi-label" x="${semi2X + boxW / 2}" y="${semiRowY - 14}">Semifinal 2</text>
+
           <g class="diagram-legend">
-            <text class="legend-note-title" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 46}" text-anchor="middle">Como funciona a repescagem</text>
-            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 70}" text-anchor="middle">Quem perde na Classificatoria nao sai do torneio: cai na Repescagem e tenta voltar.</text>
-            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 90}" text-anchor="middle">"Acesso semi 1/2" e a ultima rodada da Repescagem: quem vence garante vaga na Semifinal, ao lado de quem venceu a Classificatoria.</text>
-            <text class="legend-note" x="${finalX + boxW / 2}" y="${thirdPlaceY + boxH + 110}" text-anchor="middle">Perdeu 2 vezes, esta fora. As semifinais definem a Grande Final (1o lugar) e o duelo de 3o lugar.</text>
+            <text class="legend-note-title" x="${centerX}" y="${legendTop}" text-anchor="middle">Como funciona a repescagem</text>
+            <text class="legend-note" x="${centerX}" y="${legendTop + 24}" text-anchor="middle">Quem perde na Classificatoria nao sai do torneio: cai na Repescagem e tenta voltar.</text>
+            <text class="legend-note" x="${centerX}" y="${legendTop + 44}" text-anchor="middle">"Acesso as semis" e a ultima rodada da Repescagem: quem vence garante vaga na Semifinal, ao lado de quem venceu a Classificatoria.</text>
+            <text class="legend-note" x="${centerX}" y="${legendTop + 64}" text-anchor="middle">Perdeu 2 vezes, esta fora. As semifinais definem a Grande Final (1o lugar) e o duelo de 3o lugar.</text>
           </g>
         </svg>
       `;
-    }    function matchHtml(match, roundIndex, matchIndex) {
+    }
+
+    function matchHtml(match, roundIndex, matchIndex) {
       const aWinner = match.winner === "A" ? " winner" : "";
       const bWinner = match.winner === "B" ? " winner" : "";
       const matchLabel = match.label || (match.code === "J30" ? "Final" : match.code === "J29" ? "3o lugar" : "");
       const liveClass = isPublic && publicLiveMatchId === match.id ? " score-live" : "";
       return `
-        <article class="match${liveClass}">
+        <article class="match${liveClass}" data-match-id="${escapeAttr(match.id)}">
           <div class="match-meta">
-            <span>${matchLabel ? `${escapeAttr(matchLabel)} - ` : ""}${match.status}</span>
+            <span>${matchLabel ? `${escapeAttr(matchLabel)} - ` : ""}${escapeAttr(match.status)}</span>
           </div>
-          <div class="team${aWinner}">
-            <span class="team-name ${match.teamA ? "" : "bye"}">${teamName(match.teamA)}</span>
-            <input class="score-input" type="number" min="0" max="18" value="${match.scoreA}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
+          <div class="team${aWinner}" data-slot="A">
+            <span class="team-name ${match.teamA ? "" : "bye"}">${teamNameHtml(match.teamA)}</span>
+            <input class="score-input" type="number" min="0" max="18" value="${escapeAttr(match.scoreA)}" aria-label="Pontos de ${teamNameHtml(match.teamA)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreA" ${isPublic ? "readonly" : ""}>
           </div>
-          <div class="team${bWinner}">
-            <span class="team-name ${match.teamB ? "" : "bye"}">${teamName(match.teamB)}</span>
-            <input class="score-input" type="number" min="0" max="18" value="${match.scoreB}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
+          <div class="team${bWinner}" data-slot="B">
+            <span class="team-name ${match.teamB ? "" : "bye"}">${teamNameHtml(match.teamB)}</span>
+            <input class="score-input" type="number" min="0" max="18" value="${escapeAttr(match.scoreB)}" aria-label="Pontos de ${teamNameHtml(match.teamB)}" data-round="${roundIndex}" data-match="${matchIndex}" data-field="scoreB" ${isPublic ? "readonly" : ""}>
           </div>
         </article>
       `;
@@ -4217,13 +5248,13 @@
       const list = document.getElementById("queueList");
       if (!list) return;
       const matches = allMatches().filter(match => match.teamA && match.teamB && match.status !== "Finalizado");
-      list.innerHTML = matches.length ? matches.map(match => `
-        <article class="queue-card">
+      list.innerHTML = matches.length ? matches.map((match, index) => `
+        <article class="queue-card" style="--stagger:${index}">
           <div class="queue-meta">
-            <span class="pill sand">${match.roundName}</span>
+            <span class="pill sand">${escapeAttr(match.roundName)}</span>
           </div>
-          <strong>${teamName(match.teamA)} x ${teamName(match.teamB)}</strong>
-          <span class="muted">${match.status} - jogo ate 18 pontos</span>
+          <strong>${teamNameHtml(match.teamA)} x ${teamNameHtml(match.teamB)}</strong>
+          <span class="muted">${escapeAttr(match.status)} - jogo ate 18 pontos</span>
         </article>
       `).join("") : '<div class="empty">Nenhum jogo pendente.</div>';
 
@@ -4247,7 +5278,7 @@
       body.innerHTML = rows.length ? rows.map((row, index) => {
         const saldo = row.pf - row.pa;
         const status = row.eliminated ? "Eliminada" : "Viva";
-        return `<tr><td>${index + 1}</td><td>${teamName(row.team)}</td><td>${row.games}</td><td>${row.wins}</td><td>${row.pf}</td><td>${row.pa}</td><td>${saldo}</td><td><span class="pill ${row.eliminated ? "red" : ""}">${status}</span></td></tr>`;
+        return `<tr style="--stagger:${index}"><td>${index + 1}</td><td>${teamNameHtml(row.team)}</td><td>${row.games}</td><td>${row.wins}</td><td>${row.pf}</td><td>${row.pa}</td><td>${saldo}</td><td><span class="pill ${row.eliminated ? "red" : ""}">${status}</span></td></tr>`;
       }).join("") : '<tr><td colspan="8">Sem dados de ranking.</td></tr>';
     }
 
@@ -4295,26 +5326,14 @@
         : "Sem tabela gerada.";
 
       const dashboardTeams = activeTeams();
-      let financeTotal = 0;
-      let financePaid = 0;
-      let financePaidCount = 0;
+      const financialRows = financeRows();
+      const { total: financeTotal, paid: financePaid, paidCount: financePaidCount, open: financeOpen } = financeTotals(financialRows);
       let financeOpenCount = 0;
       let financePartialCount = 0;
-      const financialRows = financeRows();
       financialRows.forEach(record => {
-        const value = moneyValue(record.value);
-        financeTotal += value;
-        if (record.status === "Pago") {
-          financePaid += value;
-          financePaidCount += 1;
-        } else if (record.status === "Parcial") {
-          financePaid += value;
-          financePartialCount += 1;
-        } else {
-          financeOpenCount += 1;
-        }
+        if (record.status === "Parcial") financePartialCount += 1;
+        else if (record.status !== "Pago") financeOpenCount += 1;
       });
-      const financeOpen = Math.max(financeTotal - financePaid, 0);
       const financePct = pct(financePaid, financeTotal);
       let uniformDelivered = 0;
       let uniformAthletes = 0;
@@ -4386,18 +5405,7 @@
       const body = document.getElementById("financeBody");
       if (!body) return;
       const rows = financeRows();
-      let total = 0;
-      let paid = 0;
-      let paidCount = 0;
-
-      rows.forEach(record => {
-        const value = moneyValue(record.value);
-        total += value;
-        if (record.status === "Pago") {
-          paid += value;
-          paidCount += 1;
-        }
-      });
+      const { total, paid, paidCount, open } = financeTotals(rows);
 
       const search = filters.financeSearch.toLowerCase();
       const visibleRows = rows.filter(record => {
@@ -4405,31 +5413,31 @@
         return (!filters.financeStatus || record.status === filters.financeStatus) && (!search || haystack.includes(search));
       });
 
-      body.innerHTML = visibleRows.length ? visibleRows.map(record => {
+      body.innerHTML = visibleRows.length ? visibleRows.map((record, index) => {
         return `
-          <tr>
-            <td><input value="${escapeAttr(record.team)}" placeholder="Nome da dupla" data-finance="${record.id}" data-field="team"></td>
+          <tr style="--stagger:${index}">
+            <td><input value="${escapeAttr(record.team)}" placeholder="Nome da dupla" aria-label="Nome da dupla" data-finance="${escapeAttr(record.id)}" data-field="team"></td>
             <td>
-              <select data-finance="${record.id}" data-field="status">
+              <select class="finance-status finance-status-${record.status.toLowerCase()}" aria-label="Status do pagamento de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="status">
                 ${["Aberto", "Pago", "Parcial", "Cortesia"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
               </select>
             </td>
-            <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" data-finance="${record.id}" data-field="value"></td>
+            <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" aria-label="Valor pago por ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="value"></td>
             <td>
-              <select data-finance="${record.id}" data-field="method">
+              <select aria-label="Forma de pagamento de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="method">
                 ${["", "Pix", "Dinheiro", "Cartao", "Transferencia", "Outro"].map(option => `<option value="${option}" ${record.method === option ? "selected" : ""}>${option || "Forma"}</option>`).join("")}
               </select>
             </td>
-            <td><input type="date" value="${escapeAttr(record.date)}" data-finance="${record.id}" data-field="date"></td>
-            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." data-finance="${record.id}" data-field="note"></td>
-            <td><button class="delete-row-btn" type="button" title="Apagar esta linha do financeiro" data-remove-finance="${record.id}">Apagar</button></td>
+            <td><input type="date" value="${escapeAttr(record.date)}" aria-label="Data do pagamento de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="date"></td>
+            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: sinal, comprovante, pendencia..." aria-label="Observacao de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="note"></td>
+            <td><button class="delete-row-btn" type="button" title="Apagar esta linha do financeiro" aria-label="Apagar linha de ${escapeAttr(record.team)}" data-remove-finance="${escapeAttr(record.id)}">Apagar</button></td>
           </tr>
         `;
       }).join("") : `<tr><td colspan="7">${rows.length ? "Nenhuma linha encontrada com esse filtro." : "Adicione linhas para controlar pagamentos."}</td></tr>`;
 
       document.getElementById("financeTotal").textContent = formatMoney(total);
       document.getElementById("financePaid").textContent = formatMoney(paid);
-      document.getElementById("financeOpen").textContent = formatMoney(total - paid);
+      document.getElementById("financeOpen").textContent = formatMoney(open);
       document.getElementById("financePaidCount").textContent = `${paidCount}/${rows.length}`;
     }
 
@@ -4437,9 +5445,9 @@
       const body = document.getElementById("uniformBody");
       if (!body) return;
       const rows = activeTeams();
-      const sizeOrder = ["P", "M", "G", "GG"];
-      const shirtTotals = { P: 0, M: 0, G: 0, GG: 0 };
-      const shortTotals = { P: 0, M: 0, G: 0, GG: 0 };
+      const sizeOrder = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
+      const shirtTotals = Object.fromEntries(sizeOrder.map(size => [size, 0]));
+      const shortTotals = Object.fromEntries(sizeOrder.map(size => [size, 0]));
       let athletes = 0;
       let delivered = 0;
 
@@ -4459,28 +5467,28 @@
         return (!filters.uniformStatus || item.record.status === filters.uniformStatus) && (!search || haystack.includes(search));
       });
 
-      body.innerHTML = visibleRows.length ? visibleRows.map(({ team, index, record, athlete }) => {
+      body.innerHTML = visibleRows.length ? visibleRows.map(({ team, index, record, athlete }, rowIndex) => {
         return `
-          <tr>
-            <th>${teamName(team)}</th>
-            <td>${athlete || `Atleta ${index + 1}`}</td>
+          <tr style="--stagger:${rowIndex}">
+            <th>${teamNameHtml(team)}</th>
+            <td>${escapeAttr(athlete) || `Atleta ${index + 1}`}</td>
             <td>
-              <select data-uniform="${team.id}" data-athlete="${index}" data-field="shirt">
+              <select aria-label="Camisa de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shirt">
                 ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shirt === size ? "selected" : ""}>${size || "Camisa"}</option>`).join("")}
               </select>
             </td>
             <td>
-              <select data-uniform="${team.id}" data-athlete="${index}" data-field="shorts">
+              <select aria-label="Short de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="shorts">
                 ${["", "PP", "P", "M", "G", "GG", "XG", "XGG"].map(size => `<option value="${size}" ${record.shorts === size ? "selected" : ""}>${size || "Short"}</option>`).join("")}
               </select>
             </td>
-            <td><input value="${escapeAttr(record.number)}" placeholder="Opcional" data-uniform="${team.id}" data-athlete="${index}" data-field="number"></td>
+            <td><input value="${escapeAttr(record.number)}" placeholder="Opcional" aria-label="Numero de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="number"></td>
             <td>
-              <select data-uniform="${team.id}" data-athlete="${index}" data-field="status">
+              <select aria-label="Status do uniforme de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="status">
                 ${["Pendente", "Separado", "Entregue", "Trocar"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
               </select>
             </td>
-            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: preferencia, troca, falta..." data-uniform="${team.id}" data-athlete="${index}" data-field="note"></td>
+            <td><input value="${escapeAttr(record.note)}" placeholder="Ex: preferencia, troca, falta..." aria-label="Observacao de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="note"></td>
           </tr>
         `;
       }).join("") : `<tr><td colspan="7">${rows.length ? "Nenhum uniforme encontrado com esse filtro." : "Cadastre duplas para controlar uniformes."}</td></tr>`;
@@ -4520,6 +5528,75 @@
       bracket.style.setProperty("--public-scale", Math.max(scale, 0.2).toFixed(3));
     }
 
+    /* ---- Link publico + QR ---- */
+
+    function publicBaseUrl() {
+      const saved = localStorage.getItem(PUBLIC_URL_KEY);
+      if (saved) return saved;
+      // Rodando de file:// nao existe endereco que o celular alcance.
+      if (window.location.protocol === "file:") return "";
+      return `${window.location.origin}${window.location.pathname}`;
+    }
+
+    function publicShareUrl() {
+      const base = publicBaseUrl();
+      if (!base) return "";
+      const separator = base.includes("?") ? "&" : "?";
+      return `${base}${separator}view=chaveamento&t=${encodeURIComponent(activeTournamentId)}`;
+    }
+
+    function renderQrModal() {
+      const holder = document.getElementById("qrHolder");
+      const linkBox = document.getElementById("qrLink");
+      const hint = document.getElementById("qrHint");
+      const baseInput = document.getElementById("qrBaseUrl");
+      if (!holder || !linkBox || !hint || !baseInput) return;
+
+      const saved = localStorage.getItem(PUBLIC_URL_KEY) || "";
+      if (document.activeElement !== baseInput) baseInput.value = saved;
+
+      const url = publicShareUrl();
+
+      if (!activeTournamentId || !hasActiveTournament) {
+        holder.innerHTML = "";
+        linkBox.textContent = "";
+        hint.textContent = "Abra ou crie um torneio antes de gerar o QR.";
+        return;
+      }
+
+      if (!url) {
+        holder.innerHTML = "";
+        linkBox.textContent = "";
+        hint.textContent = "O arquivo esta aberto direto do computador (file://), endereco que o celular nao alcanca. Publique o sistema e cole o endereco no campo acima para liberar o QR.";
+        return;
+      }
+
+      try {
+        holder.innerHTML = qrSvg(url);
+        linkBox.textContent = url;
+        hint.textContent = window.location.protocol === "file:"
+          ? "O celular so vai abrir se o endereco acima estiver publicado e o torneio tiver sido salvo no Supabase."
+          : "";
+      } catch (error) {
+        holder.innerHTML = "";
+        linkBox.textContent = url;
+        hint.textContent = `Nao foi possivel gerar o QR: ${error.message}`;
+      }
+    }
+
+    function openQrModal() {
+      const overlay = document.getElementById("qrOverlay");
+      if (!overlay) return;
+      renderQrModal();
+      overlay.hidden = false;
+      document.getElementById("qrClose")?.focus();
+    }
+
+    function closeQrModal() {
+      const overlay = document.getElementById("qrOverlay");
+      if (overlay) overlay.hidden = true;
+    }
+
     function renderModeHelp() {
       const help = document.getElementById("modeHelp");
       const content = modeTexts[mode] || modeTexts.single;
@@ -4556,6 +5633,8 @@
       document.querySelectorAll("[data-view]").forEach(tab => tab.classList.toggle("active", tab.dataset.view === activeView));
       document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === activeView));
     }
+
+    /* ---------- 7. Eventos e inicializacao ---------- */
 
     function wireControls() {
       const initialDate = document.getElementById("newTournamentDate");
@@ -4650,6 +5729,38 @@
         window.open(`${location.pathname}?view=chaveamento`, "_blank");
       });
 
+      document.getElementById("openQr").addEventListener("click", () => {
+        persist();
+        openQrModal();
+      });
+      document.getElementById("qrClose").addEventListener("click", closeQrModal);
+      document.getElementById("qrOverlay").addEventListener("click", event => {
+        if (event.target.id === "qrOverlay") closeQrModal();
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeQrModal();
+      });
+      document.getElementById("qrBaseUrl").addEventListener("input", event => {
+        const value = event.target.value.trim();
+        if (value) localStorage.setItem(PUBLIC_URL_KEY, value);
+        else localStorage.removeItem(PUBLIC_URL_KEY);
+        renderQrModal();
+      });
+      document.getElementById("qrCopy").addEventListener("click", async () => {
+        const url = publicShareUrl();
+        if (!url) return;
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast("Link copiado.");
+        } catch {
+          showToast("Nao foi possivel copiar. Selecione o link manualmente.", "danger");
+        }
+      });
+      document.getElementById("qrOpen").addEventListener("click", () => {
+        const url = publicShareUrl();
+        if (url) window.open(url, "_blank");
+      });
+
       document.querySelectorAll("[data-mode]").forEach(tab => {
         tab.addEventListener("click", () => {
           mode = tab.dataset.mode;
@@ -4684,6 +5795,7 @@
           persist();
           setEventEditor(tournament || getSettings());
           renderSummary();
+          renderFinance();
         });
       });
 
@@ -4694,6 +5806,7 @@
           if (tournament) Object.assign(tournament, settings, { updatedAt: new Date().toISOString() });
           persist();
           renderSummary();
+          renderFinance();
         });
       });
 
@@ -4745,14 +5858,30 @@
       publicLiveMatchId = allMatches().find(match => match.status === "Em jogo" && match.scoreA !== "" && match.scoreB !== "")?.id || "";
       document.body.classList.toggle("score-focus", Boolean(publicLiveMatchId));
       publicScoreSnapshot = scoreSnapshot();
-      setInterval(() => {
-        loadState();
+
+      // Com ?t=<id> (link do QR) o telao busca no Supabase, o que faz ele
+      // funcionar em qualquer aparelho. Sem o parametro, cai no localStorage
+      // e continua servindo o telao na mesma maquina do gestor.
+      const refreshPublic = async () => {
+        if (publicTournamentId) {
+          try {
+            const remote = await fetchRemoteTournament(publicTournamentId);
+            if (remote) applyTournamentState(remote);
+          } catch (error) {
+            console.warn("Telao nao conseguiu ler o Supabase:", error.message);
+          }
+        } else {
+          loadState();
+        }
         if (tournament) setSettings(tournament);
         activeView = "bracketView";
         nextRefreshAt = Date.now() + REFRESH_MS;
         detectPublicScoreMovement();
         renderAll();
-      }, REFRESH_MS);
+      };
+
+      if (publicTournamentId) refreshPublic();
+      setInterval(refreshPublic, REFRESH_MS);
     }
 
     setInterval(renderClock, 1000);
