@@ -592,6 +592,38 @@
       margin-top: 8px;
     }
 
+    .teams-panel-main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .compact-row {
+      align-items: end;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+    }
+
+    .compact-help {
+      margin: 0;
+      min-height: 56px;
+    }
+
+    .teams-list-main {
+      display: grid;
+      gap: 8px;
+    }
+
+    .teams-list-main .team-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 110px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .team-header-main {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 110px;
+      padding: 0 8px;
+    }
     #teamsList {
       padding-bottom: 10px;
     }
@@ -2913,6 +2945,22 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
       }
+      .teams-list-main .team-row,
+      .team-header-main {
+        grid-template-columns: 1fr;
+      }
+      .team-header-main {
+        display: none;
+      }
+      .teams-list-main .team-row {
+        gap: 8px;
+      }
+      .teams-list-main .danger-btn {
+        width: 100%;
+      }
+      .compact-row {
+        grid-template-columns: 1fr;
+      }
       .round { min-width: 226px; }
       .toast {
         left: 12px;
@@ -2982,10 +3030,10 @@
   <div class="app-shell">
     <nav class="nav-tabs">
       <button class="menu-toggle" type="button" id="toggleMenu" title="Ocultar menu">☰</button>
+      <button type="button" data-view="eventView" data-icon="⚙" aria-label="Torneio" title="Torneio">Torneio</button>
+      <button type="button" data-view="teamsView" data-icon="👥" aria-label="Duplas" title="Duplas">Duplas</button>
       <button class="active" type="button" data-view="bracketView" data-icon="🏆" aria-label="Chave" title="Chave">Chave</button>
       <button type="button" data-view="queueView" data-icon="▶" aria-label="Jogos" title="Jogos">Jogos</button>
-      <button type="button" data-view="rankingView" data-icon="★" aria-label="Ranking" title="Ranking">Ranking</button>
-      <button type="button" data-view="eventView" data-icon="⚙" aria-label="Torneio" title="Torneio">Torneio</button>
       <button type="button" data-view="financeView" data-icon="$" aria-label="Financeiro" title="Financeiro">Financeiro</button>
       <button type="button" data-view="uniformView" data-icon="👕" aria-label="Uniformes" title="Uniformes">Uniformes</button>
       <button type="button" data-view="settingsView" data-icon="📈" aria-label="Dashboard" title="Dashboard">Dashboard</button>
@@ -3096,7 +3144,39 @@
         <span class="clock" id="publicClock"></span>
       </div>
 
-      <section class="view active" id="bracketView">
+      <section class="view" id="teamsView">
+        <div class="topbar">
+          <div>
+            <h2>Duplas inscritas</h2>
+            <p class="muted">Cadastre as duplas que vao jogar. Ao gerar a tabela, elas tambem entram no financeiro e nos uniformes.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="secondary" type="button" id="addTeamMain">Adicionar dupla</button>
+            <button class="secondary" type="button" id="sampleMain">Modelo teste</button>
+            <button class="primary" type="button" id="generateMain">Gerar tabela</button>
+          </div>
+        </div>
+        <div class="panel teams-panel-main">
+          <div class="field-row compact-row">
+            <label class="field">Quantidade de duplas
+              <select id="teamTargetCountMain">
+                <option value="4">4 duplas</option>
+                <option value="8">8 duplas</option>
+                <option value="12">12 duplas</option>
+                <option value="16" selected>16 duplas</option>
+                <option value="20">20 duplas</option>
+                <option value="24">24 duplas</option>
+              </select>
+            </label>
+            <div class="help-box compact-help">
+              <strong>Como usar</strong> Preencha atleta 1 e atleta 2. Depois clique em Gerar tabela para montar a chave.
+            </div>
+          </div>
+          <div class="team-header team-header-main"><span>Atleta 1</span><span>Atleta 2</span><span>Acao</span></div>
+          <div id="teamsListMain" class="teams-list-main"></div>
+        </div>
+      </section>
+      <section class="view" id="bracketView">
         <div class="topbar">
           <div>
             <h2 id="mainTitle">Chaveamento</h2>
@@ -3104,7 +3184,6 @@
           </div>
           <div class="topbar-actions">
             <button class="secondary" type="button" id="exitTournamentButton">Sair do torneio</button>
-            <button class="secondary" type="button" id="newTournamentButton">Novo torneio</button>
             <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
             <button class="secondary" type="button" id="openPublic">Abrir telao</button>
             <button class="secondary" type="button" id="openQr">QR do publico</button>
@@ -5188,12 +5267,13 @@
     }
 
     function renderTeams() {
-      const list = document.getElementById("teamsList");
-      if (!list) return;
-      const targetSelect = document.getElementById("teamTargetCount");
-      if (targetSelect) targetSelect.value = String(teamTargetCount);
+      const lists = [...document.querySelectorAll("#teamsList, #teamsListMain")];
+      if (!lists.length) return;
+      document.querySelectorAll("#teamTargetCount, #teamTargetCountMain").forEach(select => {
+        select.value = String(teamTargetCount);
+      });
       syncTeamRowsWithTarget();
-      list.innerHTML = teams.map((team, index) => `
+      const rowsHtml = teams.map((team, index) => `
         <div class="team-row">
           <input value="${escapeAttr(team.a)}" placeholder="Atleta ${index + 1}A" aria-label="Atleta ${index + 1}A" data-team="${escapeAttr(team.id)}" data-field="a">
           <input value="${escapeAttr(team.b)}" placeholder="Atleta ${index + 1}B" aria-label="Atleta ${index + 1}B" data-team="${escapeAttr(team.id)}" data-field="b">
@@ -5201,43 +5281,46 @@
         </div>
       `).join("");
 
-      list.querySelectorAll("input").forEach(input => {
-        input.addEventListener("input", () => {
-          const team = teams.find(item => item.id === input.dataset.team);
-          if (team) team[input.dataset.field] = input.value;
-          syncFinanceWithTeams();
-          persist();
-          renderSummary();
+      lists.forEach(list => {
+        list.innerHTML = rowsHtml;
+        list.querySelectorAll("input").forEach(input => {
+          input.addEventListener("input", () => {
+            const team = teams.find(item => item.id === input.dataset.team);
+            if (team) team[input.dataset.field] = input.value;
+            syncFinanceWithTeams();
+            persist();
+            renderSummary();
+          });
+          input.addEventListener("change", () => showToast("Dupla atualizada."));
         });
-        input.addEventListener("change", () => showToast("Dupla atualizada."));
-      });
 
-      list.querySelectorAll("[data-remove]").forEach(button => {
-        button.addEventListener("click", async () => {
-          const removedTeam = teams.find(team => team.id === button.dataset.remove);
-          const removedName = teamName(removedTeam) === "A definir" ? "dupla" : teamName(removedTeam);
-          if (button.dataset.confirmed !== "true") {
-            button.dataset.confirmed = "true";
-            button.classList.add("is-confirming");
-            button.textContent = "Confirmar";
-            showToast(`Clique de novo para apagar ${removedName}.`, "danger");
+        list.querySelectorAll("[data-remove]").forEach(button => {
+          button.addEventListener("click", async () => {
+            const removedTeam = teams.find(team => team.id === button.dataset.remove);
+            const removedName = teamName(removedTeam) === "A definir" ? "dupla" : teamName(removedTeam);
+            if (button.dataset.confirmed !== "true") {
+              button.dataset.confirmed = "true";
+              button.classList.add("is-confirming");
+              button.textContent = "Confirmar";
+              showToast(`Clique de novo para apagar ${removedName}.`, "danger");
+              clearTimeout(button.confirmTimer);
+              button.confirmTimer = setTimeout(() => {
+                button.dataset.confirmed = "false";
+                button.classList.remove("is-confirming");
+                button.textContent = "Apagar";
+              }, 2600);
+              return;
+            }
             clearTimeout(button.confirmTimer);
-            button.confirmTimer = setTimeout(() => {
-              button.dataset.confirmed = "false";
-              button.classList.remove("is-confirming");
-              button.textContent = "Apagar";
-            }, 2600);
-            return;
-          }
-          clearTimeout(button.confirmTimer);
-          setButtonLoading(button, true, "Apagando...");
-          showToast(`Apagando ${removedName}...`, "danger");
-          await sleep(260);
-          teams = teams.filter(team => team.id !== button.dataset.remove);
-          syncFinanceWithTeams();
-          persist();
-          renderAll();
-          showToast(`${removedName} apagada.`);
+            setButtonLoading(button, true, "Apagando...");
+            showToast(`Apagando ${removedName}...`, "danger");
+            await sleep(260);
+            teams = teams.filter(team => team.id !== button.dataset.remove);
+            syncFinanceWithTeams();
+            persist();
+            renderAll();
+            showToast(`${removedName} apagada.`);
+          });
         });
       });
     }
@@ -6190,13 +6273,13 @@
         showToast("Torneio criado.");
       });
 
-      document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
+      document.getElementById("newTournamentButton")?.addEventListener("click", openNewTournamentScreen);
       document.getElementById("exitTournamentButton").addEventListener("click", openNewTournamentScreen);
       document.getElementById("saveEventInfo").addEventListener("click", saveEventInfo);
       document.getElementById("deleteTournamentButton").addEventListener("click", deleteCurrentTournament);
       document.getElementById("exportExcel")?.addEventListener("click", exportTournamentExcel);
 
-      document.getElementById("addTeam").addEventListener("click", () => {
+      const addTeamAction = () => {
         const options = [4, 8, 12, 16, 20, 24];
         const next = options.find(value => value > teamTargetCount);
         if (!next) {
@@ -6207,12 +6290,16 @@
         persist();
         renderAll();
         showToast(`Quantidade ajustada para ${teamTargetCount} duplas.`);
-      });
+      };
+      document.getElementById("addTeam")?.addEventListener("click", addTeamAction);
+      document.getElementById("addTeamMain")?.addEventListener("click", addTeamAction);
 
-      document.getElementById("generate").addEventListener("click", event => {
+      const generateAction = event => {
         createTournament(event);
         showToast("Tabela gerada.");
-      });
+      };
+      document.getElementById("generate")?.addEventListener("click", generateAction);
+      document.getElementById("generateMain")?.addEventListener("click", generateAction);
       document.getElementById("saveScores").addEventListener("click", syncWinners);
       document.getElementById("toggleMenu").addEventListener("click", () => {
         menuCollapsed = !menuCollapsed;
@@ -6265,7 +6352,9 @@
         renderUniforms();
       });
 
-      document.getElementById("sample").addEventListener("click", () => loadSample(false));
+      const sampleAction = () => loadSample(false);
+      document.getElementById("sample")?.addEventListener("click", sampleAction);
+      document.getElementById("sampleMain")?.addEventListener("click", sampleAction);
 
       document.getElementById("clear").addEventListener("click", () => {
         if (!confirm("Limpar torneio, duplas e placares?")) return;
@@ -6338,14 +6427,16 @@
         });
       });
 
-      document.getElementById("teamTargetCount").addEventListener("change", event => {
+      const teamTargetAction = event => {
         teamTargetCount = Number(event.target.value) || 16;
         syncTeamRowsWithTarget();
         tournament = null;
         persist();
         renderAll();
         showToast(`Torneio ajustado para ${teamTargetCount} duplas.`);
-      });
+      };
+      document.getElementById("teamTargetCount")?.addEventListener("change", teamTargetAction);
+      document.getElementById("teamTargetCountMain")?.addEventListener("change", teamTargetAction);
 
       ["tournamentName", "category", "courts", "matchMinutes", "entryFee", "notes"].forEach(id => {
         document.getElementById(id).addEventListener("input", () => {
