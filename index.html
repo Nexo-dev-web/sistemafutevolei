@@ -911,6 +911,90 @@
       min-width: 92px;
     }
 
+    .uniform-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 14px 0 12px;
+    }
+
+    .uniform-stat {
+      min-height: 74px;
+      padding: 13px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.022)), rgba(12, 26, 20, 0.72);
+    }
+
+    .uniform-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .uniform-stat strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+
+    .uniform-stat.ok strong { color: var(--green); }
+    .uniform-stat.warn strong { color: var(--sand); }
+    .uniform-stat.danger strong { color: #ff8a8a; }
+
+    .uniform-breakdown {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .uniform-breakdown-card {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(12, 26, 20, 0.52);
+    }
+
+    .uniform-breakdown-card span {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .uniform-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .uniform-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .uniform-chip strong { color: var(--sand); }
+
+    .uniform-empty-chip {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(180px, 1fr));
@@ -2976,11 +3060,21 @@
             <button class="primary" type="button" id="saveUniforms">Salvar uniformes</button>
           </div>
         </div>
-        <div class="control-summary">
-          <div class="control-card"><span>Atletas</span><strong id="uniformAthletes">0</strong></div>
-          <div class="control-card"><span>Camisas PP/P/M/G/GG/XG/XGG</span><strong id="uniformShirts">0/0/0/0/0/0/0</strong></div>
-          <div class="control-card"><span>Shorts PP/P/M/G/GG/XG/XGG</span><strong id="uniformShorts">0/0/0/0/0/0/0</strong></div>
-          <div class="control-card"><span>Entregues</span><strong id="uniformDelivered">0/0</strong></div>
+        <div class="uniform-summary">
+          <div class="uniform-stat"><span>Atletas</span><strong id="uniformAthletes">0</strong></div>
+          <div class="uniform-stat warn"><span>Pendentes</span><strong id="uniformPending">0</strong></div>
+          <div class="uniform-stat"><span>Separados</span><strong id="uniformSeparated">0</strong></div>
+          <div class="uniform-stat ok"><span>Entregues</span><strong id="uniformDelivered">0/0</strong></div>
+        </div>
+        <div class="uniform-breakdown">
+          <div class="uniform-breakdown-card">
+            <span>Camisas preenchidas</span>
+            <div class="uniform-chips" id="uniformShirts"></div>
+          </div>
+          <div class="uniform-breakdown-card">
+            <span>Shorts preenchidos</span>
+            <div class="uniform-chips" id="uniformShorts"></div>
+          </div>
         </div>
         <div class="filter-bar">
           <input id="uniformSearch" type="search" aria-label="Buscar em uniformes" placeholder="Filtrar por dupla, atleta, numero ou observacao">
@@ -5503,6 +5597,7 @@
       const shortTotals = Object.fromEntries(sizeOrder.map(size => [size, 0]));
       let athletes = 0;
       let delivered = 0;
+      let separated = 0;
 
       const allRows = rows.flatMap(team => [0, 1].map(index => {
         const record = uniformRecord(team, index);
@@ -5511,6 +5606,7 @@
         if (shirtTotals[record.shirt] !== undefined) shirtTotals[record.shirt] += 1;
         if (shortTotals[record.shorts] !== undefined) shortTotals[record.shorts] += 1;
         if (record.status === "Entregue") delivered += 1;
+        if (record.status === "Separado") separated += 1;
         return { team, index, record, athlete };
       }));
 
@@ -5546,10 +5642,19 @@
         `;
       }).join("") : `<tr><td colspan="7">${rows.length ? "Nenhum uniforme encontrado com esse filtro." : "Cadastre duplas para controlar uniformes."}</td></tr>`;
 
+      const pending = Math.max(athletes - delivered - separated, 0);
+      const sizeChips = totals => {
+        const filled = sizeOrder.filter(size => totals[size] > 0);
+        if (!filled.length) return `<span class="uniform-empty-chip">Nenhum tamanho preenchido ainda.</span>`;
+        return filled.map(size => `<span class="uniform-chip">${size} <strong>${totals[size]}</strong></span>`).join("");
+      };
+
       document.getElementById("uniformAthletes").textContent = athletes;
-      document.getElementById("uniformShirts").textContent = sizeOrder.map(size => shirtTotals[size]).join("/");
-      document.getElementById("uniformShorts").textContent = sizeOrder.map(size => shortTotals[size]).join("/");
+      document.getElementById("uniformPending").textContent = pending;
+      document.getElementById("uniformSeparated").textContent = separated;
       document.getElementById("uniformDelivered").textContent = `${delivered}/${athletes}`;
+      document.getElementById("uniformShirts").innerHTML = sizeChips(shirtTotals);
+      document.getElementById("uniformShorts").innerHTML = sizeChips(shortTotals);
     }
 
     function renderClock() {
