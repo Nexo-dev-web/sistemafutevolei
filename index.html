@@ -6268,16 +6268,20 @@
       const initialDate = document.getElementById("newTournamentDate");
       if (initialDate && !initialDate.value) initialDate.value = new Date().toISOString().slice(0, 10);
 
-      document.getElementById("createNewTournament").addEventListener("click", () => {
+      document.getElementById("createNewTournament").addEventListener("click", async event => {
+        const button = event.currentTarget;
         const name = document.getElementById("newTournamentName").value.trim();
         const date = document.getElementById("newTournamentDate").value;
         const location = document.getElementById("newTournamentLocation").value.trim();
         const entryFee = document.getElementById("newTournamentEntryFee")?.value || "";
         if (!name || !date || !location) {
-          alert("Preencha nome, data e local para criar o torneio.");
+          showToast("Preencha nome, data e local para criar o torneio.", "danger");
           return;
         }
+        setButtonLoading(button, true, "Criando...");
+        await sleep(180);
         createTournamentShell({ name, date, location, entryFee });
+        setButtonLoading(button, false);
         showToast("Torneio criado.");
       });
 
@@ -6302,13 +6306,24 @@
       document.getElementById("addTeam")?.addEventListener("click", addTeamAction);
       document.getElementById("addTeamMain")?.addEventListener("click", addTeamAction);
 
-      const generateAction = event => {
+      const generateAction = async event => {
+        const button = event?.currentTarget;
+        setButtonLoading(button, true, "Gerando...");
+        await sleep(180);
         createTournament(event);
+        setButtonLoading(button, false);
         showToast("Tabela gerada.");
       };
       document.getElementById("generate")?.addEventListener("click", generateAction);
       document.getElementById("generateMain")?.addEventListener("click", generateAction);
-      document.getElementById("saveScores").addEventListener("click", syncWinners);
+      document.getElementById("saveScores").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        setButtonLoading(button, true, "Salvando...");
+        await sleep(160);
+        syncWinners();
+        setButtonLoading(button, false);
+        showToast("Placares salvos e chave atualizada.");
+      });
       document.getElementById("toggleMenu").addEventListener("click", () => {
         menuCollapsed = !menuCollapsed;
         persist();
