@@ -704,14 +704,15 @@
         rgba(8, 17, 14, 0.97);
     }
     .developer-credit {
-      position: fixed;
-      right: 14px;
-      bottom: 8px;
-      z-index: 70;
-      color: rgba(247, 255, 249, 0.42);
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      margin: 22px auto 4px;
+      color: rgba(247, 255, 249, 0.38);
+      font-size: 0.62rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-align: center;
       text-decoration: none;
       text-transform: uppercase;
       transition: color 160ms ease, opacity 160ms ease, transform 160ms ease;
@@ -719,17 +720,25 @@
 
     .developer-credit:hover,
     .developer-credit:focus-visible {
-      color: var(--sand);
+      color: rgba(230, 199, 109, 0.9);
       opacity: 1;
       transform: translateY(-1px);
     }
 
     .public-mode .developer-credit {
-      z-index: 220;
-      right: 18px;
+      position: fixed;
+      left: 50%;
       bottom: 10px;
-      color: rgba(247, 255, 249, 0.34);
-      font-size: 0.62rem;
+      z-index: 220;
+      margin: 0;
+      color: rgba(247, 255, 249, 0.32);
+      font-size: 0.58rem;
+      transform: translateX(-50%);
+    }
+
+    .public-mode .developer-credit:hover,
+    .public-mode .developer-credit:focus-visible {
+      transform: translateX(-50%) translateY(-1px);
     }
 
     .secondary {
@@ -2969,9 +2978,8 @@
         max-width: none;
       }
       .developer-credit {
-        right: 10px;
-        bottom: 6px;
-        font-size: 0.58rem;
+        margin-top: 16px;
+        font-size: 0.56rem;
       }
     }
   </style>
@@ -3464,9 +3472,9 @@
           </div>
         </div>
       </section>
+      <a class="developer-credit" href="https://portfolio-nexo.netlify.app/" target="_blank" rel="noopener noreferrer">Desenvolvido pela Nexo Developer</a>
     </main>
   </div>
-  <a class="developer-credit" href="https://portfolio-nexo.netlify.app/" target="_blank" rel="noopener noreferrer">Desenvolvido por Nexo Developer</a>
   <div class="toast" id="appToast" role="status" aria-live="polite"></div>
 
   <script>
