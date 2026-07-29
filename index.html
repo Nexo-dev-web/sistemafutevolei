@@ -2711,6 +2711,7 @@
       .round { min-width: 226px; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <section class="start-screen" id="startScreen" aria-label="Criar ou abrir torneio">
@@ -3106,6 +3107,9 @@
           <div>
             <h2>Dashboard do torneio</h2>
             <p class="muted">Resumo rapido do evento.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="primary" type="button" id="exportExcel">Exportar Excel</button>
           </div>
         </div>
         <div class="bi-grid">
@@ -4343,6 +4347,94 @@
       publicScoreSnapshot = current;
     }
 
+    function safeSheetName(name) {
+      return String(name || "Aba").replace(/[\\/?*\[\]:]/g, " ").slice(0, 31) || "Aba";
+    }
+
+    function exportTournamentExcel(event) {
+      const button = event?.currentTarget || document.getElementById("exportExcel");
+      if (!window.XLSX) {
+        showToast("Biblioteca de Excel ainda nao carregou. Tente novamente em alguns segundos.", "danger");
+        return;
+      }
+      setButtonLoading(button, true, "Exportando...");
+      try {
+        const settings = tournament || getSettings();
+        const teamsRows = activeTeams().map((team, index) => ({
+          Ordem: index + 1,
+          Dupla: teamName(team),
+          "Atleta 1": team.a || "",
+          "Atleta 2": team.b || ""
+        }));
+        const financeData = financeRows().map(row => ({
+          Dupla: row.team || "",
+          Status: row.status || "",
+          "Valor pago": moneyValue(row.value),
+          Forma: row.method || "",
+          Data: row.date || "",
+          Observacao: row.note || ""
+        }));
+        const uniformData = activeTeams().flatMap(team => [0, 1].map(index => {
+          const record = uniformRecord(team, index);
+          return {
+            Dupla: teamName(team),
+            Atleta: index === 0 ? team.a || "" : team.b || "",
+            Camisa: record.shirt || "",
+            Short: record.shorts || "",
+            Numero: record.number || "",
+            Status: record.status || "",
+            Observacao: record.note || ""
+          };
+        }));
+        const gamesData = allMatches().map(match => ({
+          Rodada: match.roundName || "",
+          Codigo: match.code || match.id || "",
+          Jogo: match.label || "",
+          Status: match.status || "",
+          "Dupla A": teamName(match.teamA),
+          "Placar A": match.scoreA ?? "",
+          "Dupla B": teamName(match.teamB),
+          "Placar B": match.scoreB ?? "",
+          Vencedor: match.winner === "A" ? teamName(match.teamA) : match.winner === "B" ? teamName(match.teamB) : ""
+        }));
+        const totals = financeTotals(financeRows());
+        const tournamentData = [{
+          Torneio: settings.name || "",
+          Data: settings.date || "",
+          Local: settings.location || "",
+          Categoria: settings.category || "",
+          Modelo: modeLabel(tournament?.mode || mode),
+          "Pontuacao": "18 pontos",
+          Quadras: settings.courts || "",
+          "Tempo estimado": `${settings.matchMinutes || 0} min`,
+          "Valor inscricao por dupla": moneyValue(settings.entryFee),
+          "Total previsto": totals.total,
+          "Total recebido": totals.paid,
+          "Em aberto": totals.open,
+          Observacao: settings.notes || ""
+        }];
+
+        const workbook = XLSX.utils.book_new();
+        const append = (name, rows) => {
+          const sheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Aviso: "Sem dados para exportar" }]);
+          XLSX.utils.book_append_sheet(workbook, sheet, safeSheetName(name));
+        };
+        append("Torneio", tournamentData);
+        append("Duplas", teamsRows);
+        append("Financeiro", financeData);
+        append("Uniformes", uniformData);
+        append("Jogos", gamesData);
+
+        const slug = String(settings.name || "torneio-futevolei").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "torneio-futevolei";
+        XLSX.writeFile(workbook, `${slug}-relatorio.xlsx`);
+        showToast("Excel exportado com sucesso.");
+      } catch (error) {
+        console.error(error);
+        showToast("Nao foi possivel exportar o Excel.", "danger");
+      } finally {
+        setButtonLoading(button, false);
+      }
+    }
     function nextPlayableMatch() {
       return allMatches().find(match => match.teamA && match.teamB && match.status !== "Finalizado");
     }
@@ -5820,6 +5912,7 @@
       document.getElementById("exitTournamentButton").addEventListener("click", openNewTournamentScreen);
       document.getElementById("saveEventInfo").addEventListener("click", saveEventInfo);
       document.getElementById("deleteTournamentButton").addEventListener("click", deleteCurrentTournament);
+      document.getElementById("exportExcel")?.addEventListener("click", exportTournamentExcel);
 
       document.getElementById("addTeam").addEventListener("click", () => {
         const options = [4, 8, 12, 16, 20, 24];
