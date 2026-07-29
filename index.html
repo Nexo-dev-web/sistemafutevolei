@@ -1938,6 +1938,33 @@
 
     .queue-card strong { font-size: 1rem; }
 
+    .queue-card.is-finished {
+      border-color: rgba(111, 191, 154, 0.34);
+      background: linear-gradient(145deg, rgba(111, 191, 154, 0.11), rgba(255, 255, 255, 0.025)), var(--panel-soft);
+    }
+
+    .queue-card.is-live {
+      border-color: rgba(53, 228, 138, 0.58);
+      box-shadow: 0 0 0 1px rgba(53, 228, 138, 0.18), 0 0 26px rgba(53, 228, 138, 0.08);
+    }
+
+    .queue-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 900;
+    }
+
+    .queue-section-title {
+      margin: 18px 0 10px;
+      color: var(--sand);
+      font-size: 0.92rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
     .queue-meta {
       display: flex;
       gap: 8px;
@@ -2926,13 +2953,13 @@
       <section class="view" id="queueView">
         <div class="topbar">
           <div>
-            <h2>Fila de jogos</h2>
-            <p class="muted">Ordem sugerida por rodada e distribuicao automatica por quadra.</p>
+            <h2>Controle de jogos</h2>
+            <p class="muted">Acompanhe proximos confrontos, jogos em andamento e partidas ja finalizadas.</p>
           </div>
         </div>
         <div class="grid-2">
           <div class="panel">
-            <h3>Proximos confrontos</h3>
+            <h3>Historico e proximos jogos</h3>
             <div class="queue-list" id="queueList"></div>
           </div>
           <div class="panel">
@@ -5504,16 +5531,35 @@
     function renderQueue() {
       const list = document.getElementById("queueList");
       if (!list) return;
-      const matches = allMatches().filter(match => match.teamA && match.teamB && match.status !== "Finalizado");
-      list.innerHTML = matches.length ? matches.map((match, index) => `
-        <article class="queue-card" style="--stagger:${index}">
-          <div class="queue-meta">
-            <span class="pill sand">${escapeAttr(match.roundName)}</span>
-          </div>
-          <strong>${teamNameHtml(match.teamA)} x ${teamNameHtml(match.teamB)}</strong>
-          <span class="muted">${escapeAttr(match.status)} - jogo ate 18 pontos</span>
-        </article>
-      `).join("") : '<div class="empty">Nenhum jogo pendente.</div>';
+      const playable = allMatches().filter(match => match.teamA && match.teamB);
+      const live = playable.filter(match => match.status === "Em jogo");
+      const upcoming = playable.filter(match => match.status !== "Finalizado" && match.status !== "Em jogo");
+      const finished = playable.filter(match => match.status === "Finalizado").reverse();
+      const card = (match, index) => {
+        const winnerName = match.winner === "A" ? teamName(match.teamA) : match.winner === "B" ? teamName(match.teamB) : "";
+        const score = match.scoreA !== "" || match.scoreB !== "" ? `<span class="queue-score">${escapeAttr(match.scoreA || "0")} x ${escapeAttr(match.scoreB || "0")}</span>` : "";
+        const stateClass = match.status === "Finalizado" ? " is-finished" : match.status === "Em jogo" ? " is-live" : "";
+        const statusClass = match.status === "Finalizado" ? "" : match.status === "Em jogo" ? "green" : "red";
+        return `
+          <article class="queue-card${stateClass}" style="--stagger:${index}">
+            <div class="queue-meta">
+              <span class="pill sand">${escapeAttr(match.roundName)}</span>
+              <span class="pill ${statusClass}">${escapeAttr(match.status)}</span>
+            </div>
+            <strong>${teamNameHtml(match.teamA)} x ${teamNameHtml(match.teamB)}</strong>
+            <span class="muted">${score || "Jogo ate 18 pontos"}${winnerName ? ` - vencedor: ${escapeAttr(winnerName)}` : ""}</span>
+          </article>
+        `;
+      };
+      const section = (title, rows, empty) => `
+        <h4 class="queue-section-title">${title}</h4>
+        ${rows.length ? rows.map(card).join("") : `<div class="empty">${empty}</div>`}
+      `;
+      list.innerHTML = playable.length ? [
+        section("Em andamento", live, "Nenhum jogo em andamento."),
+        section("Proximos jogos", upcoming, "Nenhum proximo jogo pendente."),
+        section("Jogos finalizados", finished, "Nenhum jogo finalizado ainda.")
+      ].join("") : '<div class="empty">Gere uma tabela para listar os jogos.</div>';
 
       const checklist = [
         ["Duplas cadastradas", normalizeTeams().length >= 2],
@@ -5527,7 +5573,6 @@
         <tr><td>${label}</td><td><span class="pill ${ok ? "" : "red"}">${ok ? "OK" : "Pendente"}</span></td></tr>
       `).join("");
     }
-
     function renderRanking() {
       const body = document.getElementById("rankingBody");
       if (!body) return;
