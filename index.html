@@ -2578,6 +2578,99 @@
       outline: 2px solid var(--sand);
       outline-offset: 2px;
     }
+    /* Microinteracoes de uso: hover mostra o que e clicavel sem poluir. */
+    .primary,
+    .secondary,
+    .ghost,
+    .danger-action,
+    .delete-row-btn,
+    .history-item,
+    .nav-tabs button,
+    .mode-tabs button,
+    .match,
+    .queue-card,
+    .dashboard-card,
+    .bi-card,
+    .stat,
+    .panel {
+      transition:
+        transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease,
+        filter 180ms ease;
+    }
+
+    .primary,
+    .nav-tabs button.active,
+    .mode-tabs button.active {
+      box-shadow: 0 10px 26px rgba(230, 199, 109, 0.16);
+    }
+
+    .primary:hover:not(:disabled),
+    .nav-tabs button.active:hover:not(:disabled),
+    .mode-tabs button.active:hover:not(:disabled) {
+      filter: brightness(1.06);
+      box-shadow: 0 14px 34px rgba(230, 199, 109, 0.28);
+    }
+
+    .secondary:hover:not(:disabled),
+    .ghost:hover:not(:disabled),
+    .history-item:hover,
+    .nav-tabs button:hover:not(:disabled),
+    .mode-tabs button:hover:not(:disabled) {
+      border-color: rgba(230, 199, 109, 0.48);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .match:hover,
+    .queue-card:hover,
+    .dashboard-card:hover,
+    .bi-card:hover,
+    .stat:hover {
+      transform: translateY(-2px);
+      border-color: rgba(230, 199, 109, 0.36);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .team {
+      transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .match:hover .team {
+      background: rgba(255, 255, 255, 0.075);
+    }
+
+    .team:hover {
+      transform: translateX(3px);
+      box-shadow: inset 3px 0 0 rgba(230, 199, 109, 0.72);
+    }
+
+    input:hover,
+    select:hover,
+    textarea:hover {
+      border-color: rgba(230, 199, 109, 0.42);
+      background-color: rgba(255, 255, 255, 0.09);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(230, 199, 109, 0.72);
+      box-shadow: 0 0 0 3px rgba(230, 199, 109, 0.12);
+    }
+
+    .score-input:hover,
+    .score-input:focus {
+      border-color: rgba(53, 228, 138, 0.62);
+      box-shadow: 0 0 0 3px rgba(53, 228, 138, 0.12);
+    }
+
+    .delete-row-btn:hover,
+    .danger-action:hover {
+      box-shadow: 0 12px 28px rgba(158, 42, 42, 0.24);
+    }
 
     /* Telao: as ligacoes do chaveamento se desenham em cascata da esquerda
        para a direita, acompanhando a ordem em que o SVG e montado. */
@@ -2726,8 +2819,21 @@
       body::before,
       body::after,
       .ambient-ball,
-      .double-diagram .line {
+      .double-diagram .line,
+      .view.active,
+      .queue-card,
+      #rankingBody tr,
+      #financeBody tr,
+      #uniformBody tr {
         animation: none !important;
+      }
+      .match:hover,
+      .queue-card:hover,
+      .dashboard-card:hover,
+      .bi-card:hover,
+      .stat:hover,
+      .team:hover {
+        transform: none;
       }
       .app-shell {
         min-height: 100dvh;
@@ -5692,7 +5798,7 @@
       document.getElementById("roundCount").textContent = rounds;
       document.getElementById("matchCount").textContent = matches.length;
       document.getElementById("nextMatchLabel").textContent = next ? "Pronto" : "-";
-      document.getElementById("refreshLabel").textContent = isPublic ? "30s" : "manual";
+      document.getElementById("refreshLabel").textContent = isPublic ? `${Math.round(REFRESH_MS / 1000)}s` : "manual";
       document.getElementById("scorePill").textContent = "18 pts";
       document.getElementById("mainTitle").textContent = settings.name || "Chaveamento";
       document.getElementById("publicTitle").textContent = settings.name || "Chaveamento";
