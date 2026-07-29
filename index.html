@@ -2716,13 +2716,29 @@
     }
 
     @media (max-width: 680px) {
+      html,
       body {
+        width: 100%;
+        min-height: 100dvh;
         overflow-x: hidden;
         overflow-y: auto;
       }
+      body::before,
+      body::after,
+      .ambient-ball,
+      .double-diagram .line {
+        animation: none !important;
+      }
       .app-shell {
-        min-height: auto;
-        padding: 10px;
+        min-height: 100dvh;
+        height: auto;
+        padding: 8px;
+        gap: 8px;
+      }
+      main,
+      .view.active {
+        min-width: 0;
+        overflow-x: hidden;
       }
       aside, main, .panel { padding: 12px; }
       .aside-actions-dock {
@@ -2748,7 +2764,28 @@
       .stats { grid-template-columns: 1fr; }
       .topbar-actions { justify-content: stretch; }
       .topbar-actions button { flex: 1; }
+      .table-scroll,
+      .finance-table-wrap,
+      .uniform-table-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .control-table {
+        min-width: 760px;
+      }
+      .bracket-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
       .round { min-width: 226px; }
+      .toast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        max-width: none;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -4454,16 +4491,55 @@
           Observacao: settings.notes || ""
         }];
 
+        const summaryData = [
+          { Indicador: "Torneio", Valor: settings.name || "" },
+          { Indicador: "Data", Valor: settings.date || "" },
+          { Indicador: "Local", Valor: settings.location || "" },
+          { Indicador: "Categoria", Valor: settings.category || "" },
+          { Indicador: "Modelo", Valor: modeLabel(tournament?.mode || mode) },
+          { Indicador: "Pontuacao", Valor: "18 pontos" },
+          { Indicador: "Duplas cadastradas", Valor: teamsRows.length },
+          { Indicador: "Jogos no torneio", Valor: gamesData.length },
+          { Indicador: "Jogos finalizados", Valor: gamesData.filter(row => row.Status === "Finalizado").length },
+          { Indicador: "Jogos pendentes", Valor: gamesData.filter(row => row.Status !== "Finalizado").length },
+          { Indicador: "Total previsto", Valor: totals.total },
+          { Indicador: "Total recebido", Valor: totals.paid },
+          { Indicador: "Em aberto", Valor: totals.open },
+          { Indicador: "Duplas pagas", Valor: totals.paidCount },
+          { Indicador: "Uniformes entregues", Valor: uniformData.filter(row => row.Status === "Entregue").length },
+          { Indicador: "Observacao", Valor: settings.notes || "" }
+        ];
+
         const workbook = XLSX.utils.book_new();
-        const append = (name, rows) => {
-          const sheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Aviso: "Sem dados para exportar" }]);
+        const append = (name, rows, widths = []) => {
+          const data = rows.length ? rows : [{ Aviso: "Sem dados para exportar" }];
+          const headers = Object.keys(data[0] || { Aviso: "" });
+          const sheet = XLSX.utils.aoa_to_sheet([
+            [name],
+            [`Relatorio exportado em ${new Date().toLocaleString("pt-BR")}`],
+            [],
+          ]);
+          XLSX.utils.sheet_add_json(sheet, data, { origin: "A4", skipHeader: false });
+          const endCol = Math.max(headers.length - 1, 0);
+          const endRow = data.length + 3;
+          sheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: endCol } }];
+          sheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: endRow, c: endCol } }) };
+          sheet["!freeze"] = { xSplit: 0, ySplit: 4 };
+          sheet["!cols"] = headers.map((header, index) => {
+            const measured = Math.max(
+              String(header).length,
+              ...data.map(row => String(row[header] ?? "").length)
+            );
+            return { wch: widths[index] || Math.min(Math.max(measured + 3, 12), 46) };
+          });
           XLSX.utils.book_append_sheet(workbook, sheet, safeSheetName(name));
         };
-        append("Torneio", tournamentData);
-        append("Duplas", teamsRows);
-        append("Financeiro", financeData);
-        append("Uniformes", uniformData);
-        append("Jogos", gamesData);
+        append("Resumo", summaryData, [28, 44]);
+        append("Torneio", tournamentData, [28, 14, 24, 16, 22, 14, 10, 16, 22, 16, 16, 16, 44]);
+        append("Duplas", teamsRows, [8, 30, 18, 18]);
+        append("Financeiro", financeData, [30, 14, 14, 18, 14, 42]);
+        append("Uniformes", uniformData, [30, 18, 12, 12, 12, 16, 42]);
+        append("Jogos", gamesData, [22, 10, 20, 14, 30, 10, 30, 10, 30]);
 
         const slug = String(settings.name || "torneio-futevolei").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "torneio-futevolei";
         XLSX.writeFile(workbook, `${slug}-relatorio.xlsx`);
@@ -5919,20 +5995,25 @@
       if (help) help.innerHTML = `<strong>${content.title}</strong>${content.text}`;
     }
 
+    function isCompactScreen() {
+      return window.matchMedia?.("(max-width: 760px)").matches;
+    }
+
     function renderAll() {
       document.body.classList.toggle("needs-tournament", !hasActiveTournament && !isPublic);
+      const compact = isCompactScreen() && !isPublic;
       renderTournamentHistory();
       renderTeams();
-      renderBracket();
-      renderQueue();
-      renderRanking();
-      renderSummary();
-      renderFinance();
-      renderUniforms();
+      if (!compact || activeView === "bracketView") renderBracket();
+      if (!compact || activeView === "queueView") renderQueue();
+      if (!compact || activeView === "rankingView") renderRanking();
+      if (!compact || activeView === "settingsView") renderSummary();
+      if (!compact || activeView === "financeView" || activeView === "settingsView") renderFinance();
+      if (!compact || activeView === "uniformView" || activeView === "settingsView") renderUniforms();
       setEventEditor(tournament || getSettings());
       renderClock();
       renderModeHelp();
-      requestAnimationFrame(fitPublicBracket);
+      if (!compact || activeView === "bracketView") requestAnimationFrame(fitPublicBracket);
       document.body.classList.toggle("show-admin-panel", activeView === "bracketView" && !isPublic && !adminPanelHidden);
       document.body.classList.toggle("menu-collapsed", menuCollapsed);
       const toggle = document.getElementById("toggleMenu");
