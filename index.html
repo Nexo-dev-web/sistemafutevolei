@@ -506,7 +506,7 @@
 
     .team-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 96px;
       gap: 7px;
       margin-bottom: 8px;
     }
@@ -515,7 +515,7 @@
 
     .team-header {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 96px;
       gap: 7px;
       margin: 10px 0 6px;
       color: var(--muted);
@@ -526,10 +526,25 @@
 
     .danger-btn {
       min-height: 38px;
+      padding: 0 10px;
       border-radius: 8px;
       color: #fff;
       background: rgba(255, 71, 71, 0.18);
       border: 1px solid rgba(255, 71, 71, 0.38);
+      font-size: 0.76rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .danger-btn:hover {
+      background: rgba(158, 42, 42, 0.92);
+      transform: translateY(-1px);
+    }
+
+    .danger-btn.is-confirming {
+      color: #06100c;
+      background: var(--sand);
+      border-color: rgba(230, 199, 109, 0.75);
     }
 
     .delete-row-btn {
@@ -1248,9 +1263,11 @@
       fill: rgba(0, 0, 0, 0.42);
     }
 
+    /* 13px mantem "Leandro / Matheus" (17 caracteres, o limite de nameMax)
+       dentro da caixa sem encostar na etiqueta do placar. */
     .double-diagram .slot-text {
       fill: #eef0f2;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
     }
 
@@ -1407,7 +1424,7 @@
     }
 
     .public-mode.double-public .double-diagram .slot-text {
-      font-size: 15px;
+      font-size: 13px;
     }
 
     .public-mode.double-public .double-diagram .score-text {
@@ -4322,7 +4339,10 @@
       }
       const synced = validTeams.map(team => {
         const current = existing.get(team.id);
-        if (current) return { ...current, id: team.id, team: teamName(team) };
+        if (current) {
+          const value = current.status === "Aberto" ? "" : current.value;
+          return { ...current, id: team.id, team: teamName(team), value };
+        }
         return { id: team.id, team: teamName(team), status: "Aberto", value: "", method: "", date: "", note: "" };
       });
       const manualRows = finances.filter(row => !teams.some(team => team.id === row.id) && row.team);
@@ -4730,7 +4750,7 @@
         <div class="team-row">
           <input value="${escapeAttr(team.a)}" placeholder="Atleta ${index + 1}A" aria-label="Atleta ${index + 1}A" data-team="${escapeAttr(team.id)}" data-field="a">
           <input value="${escapeAttr(team.b)}" placeholder="Atleta ${index + 1}B" aria-label="Atleta ${index + 1}B" data-team="${escapeAttr(team.id)}" data-field="b">
-          <button class="danger-btn" type="button" title="Remover dupla" aria-label="Remover dupla ${index + 1}" data-remove="${escapeAttr(team.id)}">x</button>
+          <button class="danger-btn" type="button" title="Apagar ${escapeAttr(teamName(team) === "A definir" ? `dupla ${index + 1}` : teamName(team))}" aria-label="Apagar ${escapeAttr(teamName(team) === "A definir" ? `dupla ${index + 1}` : teamName(team))}" data-remove="${escapeAttr(team.id)}">Apagar</button>
         </div>
       `).join("");
 
@@ -4742,14 +4762,35 @@
           persist();
           renderSummary();
         });
+        input.addEventListener("change", () => showToast("Dupla atualizada."));
       });
 
       list.querySelectorAll("[data-remove]").forEach(button => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", async () => {
+          const removedTeam = teams.find(team => team.id === button.dataset.remove);
+          const removedName = teamName(removedTeam) === "A definir" ? "dupla" : teamName(removedTeam);
+          if (button.dataset.confirmed !== "true") {
+            button.dataset.confirmed = "true";
+            button.classList.add("is-confirming");
+            button.textContent = "Confirmar";
+            showToast(`Clique de novo para apagar ${removedName}.`, "danger");
+            clearTimeout(button.confirmTimer);
+            button.confirmTimer = setTimeout(() => {
+              button.dataset.confirmed = "false";
+              button.classList.remove("is-confirming");
+              button.textContent = "Apagar";
+            }, 2600);
+            return;
+          }
+          clearTimeout(button.confirmTimer);
+          setButtonLoading(button, true, "Apagando...");
+          showToast(`Apagando ${removedName}...`, "danger");
+          await sleep(260);
           teams = teams.filter(team => team.id !== button.dataset.remove);
           syncFinanceWithTeams();
           persist();
           renderAll();
+          showToast(`${removedName} apagada.`);
         });
       });
     }
@@ -5661,6 +5702,7 @@
           return;
         }
         createTournamentShell({ name, date, location });
+        showToast("Torneio criado.");
       });
 
       document.getElementById("newTournamentButton").addEventListener("click", openNewTournamentScreen);
@@ -5678,9 +5720,13 @@
         teamTargetCount = next;
         persist();
         renderAll();
+        showToast(`Quantidade ajustada para ${teamTargetCount} duplas.`);
       });
 
-      document.getElementById("generate").addEventListener("click", createTournament);
+      document.getElementById("generate").addEventListener("click", event => {
+        createTournament(event);
+        showToast("Tabela gerada.");
+      });
       document.getElementById("saveScores").addEventListener("click", syncWinners);
       document.getElementById("toggleMenu").addEventListener("click", () => {
         menuCollapsed = !menuCollapsed;
@@ -5692,14 +5738,20 @@
         persist();
         renderAll();
       });
-      document.getElementById("saveFinance").addEventListener("click", () => {
+      document.getElementById("saveFinance").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        setButtonLoading(button, true, "Salvando...");
         persist();
+        await sleep(260);
+        setButtonLoading(button, false);
         renderFinance();
         renderSummary();
+        showToast("Financeiro salvo.");
       });
       document.getElementById("addFinanceRow").addEventListener("click", () => {
         financeRows().push(emptyFinanceRow());
         renderFinance();
+        showToast("Linha financeira adicionada.");
       });
       document.getElementById("financeSearch").addEventListener("input", event => {
         filters.financeSearch = event.target.value;
@@ -5709,9 +5761,14 @@
         filters.financeStatus = event.target.value;
         renderFinance();
       });
-      document.getElementById("saveUniforms").addEventListener("click", () => {
+      document.getElementById("saveUniforms").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        setButtonLoading(button, true, "Salvando...");
         persist();
+        await sleep(260);
+        setButtonLoading(button, false);
         renderUniforms();
+        showToast("Uniformes salvos.");
       });
       document.getElementById("uniformSearch").addEventListener("input", event => {
         filters.uniformSearch = event.target.value;
@@ -5782,6 +5839,7 @@
           }
           persist();
           renderAll();
+          showToast(`${modeLabel(mode)} selecionado.`);
         });
       });
 
@@ -5790,6 +5848,7 @@
           activeView = tab.dataset.view;
           persist();
           renderAll();
+          showToast(`${tab.textContent.trim()} aberto.`);
         });
       });
 
@@ -5799,6 +5858,7 @@
         tournament = null;
         persist();
         renderAll();
+        showToast(`Torneio ajustado para ${teamTargetCount} duplas.`);
       });
 
       ["tournamentName", "category", "courts", "matchMinutes", "entryFee", "notes"].forEach(id => {
@@ -5837,13 +5897,16 @@
         if (!record) return;
         record[event.target.dataset.field] = event.target.value;
         renderFinance();
+        showToast("Financeiro atualizado.");
       });
 
       document.getElementById("financeView").addEventListener("click", event => {
         const rowId = event.target.dataset.removeFinance;
         if (!rowId) return;
+        const removed = financeRows().find(row => row.id === rowId);
         finances = financeRows().filter(row => row.id !== rowId);
         renderFinance();
+        showToast(`${removed?.team || "Linha"} apagada do financeiro.`, "danger");
       });
 
       document.getElementById("uniformView").addEventListener("change", event => {
@@ -5854,6 +5917,7 @@
         if (!record) return;
         record[event.target.dataset.field] = event.target.value;
         renderUniforms();
+        showToast("Uniforme atualizado.");
       });
     }
 
