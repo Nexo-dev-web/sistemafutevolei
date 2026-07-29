@@ -868,6 +868,23 @@
       border-radius: 8px;
     }
 
+    .system-actions {
+      align-items: center;
+      margin: 0 0 14px;
+      padding: 0 0 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .system-actions::before {
+      content: "Acoes do torneio";
+      margin-right: auto;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
     #saveScores {
       min-width: 172px;
       box-shadow: 0 12px 28px rgba(230, 199, 109, 0.16);
@@ -3152,6 +3169,14 @@
         <span class="clock" id="publicClock"></span>
       </div>
 
+      <div class="topbar-actions system-actions" aria-label="Acoes do torneio">
+        <button class="secondary" type="button" id="exitTournamentButton">Sair do torneio</button>
+        <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
+        <button class="secondary" type="button" id="openPublic">Abrir telao</button>
+        <button class="secondary" type="button" id="openQr">QR do publico</button>
+        <button class="primary" type="button" id="saveScores">Salvar placares</button>
+      </div>
+
       <section class="view" id="teamsView">
         <div class="topbar">
           <div>
@@ -3190,13 +3215,7 @@
             <h2 id="mainTitle">Chaveamento</h2>
             <p class="muted" id="subtitle">Gere a tabela para visualizar os confrontos.</p>
           </div>
-          <div class="topbar-actions">
-            <button class="secondary" type="button" id="exitTournamentButton">Sair do torneio</button>
-            <button class="secondary" type="button" id="toggleAdminPanel">Ocultar gestor</button>
-            <button class="secondary" type="button" id="openPublic">Abrir telao</button>
-            <button class="secondary" type="button" id="openQr">QR do publico</button>
-            <button class="primary" type="button" id="saveScores">Salvar placares</button>
-          </div>
+
         </div>
 
         <section class="stats" id="adminOnlyStats">
