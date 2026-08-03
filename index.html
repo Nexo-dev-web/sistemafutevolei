@@ -5061,15 +5061,17 @@
     }
 
     async function saveRemoteTournament(snapshot) {
-      if (!snapshot?.id) return;
+      if (!snapshot?.id) return false;
       try {
         await supabaseRequest(`${SUPABASE_TABLE}?on_conflict=id`, {
           method: "POST",
           headers: { Prefer: "resolution=merge-duplicates" },
           body: JSON.stringify({ id: snapshot.id, payload: snapshot, updated_at: snapshot.savedAt })
         });
+        return true;
       } catch (error) {
         console.warn("Nao foi possivel salvar no Supabase:", error.message);
+        return false;
       }
     }
 
@@ -5090,9 +5092,19 @@
     function queueRemoteSave() {
       clearTimeout(remoteSaveTimer);
       remoteSaveTimer = setTimeout(() => {
-        const snapshot = tournaments.find(item => item.id === activeTournamentId);
-        if (snapshot) saveRemoteTournament(snapshot);
+        flushRemoteSave(false);
       }, REMOTE_SAVE_DEBOUNCE_MS);
+    }
+
+    async function flushRemoteSave(showFeedback = true) {
+      clearTimeout(remoteSaveTimer);
+      const snapshot = tournaments.find(item => item.id === activeTournamentId);
+      if (!snapshot) return false;
+      const saved = await saveRemoteTournament(snapshot);
+      if (showFeedback) {
+        showToast(saved ? "Torneio sincronizado com o banco." : "Nao foi possivel sincronizar com o banco.", saved ? "success" : "danger");
+      }
+      return saved;
     }
 
     function persist() {
@@ -6437,13 +6449,21 @@
         renderAll();
       });
 
-      document.getElementById("openPublic").addEventListener("click", () => {
+      document.getElementById("openPublic").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        setButtonLoading(button, true, "Sincronizando...");
         persist();
-        window.open(`${location.pathname}?view=chaveamento`, "_blank");
+        await flushRemoteSave(false);
+        setButtonLoading(button, false);
+        window.open(`${location.pathname}?view=chaveamento&t=${encodeURIComponent(activeTournamentId)}`, "_blank");
       });
 
-      document.getElementById("openQr").addEventListener("click", () => {
+      document.getElementById("openQr").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        setButtonLoading(button, true, "Gerando QR...");
         persist();
+        await flushRemoteSave(false);
+        setButtonLoading(button, false);
         openQrModal();
       });
       document.getElementById("qrClose").addEventListener("click", closeQrModal);
