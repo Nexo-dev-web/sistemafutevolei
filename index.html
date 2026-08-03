@@ -3958,23 +3958,38 @@
       };
     }
 
+    function fieldValue(id, fallback = "") {
+      const field = document.getElementById(id);
+      if (!field) return fallback;
+      const value = field.value;
+      return typeof value === "string" ? value.trim() || fallback : value || fallback;
+    }
+
+    function numericFieldValue(id, fallback) {
+      const field = document.getElementById(id);
+      if (!field || field.value === "") return fallback;
+      return Number(field.value) || fallback;
+    }
+
     function getSettings() {
+      const base = { ...defaultSettings(), ...(settingsState || {}), ...(tournament || {}) };
       return {
-        name: document.getElementById("tournamentName")?.value.trim() || "Torneio de Futevolei",
-        date: document.getElementById("tournamentDate")?.value || tournament?.date || "",
-        location: document.getElementById("tournamentLocation")?.value.trim() || tournament?.location || "",
-        category: document.getElementById("category")?.value || "Intermediario",
-        courts: Number(document.getElementById("courts")?.value || 1),
+        name: fieldValue("tournamentName", base.name || "Torneio de Futevolei"),
+        date: fieldValue("tournamentDate", base.date || ""),
+        location: fieldValue("tournamentLocation", base.location || ""),
+        category: fieldValue("category", base.category || "Intermediario"),
+        courts: numericFieldValue("courts", Number(base.courts) || 1),
         points: 18,
-        matchMinutes: Number(document.getElementById("matchMinutes")?.value || 15),
+        matchMinutes: numericFieldValue("matchMinutes", Number(base.matchMinutes) || 15),
         model: "random",
-        entryFee: document.getElementById("entryFee")?.value || "",
-        notes: document.getElementById("notes")?.value.trim() || ""
+        entryFee: fieldValue("entryFee", base.entryFee || ""),
+        notes: fieldValue("notes", base.notes || "")
       };
     }
 
     function setSettings(settings) {
       const s = { ...defaultSettings(), ...settings };
+      settingsState = s;
       const fields = {
         tournamentName: s.name,
         tournamentDate: s.date || "",
