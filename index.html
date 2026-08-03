@@ -3003,9 +3003,38 @@
               <input id="newTournamentLocation" type="text" placeholder="Ex: Arena Noite Vegas">
             </label>
           </div>
-          <label class="field">Valor da inscricao por dupla (R$)
-            <input id="newTournamentEntryFee" type="number" min="0" step="0.01" placeholder="Ex: 50,00">
-          </label>
+          <div class="field-row">
+            <label class="field">Categoria
+              <select id="newTournamentCategory">
+                <option>Iniciante</option>
+                <option selected>Intermediario</option>
+                <option>Avancado</option>
+                <option>Misto</option>
+                <option>Open</option>
+              </select>
+            </label>
+            <label class="field">Quadras
+              <select id="newTournamentCourts">
+                <option value="1" selected>1 quadra</option>
+                <option value="2">2 quadras</option>
+                <option value="3">3 quadras</option>
+                <option value="4">4 quadras</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">Tempo estimado
+              <select id="newTournamentMatchMinutes">
+                <option value="12">12 min</option>
+                <option value="15" selected>15 min</option>
+                <option value="18">18 min</option>
+                <option value="20">20 min</option>
+              </select>
+            </label>
+            <label class="field">Valor da inscricao por dupla (R$)
+              <input id="newTournamentEntryFee" type="number" min="0" step="0.01" placeholder="Ex: 50,00">
+            </label>
+          </div>
           <button class="primary" type="button" id="createNewTournament">Criar torneio</button>
         </div>
       </div>
@@ -5214,7 +5243,7 @@
       uniforms = {};
       tournament = null;
       mode = "single";
-      activeView = "bracketView";
+      activeView = "eventView";
       adminPanelHidden = false;
       teamTargetCount = 16;
       setSettings({ ...defaultSettings(), ...meta });
@@ -6273,13 +6302,16 @@
         const date = document.getElementById("newTournamentDate").value;
         const location = document.getElementById("newTournamentLocation").value.trim();
         const entryFee = document.getElementById("newTournamentEntryFee")?.value || "";
+        const category = document.getElementById("newTournamentCategory")?.value || "Intermediario";
+        const courts = Number(document.getElementById("newTournamentCourts")?.value || 1);
+        const matchMinutes = Number(document.getElementById("newTournamentMatchMinutes")?.value || 15);
         if (!name || !date || !location) {
           showToast("Preencha nome, data e local para criar o torneio.", "danger");
           return;
         }
         setButtonLoading(button, true, "Criando...");
         await sleep(180);
-        createTournamentShell({ name, date, location, entryFee });
+        createTournamentShell({ name, date, location, entryFee, category, courts, matchMinutes });
         setButtonLoading(button, false);
         showToast("Torneio criado.");
       });
