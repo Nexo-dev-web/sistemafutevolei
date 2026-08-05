@@ -1909,7 +1909,7 @@
 
     .team {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 46px;
+      grid-template-columns: minmax(0, 1fr) 52px;
       align-items: center;
       gap: 6px;
       min-height: 42px;
@@ -1942,6 +1942,15 @@
       font-weight: 900;
       line-height: 1;
       background: rgba(255, 255, 255, 0.07);
+      /* Remove as setinhas nativas do input number: elas roubam espaco interno
+         e cortam o segundo digito num placar de 2 algarismos (ex: 18). */
+      -moz-appearance: textfield;
+    }
+
+    .score-input::-webkit-outer-spin-button,
+    .score-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .bye {
@@ -2219,7 +2228,7 @@
     }
 
     .public-mode.single-public .team {
-      grid-template-columns: minmax(0, 1fr) 34px;
+      grid-template-columns: minmax(0, 1fr) 40px;
       min-height: 28px;
       padding: 4px 6px;
       gap: 4px;
@@ -2235,7 +2244,7 @@
     }
 
     .public-mode.single-public .score-input {
-      width: 34px;
+      width: 40px;
       min-height: 24px;
       font-size: 0.9rem;
       padding: 2px;
@@ -6226,7 +6235,10 @@
       const availableWidth = Math.max(window.innerWidth - 34, 1);
       const availableHeight = Math.max(window.innerHeight - top - 8, 1);
       wrap.style.height = `${availableHeight}px`;
-      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.12);
+      // Margem de seguranca: sem ela o calculo fecha quase exato (as vezes <1%
+      // de folga), e qualquer variacao de fonte/zoom entre navegadores corta a
+      // ultima linha da chave.
+      const scale = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1.12) * 0.96;
       bracket.style.setProperty("--public-scale", Math.max(scale, 0.2).toFixed(3));
     }
 
