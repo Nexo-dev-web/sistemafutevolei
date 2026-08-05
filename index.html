@@ -1147,7 +1147,7 @@
 
     .bi-card h3 {
       margin: 0 0 12px;
-      color: var(--gold);
+      color: var(--sand);
       font-size: 1rem;
     }
 
@@ -1210,7 +1210,7 @@
       width: 0%;
       height: 100%;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--green), var(--gold));
+      background: linear-gradient(90deg, var(--green), var(--sand));
       box-shadow: 0 0 18px rgba(53, 228, 138, 0.28);
       transition: width 260ms ease;
     }
@@ -1227,8 +1227,9 @@
     }
 
     .stack-paid { background: var(--green); }
-    .stack-open { background: var(--gold); }
+    .stack-open { background: var(--sand); }
     .stack-late { background: #ff4b65; }
+    .stack-empty { background: rgba(255, 255, 255, 0.14); }
 
     .bi-split {
       display: grid;
@@ -1303,7 +1304,7 @@
       width: 0%;
       height: 100%;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--gold), var(--green));
+      background: linear-gradient(90deg, var(--sand), var(--green));
     }
 
     .insight-list li {
@@ -1329,7 +1330,7 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--gold);
+      background: var(--sand);
       box-shadow: 0 0 16px rgba(230, 199, 109, 0.25);
     }
 
@@ -3290,6 +3291,12 @@
             <button class="primary" type="button" id="saveEventInfo">Salvar informações</button>
           </div>
         </div>
+        <section class="stats" id="eventStats">
+          <div class="stat"><span>Duplas confirmadas</span><strong id="eventTeamCount">0</strong></div>
+          <div class="stat"><span>Valor previsto</span><strong id="eventEntryTotal">R$ 0,00</strong></div>
+          <div class="stat"><span>Recebido</span><strong id="eventReceived">R$ 0,00</strong></div>
+          <div class="stat"><span>Status</span><strong id="eventStatusLabel">Rascunho</strong></div>
+        </section>
         <div class="panel">
           <div class="event-form-grid">
             <div>
@@ -3367,10 +3374,10 @@
           <input id="financeSearch" type="search" aria-label="Buscar no financeiro" placeholder="Filtrar pagamento por dupla, status, forma, data ou observacao">
           <select id="financeStatusFilter" aria-label="Filtrar financeiro por status">
             <option value="">Todos os status</option>
-            <option>Aberto</option>
-            <option>Pago</option>
-            <option>Parcial</option>
-            <option>Cortesia</option>
+            <option value="Aberto">⏳ Aberto</option>
+            <option value="Pago">✓ Pago</option>
+            <option value="Parcial">◐ Parcial</option>
+            <option value="Cortesia">★ Cortesia</option>
           </select>
         </div>
         <div class="panel">
@@ -3415,10 +3422,10 @@
           <input id="uniformSearch" type="search" aria-label="Buscar em uniformes" placeholder="Filtrar uniforme por dupla, atleta, tamanho, numero ou observacao">
           <select id="uniformStatusFilter" aria-label="Filtrar uniformes por status">
             <option value="">Todos os status</option>
-            <option>Pendente</option>
-            <option>Separado</option>
-            <option>Entregue</option>
-            <option>Trocar</option>
+            <option value="Pendente">⏳ Pendente</option>
+            <option value="Separado">◐ Separado</option>
+            <option value="Entregue">✓ Entregue</option>
+            <option value="Trocar">⚠ Trocar</option>
           </select>
         </div>
         <div class="panel">
@@ -3541,6 +3548,9 @@
     const publicTournamentId = params.get("t") || "";
     // Base usada para montar o link do QR quando a pagina esta publicada.
     const PUBLIC_URL_KEY = "nexo_futevolei_public_url";
+    // Icones nas opcoes de status: reforcam o significado sem depender so da cor.
+    const FINANCE_STATUS_ICONS = { Aberto: "⏳", Pago: "✓", Parcial: "◐", Cortesia: "★" };
+    const UNIFORM_STATUS_ICONS = { Pendente: "⏳", Separado: "◐", Entregue: "✓", Trocar: "⚠" };
 
     let activeView = "bracketView";
     let mode = "single";
@@ -4022,6 +4032,21 @@
         const field = document.getElementById(id);
         if (field) field.value = value;
       });
+    }
+
+    function renderEventSummary() {
+      const el = document.getElementById("eventStats");
+      if (!el) return;
+      const setText = (id, value) => {
+        const field = document.getElementById(id);
+        if (field) field.textContent = value;
+      };
+      const validTeams = normalizeTeams().length;
+      const { total, paid } = financeTotals(financeRows());
+      setText("eventTeamCount", `${validTeams}/${teamTargetCount}`);
+      setText("eventEntryTotal", formatMoney(total));
+      setText("eventReceived", formatMoney(paid));
+      setText("eventStatusLabel", tournament ? "Tabela gerada" : "Rascunho");
     }
 
     function getEventEditorSettings() {
@@ -5256,7 +5281,6 @@
       finances = defaultFinanceRows();
       uniforms = {};
       teamTargetCount = 16;
-      setSettings(defaultSettings());
       mode = "double";
       if (!keepTournament) tournament = null;
       createTournament();
@@ -6052,11 +6076,11 @@
         <li class="metric-row"><span>Finalizados</span><b>${finished}</b></li>
         <li class="metric-row"><span>Pendentes jogaveis</span><b>${pending}</b></li>
       `);
-      setHtml("dashFinanceStack", `
+      setHtml("dashFinanceStack", financeTotal > 0 ? `
         <div class="stack-segment stack-paid" style="width:${pct(financePaidCount, financialRows.length || 1)}%"></div>
         <div class="stack-segment stack-open" style="width:${pct(financePartialCount, financialRows.length || 1)}%"></div>
         <div class="stack-segment stack-late" style="width:${pct(financeOpenCount, financialRows.length || 1)}%"></div>
-      `);
+      ` : `<div class="stack-segment stack-empty" style="width:100%"></div>`);
       setHtml("dashFinanceMetrics", `
         <li class="metric-row"><span>Previsto</span><b>${formatMoney(financeTotal)}</b></li>
         <li class="metric-row"><span>Recebido</span><b>${formatMoney(financePaid)}</b></li>
@@ -6083,7 +6107,7 @@
             <td><input value="${escapeAttr(record.team)}" placeholder="Dupla da chave" aria-label="Dupla da chave" data-finance="${escapeAttr(record.id)}" data-field="team"></td>
             <td>
               <select class="finance-status finance-status-${record.status.toLowerCase()}" aria-label="Status do pagamento de ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="status">
-                ${["Aberto", "Pago", "Parcial", "Cortesia"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
+                ${Object.entries(FINANCE_STATUS_ICONS).map(([option, icon]) => `<option value="${option}" ${record.status === option ? "selected" : ""}>${icon} ${option}</option>`).join("")}
               </select>
             </td>
             <td><input type="number" min="0" step="0.01" value="${escapeAttr(record.value)}" placeholder="0,00" aria-label="Valor pago por ${escapeAttr(record.team)}" data-finance="${escapeAttr(record.id)}" data-field="value"></td>
@@ -6154,7 +6178,7 @@
             <td><input value="${escapeAttr(record.number)}" placeholder="Opcional" aria-label="Numero de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="number"></td>
             <td>
               <select class="${statusClass}" aria-label="Status do uniforme de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="status">
-                ${["Pendente", "Separado", "Entregue", "Trocar"].map(option => `<option ${record.status === option ? "selected" : ""}>${option}</option>`).join("")}
+                ${Object.entries(UNIFORM_STATUS_ICONS).map(([option, icon]) => `<option value="${option}" ${record.status === option ? "selected" : ""}>${icon} ${option}</option>`).join("")}
               </select>
             </td>
             <td><input value="${escapeAttr(record.note)}" placeholder="Ex: preferencia, troca, falta..." aria-label="Observacao de ${escapeAttr(athlete) || `atleta ${index + 1}`}" data-uniform="${escapeAttr(team.id)}" data-athlete="${index}" data-field="note"></td>
@@ -6297,6 +6321,7 @@
       if (!compact || activeView === "financeView" || activeView === "settingsView") renderFinance();
       if (!compact || activeView === "uniformView" || activeView === "settingsView") renderUniforms();
       setEventEditor(tournament || getSettings());
+      renderEventSummary();
       renderClock();
       renderModeHelp();
       if (!compact || activeView === "bracketView") requestAnimationFrame(fitPublicBracket);
